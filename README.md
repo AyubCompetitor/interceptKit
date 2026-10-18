@@ -1,2 +1,5 @@
-# interceptKit
-Open-source browser extension to intercept, mock and redirect HTTP requests, with a built-in API client. Local-first: no backend, no accounts, no telemetry.
+# InterceptKit
+
+Intercept, mock and redirect HTTP requests, plus a lightweight API client - in one open-source browser extension.
+
+Local-first by design: no backend, no accounts, no telemetry. Everything you create stays in your browser.
