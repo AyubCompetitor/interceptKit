@@ -1,0 +1,11 @@
+# Supply-chain hardening (CLAUDE.md, principle 4).
+
+# Never resolve versions published less than 7 days ago (minutes).
+minimumReleaseAge: 10080
+
+# Dependency lifecycle scripts are blocked by default. Fail the install instead of
+# silently skipping, so any dependency that wants to run code gets an explicit review.
+strictDepBuilds: true
+
+# Enforce "engines" (Node 24 LTS).
+engineStrict: true

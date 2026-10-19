@@ -1,0 +1,49 @@
+{
+    "name": "interceptkit",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Intercept, mock and redirect HTTP requests, plus a lightweight API client, in one open-source browser extension.",
+    "type": "module",
+    "packageManager": "pnpm@12.12.1+sha512.b7f98934c0b1f29a65f5da52f2d7f994e7faad573ffdddea1497fb4dcb5aec051590ee7c7d95a38172b4bfae103a5b83edf2ee866e11731c2cafa96063610ac5",
+    "engines": {
+        "node": ">=24"
+    },
+    "imports": {
+        "#pages/*": "./src/pages/*/index.ts",
+        "#widgets/*": "./src/widgets/*/index.ts",
+        "#features/*": "./src/features/*/index.ts",
+        "#entities/*": "./src/entities/*/index.ts",
+        "#shared/*": "./src/shared/*/index.ts"
+    },
+    "scripts": {
+        "dev": "rsbuild dev",
+        "build": "rsbuild build",
+        "typecheck": "tsc -p tsconfig.json",
+        "lint": "oxlint --type-aware --deny-warnings",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "test": "rstest run",
+        "test:watch": "rstest",
+        "test:coverage": "rstest run --coverage",
+        "test:e2e": "rsbuild build && playwright test",
+        "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm test:e2e"
+    },
+    "dependencies": {
+        "react": "^19.3.0",
+        "react-dom": "^19.3.0"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.64.0",
+        "@rsbuild/core": "^2.2.12",
+        "@rsbuild/plugin-react": "^2.1.1",
+        "@rstest/core": "~0.12.3",
+        "@rstest/coverage-istanbul": "~0.12.3",
+        "@types/chrome": "0.3.5",
+        "@types/react": "^19.3.0",
+        "@types/react-dom": "^19.3.0",
+        "oxlint": "^1.87.0",
+        "oxlint-tsgolint": "^7.0.2004",
+        "prettier": "^3.9.10",
+        "typescript": "^7.0.2"
+    }
+}

@@ -1,0 +1,65 @@
+{
+    "extName": {
+        "message": "InterceptKit"
+    },
+    "extDescription": {
+        "message": "Редиректы, заголовки, блокировка и моки HTTP-запросов плюс лёгкий API-клиент. Без серверов, аккаунтов и телеметрии."
+    },
+    "popupTagline": {
+        "message": "Ваши запросы — ваши правила. Все данные остаются в браузере."
+    },
+    "popupOpenDashboard": {
+        "message": "Открыть панель управления"
+    },
+    "popupOpenApiClient": {
+        "message": "Открыть API-клиент"
+    },
+    "dashboardSubtitle": {
+        "message": "Правила, моки и настройки"
+    },
+    "dashboardUpcomingTitle": {
+        "message": "Скоро появится"
+    },
+    "sectionRules": {
+        "message": "Редиректы, заголовки и блокировка"
+    },
+    "sectionMocks": {
+        "message": "Моки API"
+    },
+    "sectionSites": {
+        "message": "Сайты"
+    },
+    "sectionPolicy": {
+        "message": "Политика организации"
+    },
+    "sectionTransfer": {
+        "message": "Импорт и экспорт"
+    },
+    "settingsTitle": {
+        "message": "Настройки"
+    },
+    "settingsLanguage": {
+        "message": "Язык интерфейса"
+    },
+    "languageAuto": {
+        "message": "Как в браузере"
+    },
+    "languageEnglish": {
+        "message": "English"
+    },
+    "languageRussian": {
+        "message": "Русский"
+    },
+    "settingsSaveFailed": {
+        "message": "Не удалось сохранить настройку. Попробуйте ещё раз."
+    },
+    "apiClientTitle": {
+        "message": "API-клиент"
+    },
+    "apiClientPlaceholder": {
+        "message": "Конструктор запросов появится в следующих версиях."
+    },
+    "dialogClose": {
+        "message": "Закрыть"
+    }
+}

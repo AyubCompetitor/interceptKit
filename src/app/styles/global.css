@@ -1,0 +1,60 @@
+@layer reset, base;
+
+@import '../../shared/ui/tokens.css';
+
+@layer reset {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    body,
+    h1,
+    h2,
+    h3,
+    p {
+        margin: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        font: inherit;
+        color: inherit;
+    }
+}
+
+@layer base {
+    body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-sans);
+        font-size: var(--font-size-m);
+        line-height: var(--line-height);
+    }
+
+    h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    h2 {
+        font-size: var(--font-size-l);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+
+    input,
+    select,
+    textarea {
+        min-height: 32px;
+        padding: var(--space-xs) var(--space-s);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-m);
+        background: var(--color-bg);
+    }
+}

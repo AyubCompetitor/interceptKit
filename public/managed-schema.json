@@ -1,0 +1,32 @@
+{
+    "type": "object",
+    "properties": {
+        "disabledFeatures": {
+            "title": "Disabled features",
+            "description": "Features to turn off: redirect, headers, block, mocks, apiClient.",
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "allowedHosts": {
+            "title": "Allowed hosts",
+            "description": "Hosts the extension may be granted access to, e.g. example.com or *.example.com.",
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "allowUserRules": {
+            "title": "Allow user rules",
+            "description": "When false, only rules provided by this policy apply.",
+            "type": "boolean"
+        },
+        "requireVault": {
+            "title": "Require vault",
+            "description": "Require encrypting API client secrets with a master password.",
+            "type": "boolean"
+        },
+        "presetBundle": {
+            "title": "Preset bundle",
+            "description": "Rules and mocks to preinstall: an InterceptKit export bundle as a JSON string.",
+            "type": "string"
+        }
+    }
+}

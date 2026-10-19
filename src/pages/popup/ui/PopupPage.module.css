@@ -1,0 +1,8 @@
+.popup {
+    width: 320px;
+    padding: var(--space-l);
+}
+
+.tagline {
+    color: var(--color-text-muted);
+}

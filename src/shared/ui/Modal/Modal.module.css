@@ -1,0 +1,48 @@
+.dialog {
+    width: min(560px, calc(100vw - 2 * var(--space-l)));
+    max-height: calc(100vh - 2 * var(--space-l));
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-l);
+    background: var(--color-bg);
+    color: var(--color-text);
+    box-shadow: var(--shadow-l);
+
+    &[open] {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &::backdrop {
+        background: var(--color-backdrop);
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding: var(--space-l) var(--space-l) 0;
+}
+
+.title {
+    font-size: var(--font-size-l);
+}
+
+.closeIcon {
+    font-size: var(--font-size-xl);
+    line-height: 1;
+}
+
+.body {
+    padding: var(--space-l);
+    overflow: auto;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-s);
+    padding: 0 var(--space-l) var(--space-l);
+}

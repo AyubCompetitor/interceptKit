@@ -1,0 +1,9 @@
+.apiClient {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.placeholder {
+    color: var(--color-text-muted);
+}

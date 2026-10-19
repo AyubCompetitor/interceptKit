@@ -1,0 +1,293 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "unicorn", "oxc", "react", "import"],
+    "categories": {
+        "correctness": "error",
+        "suspicious": "error"
+    },
+    "ignorePatterns": ["dist/**", "coverage/**", "test-results/**", "playwright-report/**"],
+    "rules": {
+        "no-eval": "error",
+        "no-new-func": "error",
+        "no-script-url": "error",
+        "typescript/no-implied-eval": "error",
+        "react/no-danger": "error",
+        "react/react-in-jsx-scope": "off",
+        "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }],
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "error",
+        "react/error-boundaries": "error",
+        "react/globals": "error",
+        "react/immutability": "error",
+        "react/incompatible-library": "error",
+        "react/preserve-manual-memoization": "error",
+        "react/purity": "error",
+        "react/refs": "error",
+        "react/set-state-in-effect": "error",
+        "react/set-state-in-render": "error",
+        "react/static-components": "error",
+        "react/unsupported-syntax": "error",
+        "react/use-memo": "error",
+        "typescript/no-floating-promises": "error",
+        "typescript/no-misused-promises": "error",
+        "typescript/await-thenable": "error",
+        "typescript/no-explicit-any": "error",
+        "no-restricted-globals": [
+            "error",
+            {
+                "name": "fetch",
+                "message": "Network access lives only in src/pages/api-client/api (principle 1)."
+            },
+            {
+                "name": "XMLHttpRequest",
+                "message": "Network access lives only in src/pages/api-client/api (principle 1)."
+            },
+            {
+                "name": "WebSocket",
+                "message": "Network access lives only in src/pages/api-client/api (principle 1)."
+            },
+            {
+                "name": "EventSource",
+                "message": "Network access lives only in src/pages/api-client/api (principle 1)."
+            },
+            {
+                "name": "WebTransport",
+                "message": "Network access lives only in src/pages/api-client/api (principle 1)."
+            }
+        ],
+        "no-restricted-imports": [
+            "error",
+            {
+                "patterns": [
+                    {
+                        "regex": "^[.][.]/[.][.]/",
+                        "message": "Leave a slice through its public API (#layer/slice), not ../../."
+                    }
+                ]
+            }
+        ]
+    },
+    "overrides": [
+        {
+            "files": ["src/shared/**"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "regex": "^[.][.]/[.][.]/",
+                                "message": "Leave a slice through its public API (#layer/slice), not ../../."
+                            },
+                            {
+                                "group": ["#pages/*", "#widgets/*", "#features/*", "#entities/*"],
+                                "message": "FSD: shared is the lowest layer and imports no other layer."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["src/shared/lib/**", "src/shared/config/**"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "regex": "^[.][.]/[.][.]/",
+                                "message": "Leave a slice through its public API (#layer/slice), not ../../."
+                            },
+                            {
+                                "group": ["#pages/*", "#widgets/*", "#features/*", "#entities/*"],
+                                "message": "FSD: shared is the lowest layer and imports no other layer."
+                            },
+                            {
+                                "group": [
+                                    "react",
+                                    "react/*",
+                                    "react-dom",
+                                    "react-dom/*",
+                                    "#shared/messaging",
+                                    "#shared/platform",
+                                    "#shared/i18n",
+                                    "#shared/ui"
+                                ],
+                                "message": "shared/lib and shared/config are universal: they run in every context, including a web page's main world."
+                            }
+                        ]
+                    }
+                ],
+                "no-restricted-globals": [
+                    "error",
+                    { "name": "fetch", "message": "Universal code must not use the network." },
+                    { "name": "XMLHttpRequest", "message": "Universal code must not use the network." },
+                    { "name": "WebSocket", "message": "Universal code must not use the network." },
+                    { "name": "EventSource", "message": "Universal code must not use the network." },
+                    {
+                        "name": "chrome",
+                        "message": "Universal code must not use extension APIs; use shared/platform."
+                    },
+                    {
+                        "name": "browser",
+                        "message": "Universal code must not use extension APIs; use shared/platform."
+                    },
+                    { "name": "window", "message": "Universal code must not depend on the DOM." },
+                    { "name": "document", "message": "Universal code must not depend on the DOM." },
+                    { "name": "navigator", "message": "Universal code must not depend on the DOM." },
+                    {
+                        "name": "localStorage",
+                        "message": "User data lives in chrome.storage or IndexedDB (principle 5)."
+                    },
+                    {
+                        "name": "sessionStorage",
+                        "message": "User data lives in chrome.storage or IndexedDB (principle 5)."
+                    },
+                    {
+                        "name": "indexedDB",
+                        "message": "Universal code must not touch storage; use shared/platform."
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["src/entities/**"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "regex": "^[.][.]/[.][.]/",
+                                "message": "Leave a slice through its public API (#layer/slice), not ../../."
+                            },
+                            {
+                                "group": ["#pages/*", "#widgets/*", "#features/*"],
+                                "message": "FSD: entities import only shared."
+                            },
+                            {
+                                "group": ["#entities/*"],
+                                "message": "FSD: no cross-imports between entities; inside a slice use relative imports."
+                            },
+                            {
+                                "group": [
+                                    "react",
+                                    "react/*",
+                                    "react-dom",
+                                    "react-dom/*",
+                                    "#shared/messaging",
+                                    "#shared/platform",
+                                    "#shared/i18n",
+                                    "#shared/ui"
+                                ],
+                                "message": "Entities are universal: no React, extension APIs or DOM."
+                            }
+                        ]
+                    }
+                ],
+                "no-restricted-globals": [
+                    "error",
+                    { "name": "fetch", "message": "Entities must not use the network." },
+                    { "name": "XMLHttpRequest", "message": "Entities must not use the network." },
+                    { "name": "WebSocket", "message": "Entities must not use the network." },
+                    { "name": "EventSource", "message": "Entities must not use the network." },
+                    {
+                        "name": "chrome",
+                        "message": "Entities are universal: declare contracts, let shared/platform and shared/messaging execute them."
+                    },
+                    {
+                        "name": "browser",
+                        "message": "Entities are universal: declare contracts, let shared/platform and shared/messaging execute them."
+                    },
+                    { "name": "window", "message": "Entities are universal: no DOM." },
+                    { "name": "document", "message": "Entities are universal: no DOM." },
+                    { "name": "navigator", "message": "Entities are universal: no DOM." },
+                    {
+                        "name": "localStorage",
+                        "message": "User data lives in chrome.storage or IndexedDB (principle 5)."
+                    },
+                    {
+                        "name": "sessionStorage",
+                        "message": "User data lives in chrome.storage or IndexedDB (principle 5)."
+                    },
+                    { "name": "indexedDB", "message": "Entities are universal: no storage access." }
+                ]
+            }
+        },
+        {
+            "files": ["src/features/**"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "regex": "^[.][.]/[.][.]/",
+                                "message": "Leave a slice through its public API (#layer/slice), not ../../."
+                            },
+                            {
+                                "group": ["#pages/*", "#widgets/*", "#features/*"],
+                                "message": "FSD: features import only entities and shared; no cross-imports between features."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["src/widgets/**"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "regex": "^[.][.]/[.][.]/",
+                                "message": "Leave a slice through its public API (#layer/slice), not ../../."
+                            },
+                            {
+                                "group": ["#pages/*", "#widgets/*"],
+                                "message": "FSD: widgets import lower layers only; no cross-imports between widgets."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["src/pages/**"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "regex": "^[.][.]/[.][.]/",
+                                "message": "Leave a slice through its public API (#layer/slice), not ../../."
+                            },
+                            { "group": ["#pages/*"], "message": "FSD: no cross-imports between pages." }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "files": ["src/app/**"],
+            "rules": { "no-restricted-imports": "off" }
+        },
+        {
+            "files": ["src/pages/api-client/api/**"],
+            "rules": { "no-restricted-globals": "off" }
+        },
+        {
+            "files": ["e2e/**", "build/**", "*.config.ts"],
+            "rules": {
+                "react-hooks/rules-of-hooks": "off",
+                "no-empty-pattern": "off",
+                "no-restricted-globals": "off",
+                "no-restricted-imports": "off"
+            }
+        }
+    ]
+}

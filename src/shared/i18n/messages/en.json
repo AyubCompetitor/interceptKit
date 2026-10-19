@@ -1,0 +1,70 @@
+{
+    "extName": {
+        "message": "InterceptKit",
+        "description": "Extension name. Not translated."
+    },
+    "extDescription": {
+        "message": "Redirect, modify, block and mock HTTP requests, plus a lightweight API client. No servers, accounts or telemetry.",
+        "description": "Store and extensions page description. At most 132 characters."
+    },
+    "popupTagline": {
+        "message": "Your requests, your rules. Everything stays in your browser."
+    },
+    "popupOpenDashboard": {
+        "message": "Open dashboard"
+    },
+    "popupOpenApiClient": {
+        "message": "Open API client"
+    },
+    "dashboardSubtitle": {
+        "message": "Rules, mocks and settings"
+    },
+    "dashboardUpcomingTitle": {
+        "message": "Coming next"
+    },
+    "sectionRules": {
+        "message": "Redirects, headers and blocking"
+    },
+    "sectionMocks": {
+        "message": "Mock API"
+    },
+    "sectionSites": {
+        "message": "Sites"
+    },
+    "sectionPolicy": {
+        "message": "Organization policy"
+    },
+    "sectionTransfer": {
+        "message": "Import and export"
+    },
+    "settingsTitle": {
+        "message": "Settings"
+    },
+    "settingsLanguage": {
+        "message": "Interface language"
+    },
+    "languageAuto": {
+        "message": "Same as browser"
+    },
+    "languageEnglish": {
+        "message": "English",
+        "description": "Language name in that language. Not translated."
+    },
+    "languageRussian": {
+        "message": "Русский",
+        "description": "Language name in that language. Not translated."
+    },
+    "settingsSaveFailed": {
+        "message": "Could not save the setting. Try again."
+    },
+    "apiClientTitle": {
+        "message": "API client"
+    },
+    "apiClientPlaceholder": {
+        "message": "The request builder arrives in a later version."
+    },
+    "dialogClose": {
+        "message": "Close",
+        "description": "Accessible name of the button that closes a dialog."
+    }
+}
