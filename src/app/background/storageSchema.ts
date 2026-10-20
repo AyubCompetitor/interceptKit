@@ -1,40 +1,53 @@
-import { defineStore, MigrationStatuses, number, runMigrations, Stores, type Migration } from '#shared/lib';
-import { readArea, readItem, replaceArea, writeItem } from '#shared/platform';
+import {
+    defineStoreItem,
+    MigrationStatuses,
+    number,
+    runMigrations,
+    Stores,
+    type Migration,
+    type MigrationOutcome,
+} from '#shared/lib';
+import { readStoreData, readItem, writeStoreData, writeItem } from '#shared/platform';
 
 export const SCHEMA_VERSION = 1;
 
 const MIGRATIONS: readonly Migration[] = [];
 
-const schemaVersionItem = defineStore({
+const schemaVersionItem = defineStoreItem({
     key: 'schemaVersion',
     area: Stores.LOCAL,
     fallback: 0,
     validator: number({ integer: true, min: 1 }),
 });
 
+const warnNewerStatus = (result: MigrationOutcome) =>
+    console.warn(`[storage] schema ${result.version} is newer than this build (${SCHEMA_VERSION}); left untouched`);
+
 export const migrateStorage = async (): Promise<void> => {
     const storedVersion = await readItem(schemaVersionItem);
 
-    if (storedVersion === SCHEMA_VERSION) {
+    const isCurrentSchema = storedVersion === SCHEMA_VERSION;
+
+    if (isCurrentSchema) {
         return;
     }
 
-    const data = await readArea(Stores.LOCAL);
+    const data = await readStoreData(Stores.LOCAL);
     const version = storedVersion === 0 ? undefined : storedVersion;
+    const result = runMigrations(data, version, MIGRATIONS, SCHEMA_VERSION);
 
-    const outcome = runMigrations(data, version, MIGRATIONS, SCHEMA_VERSION);
+    const isNewerMigration = result.status === MigrationStatuses.NEWER;
+    const isMigrated = result.status === MigrationStatuses.MIGRATED;
 
-    if (outcome.status === MigrationStatuses.NWR) {
-        console.warn(
-            `[storage] schema ${outcome.version} is newer than this build (${SCHEMA_VERSION}); left untouched`,
-        );
+    if (isNewerMigration) {
+        warnNewerStatus(result);
 
         return;
     }
 
-    if (outcome.status === 'migrated') {
-        await replaceArea(Stores.LOCAL, outcome.data);
+    if (isMigrated) {
+        await writeStoreData(Stores.LOCAL, result.data);
     }
 
-    await writeItem(schemaVersionItem, outcome.version);
+    await writeItem(schemaVersionItem, result.version);
 };

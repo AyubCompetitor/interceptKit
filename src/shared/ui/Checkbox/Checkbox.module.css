@@ -1,0 +1,14 @@
+.checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: 32px;
+    cursor: pointer;
+}
+
+.box {
+    min-height: auto;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--color-accent);
+}

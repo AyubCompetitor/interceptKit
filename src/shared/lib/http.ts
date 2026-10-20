@@ -1,4 +1,4 @@
-import { boolean, object, oneOf, refine, string, type Validator } from './validation.ts';
+import { array, boolean, object, oneOf, refine, string, type Validator } from './validation.ts';
 
 /** Methods the extension can match and send */
 export enum HttpMethods {
@@ -32,23 +32,26 @@ export interface KeyValue {
 
 export const HTTP_METHODS = Object.values(HttpMethods);
 
-const HTTP_PATTERNS = {
+export const PROTOCOLS: readonly string[] = Object.values(Protocols);
+
+const HTTP_RGXS = {
     TOKEN: /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/,
     HEADER_VALUE: /^[\t\x20-\x7e\x80-\xff]*$/,
 } as const;
 
 const URL_ERRORS = {
     NON_ABSOLUTE: 'expected an absolute URL',
-    EXPECT_HTTPS: 'expected an https URL',
-}
+    NON_HTTP: 'expected an http(s) URL',
+} as const;
 
 export const httpMethod = oneOf(HTTP_METHODS);
 
-export const headerName = string({ minLength: 1, maxLength: 256, pattern: HTTP_PATTERNS.TOKEN });
+/** A non-empty list of methods: DNR rejects empty condition lists */
+export const httpMethods = array(httpMethod, { minLength: 1, maxLength: HTTP_METHODS.length });
 
-export const headerValue = string({ maxLength: 8192, pattern: HTTP_PATTERNS.HEADER_VALUE });
+export const headerName = string({ minLength: 1, maxLength: 256, pattern: HTTP_RGXS.TOKEN });
 
-
+export const headerValue = string({ maxLength: 8192, pattern: HTTP_RGXS.HEADER_VALUE });
 
 export const keyValue: Validator<KeyValue> = object({
     key: string({ maxLength: 1024 }),
@@ -56,7 +59,7 @@ export const keyValue: Validator<KeyValue> = object({
     enabled: boolean(),
 });
 
-/** An absolute http URL */
+/** An absolute http(s) URL */
 export const httpUrl = refine(string({ minLength: 1, maxLength: 8192 }), value => {
     if (!URL.canParse(value)) {
         return URL_ERRORS.NON_ABSOLUTE;
@@ -64,11 +67,11 @@ export const httpUrl = refine(string({ minLength: 1, maxLength: 8192 }), value =
 
     const { protocol } = new URL(value);
 
-    const isValidProtocol = protocol === Protocols.HTTP || protocol === Protocols.HTTPS;
+    const isValidProtocol = PROTOCOLS.includes(protocol);
 
     if (isValidProtocol) {
         return;
     }
 
-    return URL_ERRORS.EXPECT_HTTPS;
+    return URL_ERRORS.NON_HTTP;
 });

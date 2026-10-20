@@ -1,3 +1,3 @@
-import { startBackground } from '../background/index.ts';
+import { startListenBackground } from '../background/index.ts';
 
-startBackground();
+startListenBackground();

@@ -1,0 +1,23 @@
+.typography {
+    overflow-wrap: anywhere;
+}
+
+.primary {
+    color: var(--color-text);
+}
+
+.hint {
+    color: var(--color-text-muted);
+}
+
+.danger {
+    color: var(--color-danger-text);
+}
+
+.small {
+    font-size: var(--font-size-s);
+}
+
+.medium {
+    font-size: var(--font-size-m);
+}

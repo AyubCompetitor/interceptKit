@@ -1,4 +1,4 @@
-.dialog {
+.modal {
     width: min(560px, calc(100vw - 2 * var(--space-l)));
     max-height: calc(100vh - 2 * var(--space-l));
     padding: 0;

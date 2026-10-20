@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import type { Locale } from '#shared/config';
 
 import { I18nContext } from './context.ts';
-import { createTranslator } from './translator.ts';
+import { createTFunction } from './translator.ts';
 
 interface I18nProviderProps {
     /** Language of the subtree, also set as <html lang> */
@@ -11,7 +11,7 @@ interface I18nProviderProps {
 }
 
 export const I18nProvider: FCC<I18nProviderProps> = ({ locale, children }) => {
-    const t = createTranslator(locale);
+    const t = createTFunction(locale);
 
     const value = { locale, t };
 

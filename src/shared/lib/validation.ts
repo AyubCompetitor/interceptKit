@@ -206,12 +206,14 @@ export const object = <const S extends Shape>(shape: S): Validator<ObjectOf<S>> 
 
         for (const key of Object.keys(input)) {
             if (!known.has(key)) {
-                issues.push({ path: `${path}.${key}`, message: 'unknown property' });
+                issues.push({
+                    path: `${path}.${key}`,
+                    message: 'unknown property',
+                });
             }
         }
 
         for (const [key, entry] of Object.entries(shape)) {
-            /** Own properties only: never read inherited values such as `constructor`. */
             const value = Object.hasOwn(input, key) ? input[key] : undefined;
             const isOptional = typeof entry === 'object';
 
@@ -232,11 +234,12 @@ export const object = <const S extends Shape>(shape: S): Validator<ObjectOf<S>> 
             return { ok: false, issues };
         }
 
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the loop above builds exactly ObjectOf<S>
         return ok(output as ObjectOf<S>);
     };
 };
 
-/** Picks the variant validator by a string tag such as type or kind. */
+/** Picks the variant validator by a string tag such as type or syntaxType. */
 export const discriminatedUnion = <const M extends Readonly<Record<string, Validator<unknown>>>>(
     key: string,
     variants: M,
@@ -255,6 +258,7 @@ export const discriminatedUnion = <const M extends Readonly<Record<string, Valid
             return fail(`${path}.${key}`, `expected one of: ${tags.join(', ')}`);
         }
 
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the variant under this tag yields its member of the union
         return variant(input, path) as Result<Infer<M[keyof M]>>;
     };
 };

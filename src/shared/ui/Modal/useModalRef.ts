@@ -23,6 +23,7 @@ export const useModalRef = (isOpen: boolean) => {
 
     return {
         modalRef,
-        onModalClose
+
+        onModalClose,
     };
 };

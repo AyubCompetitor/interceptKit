@@ -1,9 +1,10 @@
 import { formatIssues, RpcCallers, validate, type RpcCaller, type RpcMethod } from '#shared/lib';
 
-import { rpcFailure, RpcErrorCodes, rpcRequest, type RpcResponse } from './protocol.ts';
+import { RpcError, rpcFailure, RpcErrorCodes, rpcRequest, type RpcResponse } from './protocol.ts';
 
-/** Content scripts may call us only from https pages. */
 const WEB_ORIGIN_RGX = /^https?:\/\//;
+
+const EXTENSION_BASE_PATH = 'chrome-extension://';
 
 /** The parts of chrome.runtime.MessageSender the router relies on */
 export interface MessageSender {
@@ -34,7 +35,7 @@ interface Route {
 
 export interface Router {
     /** Registers the handler of a method */
-    handle<Params, Result>(method: RpcMethod<Params, Result>, handler: Handler<Params, Result>): void;
+    on<Params, Result>(method: RpcMethod<Params, Result>, handler: Handler<Params, Result>): void;
     /** Resolves to undefined for messages that are not ours */
     dispatch(message: unknown, sender: MessageSender): Promise<NotRequired<RpcResponse>>;
     /** Subscribes to chrome.runtime.onMessage */
@@ -46,31 +47,32 @@ interface RouterOptions {
     readonly extensionId: string;
 }
 
-export const createRouter = ({ extensionId }: RouterOptions): Router => {
-    const extensionOrigin = `chrome-extension://${extensionId}`;
-    const routes = new Map<string, Route>();
+const getCallerCtx = (sender: MessageSender, extensionId: string): NotRequired<HandlerContext> => {
+    const extensionOrigin = EXTENSION_BASE_PATH + extensionId;
 
-    const getCtx = (sender: MessageSender): NotRequired<HandlerContext> => {
-        if (sender.id !== extensionId || sender.origin === undefined) {
-            return;
-        }
-
-        if (sender.origin === extensionOrigin) {
-            return {
-                caller: RpcCallers.EXTENSION,
-                origin: sender.origin,
-            };
-        }
-
-        if (sender.tab !== undefined && WEB_ORIGIN_RGX.test(sender.origin)) {
-            return {
-                caller: RpcCallers.CONTENT_SCRIPT,
-                origin: sender.origin,
-            };
-        }
-
+    if (sender.id !== extensionId || !sender.origin) {
         return;
-    };
+    }
+
+    if (sender.origin === extensionOrigin) {
+        return {
+            caller: RpcCallers.EXTENSION,
+            origin: sender.origin,
+        };
+    }
+
+    if (sender.tab && WEB_ORIGIN_RGX.test(sender.origin)) {
+        return {
+            caller: RpcCallers.CONTENT_SCRIPT,
+            origin: sender.origin,
+        };
+    }
+
+    return;
+};
+
+export const createRouter = ({ extensionId }: RouterOptions): Router => {
+    const routes = new Map<string, Route>();
 
     const dispatch = async (message: unknown, sender: MessageSender): Promise<NotRequired<RpcResponse>> => {
         const request = validate(rpcRequest, message);
@@ -81,15 +83,15 @@ export const createRouter = ({ extensionId }: RouterOptions): Router => {
 
         const { method, params } = request.value;
 
-        const context = getCtx(sender);
+        const context = getCallerCtx(sender, extensionId);
 
-        if (context === undefined) {
+        if (!context) {
             return rpcFailure(RpcErrorCodes.FORBIDDEN, 'sender is not allowed');
         }
 
         const route = routes.get(method);
 
-        if (route === undefined) {
+        if (!route) {
             return rpcFailure(RpcErrorCodes.UNKNOWN_METHOD, `unknown method ${method}`);
         }
 
@@ -100,13 +102,18 @@ export const createRouter = ({ extensionId }: RouterOptions): Router => {
         try {
             return await route.run(params, context);
         } catch (error) {
+            if (error instanceof RpcError) {
+                return rpcFailure(error.code, error.message);
+            }
+
+            /** Anything but RpcError is a bug: its details go to the log, never to the caller */
             console.error(`[rpc] ${method} failed`, error);
 
             return rpcFailure(RpcErrorCodes.INTERNAL, 'internal error');
         }
     };
 
-    const handle: Router['handle'] = (method, handler) => {
+    const on: Router['on'] = (method, handler) => {
         if (routes.has(method.name)) {
             throw new Error(`Duplicate handler for ${method.name}`);
         }
@@ -130,7 +137,9 @@ export const createRouter = ({ extensionId }: RouterOptions): Router => {
 
     const listen: VoidFunction = () => {
         chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
-            if (!validate(rpcRequest, message).ok) {
+            const isValid = validate(rpcRequest, message).ok;
+
+            if (!isValid) {
                 return false;
             }
 
@@ -143,8 +152,8 @@ export const createRouter = ({ extensionId }: RouterOptions): Router => {
     };
 
     return {
-        handle,
-        dispatch,
+        on,
         listen,
+        dispatch,
     };
 };

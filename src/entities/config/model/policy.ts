@@ -12,46 +12,66 @@ export type Feature = `${Features}`;
 
 export const FEATURES = Object.values(Features);
 
-/** Settings an administrator sets through enterprise policy (chrome.storage.managed). */
+/** Settings an administrator sets through enterprise policy (chrome.storage.managed) */
 export interface ManagedPolicy {
-    /** Features the organization turned off. */
+    /** Features the organization turned off */
     readonly disabledFeatures?: readonly Feature[];
-    /** Hosts the extension may ever be granted (`example.com` or `*.example.com`). */
+    /** Hosts the extension may ever be granted: example.com or *.example.com */
     readonly allowedHosts?: readonly string[];
-    /** When false, only rules shipped by the policy apply. */
+    /** When false, only rules shipped by the policy apply */
     readonly allowUserRules?: boolean;
-    /** When true, API client secrets must be encrypted with a master password. */
+    /** When true, API client secrets must be encrypted with a master password */
     readonly requireVault?: boolean;
-    /** Preset rules and mocks: an export bundle serialized as JSON. */
+    /** Preset rules and mocks: an export bundle serialized as JSON */
     readonly presetBundle?: string;
 }
 
 export interface PolicyReadResult {
-    /** Valid fields, plus the fail-closed values of broken ones. */
+    /** Valid fields, plus the fail-closed values of broken ones */
     readonly policy: ManagedPolicy;
-    /** Every problem found, for the UI to show. */
+    /** Every problem found, for the UI to show */
     readonly issues: readonly Issue[];
 }
 
-/** `example.com` or `*.example.com`. */
-const HOST_REGEX = /^(\*\.)?[a-z0-9-]+(\.[a-z0-9-]+)*$/;
-
 interface PolicyField<T> {
-    /** Checks the administrator's value. */
+    /** Checks the administrator's value */
     readonly validator: Validator<T>;
-    /** Applied when the field is present but invalid: always the most restrictive reading. */
+    /** Applied when the field is present but invalid: always the most restrictive reading */
     readonly failClosed?: T;
 }
 
-const POLICY_FIELDS: { readonly [K in keyof Required<ManagedPolicy>]: PolicyField<Required<ManagedPolicy>[K]> } = {
-    disabledFeatures: { validator: array(oneOf(FEATURES), { maxLength: FEATURES.length }), failClosed: FEATURES },
+type PolicyFields = { readonly [K in keyof Required<ManagedPolicy>]: PolicyField<Required<ManagedPolicy>[K]> };
+
+/** example.com or *.example.com */
+const HOST_RGX = /^(\*\.)?[a-z0-9-]+(\.[a-z0-9-]+)*$/;
+
+const POLICY_ERRORS = {
+    NOT_OBJECT: 'expected an object',
+    UNKNOWN_KEY: 'unknown policy, ignored',
+} as const;
+
+const host = string({ minLength: 1, maxLength: 253, pattern: HOST_RGX });
+
+const POLICY_FIELDS: PolicyFields = {
+    disabledFeatures: {
+        validator: array(oneOf(FEATURES), { maxLength: FEATURES.length }),
+        failClosed: FEATURES,
+    },
     allowedHosts: {
-        validator: array(string({ minLength: 1, maxLength: 253, pattern: HOST_REGEX }), { maxLength: 1000 }),
+        validator: array(host, { maxLength: 1000 }),
         failClosed: [],
     },
-    allowUserRules: { validator: boolean(), failClosed: false },
-    requireVault: { validator: boolean(), failClosed: true },
-    presetBundle: { validator: string({ maxLength: 1_000_000 }) },
+    allowUserRules: {
+        validator: boolean(),
+        failClosed: false,
+    },
+    requireVault: {
+        validator: boolean(),
+        failClosed: true,
+    },
+    presetBundle: {
+        validator: string({ maxLength: 1_000_000 }),
+    },
 };
 
 const isPolicyKey = (key: string): key is keyof ManagedPolicy => Object.hasOwn(POLICY_FIELDS, key);
@@ -61,12 +81,27 @@ const isPolicyKey = (key: string): key is keyof ManagedPolicy => Object.hasOwn(P
  * Restrictive fields fall back to their most restrictive value; every problem is reported.
  */
 export const readPolicy = (raw: unknown): PolicyReadResult => {
-    if (raw === undefined || raw === null) {
-        return { policy: {}, issues: [] };
+    const isMissing = raw === undefined || raw === null;
+
+    if (isMissing) {
+        return {
+            policy: {},
+            issues: [],
+        };
     }
 
-    if (typeof raw !== 'object' || Array.isArray(raw)) {
-        return { policy: {}, issues: [{ path: '$', message: 'expected an object' }] };
+    const isObject = typeof raw === 'object' && !Array.isArray(raw);
+
+    if (!isObject) {
+        return {
+            policy: {},
+            issues: [
+                {
+                    path: '$',
+                    message: POLICY_ERRORS.NOT_OBJECT,
+                },
+            ],
+        };
     }
 
     const policy: Record<string, unknown> = {};
@@ -74,7 +109,10 @@ export const readPolicy = (raw: unknown): PolicyReadResult => {
 
     for (const [key, value] of Object.entries(raw)) {
         if (!isPolicyKey(key)) {
-            issues.push({ path: `$.${key}`, message: 'unknown policy, ignored' });
+            issues.push({
+                path: `$.${key}`,
+                message: POLICY_ERRORS.UNKNOWN_KEY,
+            });
 
             continue;
         }
@@ -84,17 +122,27 @@ export const readPolicy = (raw: unknown): PolicyReadResult => {
 
         if (result.ok) {
             policy[key] = result.value;
-        } else {
-            issues.push(...result.issues);
 
-            if (field.failClosed !== undefined) {
-                policy[key] = field.failClosed;
-            }
+            continue;
+        }
+
+        issues.push(...result.issues);
+
+        const hasFailClosed = field.failClosed !== undefined;
+
+        if (hasFailClosed) {
+            policy[key] = field.failClosed;
         }
     }
 
-    return { policy, issues };
+    return {
+        policy,
+        issues,
+    };
 };
 
-export const isFeatureEnabled = (policy: ManagedPolicy, feature: Feature): boolean =>
-    !(policy.disabledFeatures ?? []).includes(feature);
+export const isFeatureEnabled = (policy: ManagedPolicy, feature: Feature): boolean => {
+    const disabledFeatures = policy.disabledFeatures ?? [];
+
+    return !disabledFeatures.includes(feature);
+};

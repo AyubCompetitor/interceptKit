@@ -16,13 +16,13 @@ import {
     type Validator,
 } from '#shared/lib';
 
-export type NoneBody = { readonly kind: 'none' };
+export type NoneBody = { readonly bodyType: 'none' };
 
-export type JsonBody = { readonly kind: 'json'; readonly text: string };
+export type JsonBody = { readonly bodyType: 'json'; readonly text: string };
 
-export type RawBody = { readonly kind: 'raw'; readonly text: string; readonly contentType: string };
+export type RawBody = { readonly bodyType: 'raw'; readonly text: string; readonly contentType: string };
 
-export type FormBody = { readonly kind: 'form'; readonly fields: readonly KeyValue[] };
+export type FormBody = { readonly bodyType: 'form'; readonly fields: readonly KeyValue[] };
 
 export type RequestBody = NoneBody | JsonBody | RawBody | FormBody;
 
@@ -48,17 +48,36 @@ export interface ApiRequest {
 
 export const MAX_BODY_LENGTH = 5_000_000;
 
+/** fetch() throws when these methods carry a body */
+const BODYLESS_METHODS: readonly HttpMethod[] = [HttpMethods.GET, HttpMethods.HEAD];
+
+const REQUEST_ERRORS = {
+    BODY_NOT_ALLOWED: 'requests cannot have a body',
+} as const;
+
+const getBodyError = (request: ApiRequest): NotRequired<string> => {
+    const hasBody = request.body.bodyType !== 'none';
+
+    const isBodylessMethod = BODYLESS_METHODS.includes(request.method);
+
+    if (hasBody && isBodylessMethod) {
+        return `${request.method} ${REQUEST_ERRORS.BODY_NOT_ALLOWED}`;
+    }
+
+    return;
+};
+
 const fields = array(keyValue, { maxLength: 500 });
 
-const requestBody: Validator<RequestBody> = discriminatedUnion('kind', {
-    none: object({ kind: literal('none') }),
-    json: object({ kind: literal('json'), text: string({ maxLength: MAX_BODY_LENGTH }) }),
+const requestBody: Validator<RequestBody> = discriminatedUnion('bodyType', {
+    none: object({ bodyType: literal('none') }),
+    json: object({ bodyType: literal('json'), text: string({ maxLength: MAX_BODY_LENGTH }) }),
     raw: object({
-        kind: literal('raw'),
+        bodyType: literal('raw'),
         text: string({ maxLength: MAX_BODY_LENGTH }),
         contentType: string({ maxLength: 256 }),
     }),
-    form: object({ kind: literal('form'), fields }),
+    form: object({ bodyType: literal('form'), fields }),
 });
 
 export const apiRequestValidator: Validator<ApiRequest> = refine(
@@ -72,8 +91,5 @@ export const apiRequestValidator: Validator<ApiRequest> = refine(
         body: requestBody,
         sendCookies: boolean(),
     }),
-    request =>
-        (request.method === HttpMethods.GET || request.method === HttpMethods.HEAD) && request.body.kind !== 'none'
-            ? `${request.method} requests cannot have a body`
-            : undefined,
+    getBodyError,
 );

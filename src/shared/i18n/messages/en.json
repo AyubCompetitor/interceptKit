@@ -37,6 +37,219 @@
     "sectionTransfer": {
         "message": "Import and export"
     },
+    "sitesHint": {
+        "message": "Rules work only on sites you allow here. The browser checks access to both the requested site and the page that sent the request."
+    },
+    "sitesDomain": {
+        "message": "Domain"
+    },
+    "sitesDomainPlaceholder": {
+        "message": "example.com",
+        "description": "Sample domain in an empty input. Not translated."
+    },
+    "sitesSubdomains": {
+        "message": "Include subdomains"
+    },
+    "sitesAllow": {
+        "message": "Allow access"
+    },
+    "sitesEmpty": {
+        "message": "No sites yet."
+    },
+    "sitesAllSites": {
+        "message": "All sites"
+    },
+    "sitesRemove": {
+        "message": "Remove"
+    },
+    "sitesInvalidDomain": {
+        "message": "Enter a domain such as example.com or localhost."
+    },
+    "sitesNotGranted": {
+        "message": "Access was not granted."
+    },
+    "sitesRequestFailed": {
+        "message": "Could not request access. Try again."
+    },
+    "sitesRemoveFailed": {
+        "message": "Could not remove access. Try again."
+    },
+    "interceptionEnabled": {
+        "message": "Intercept requests"
+    },
+    "interceptionSaveFailed": {
+        "message": "Could not switch interception. Try again."
+    },
+    "rulesAdd": {
+        "message": "Add rule"
+    },
+    "rulesHint": {
+        "message": "The first matching rule in the list wins. Rules work only on sites allowed under Sites."
+    },
+    "rulesEmpty": {
+        "message": "No rules yet."
+    },
+    "rulesEdit": {
+        "message": "Edit"
+    },
+    "rulesDelete": {
+        "message": "Delete"
+    },
+    "rulesActionFailed": {
+        "message": "Could not update the rule. Try again."
+    },
+    "rulesNewTitle": {
+        "message": "New rule"
+    },
+    "rulesEditTitle": {
+        "message": "Edit rule"
+    },
+    "rulesCancel": {
+        "message": "Cancel"
+    },
+    "rulesSave": {
+        "message": "Save"
+    },
+    "rulesSaveFailed": {
+        "message": "Could not save the rule: $1",
+        "description": "$1 is the technical reason, in English."
+    },
+    "rulesDeleteTitle": {
+        "message": "Delete rule"
+    },
+    "rulesDeleteText": {
+        "message": "Delete the rule “$1”? This cannot be undone.",
+        "description": "$1 is the rule name."
+    },
+    "ruleName": {
+        "message": "Name"
+    },
+    "ruleType": {
+        "message": "Action"
+    },
+    "ruleTypeRedirect": {
+        "message": "Redirect"
+    },
+    "ruleTypeHeaders": {
+        "message": "Modify headers"
+    },
+    "ruleTypeBlock": {
+        "message": "Block"
+    },
+    "ruleSyntax": {
+        "message": "Pattern type"
+    },
+    "ruleSyntaxFilter": {
+        "message": "URL filter"
+    },
+    "ruleSyntaxRegex": {
+        "message": "Regular expression"
+    },
+    "rulePattern": {
+        "message": "URL pattern"
+    },
+    "rulePatternHint": {
+        "message": "In a URL filter, || anchors a domain, * matches any text and ^ a separator: ||api.example.com/v1/. Regular expressions use the RE2 syntax."
+    },
+    "ruleConditions": {
+        "message": "More conditions"
+    },
+    "ruleMethods": {
+        "message": "Methods"
+    },
+    "ruleResourceTypes": {
+        "message": "Resource types"
+    },
+    "ruleResourceTypesHint": {
+        "message": "With none selected, the rule applies to every type, page loads included."
+    },
+    "ruleInitiatorDomains": {
+        "message": "Only from pages on"
+    },
+    "ruleInitiatorDomainsHint": {
+        "message": "Domains separated by commas; their subdomains are included."
+    },
+    "ruleTarget": {
+        "message": "Redirect to"
+    },
+    "ruleTargetUrl": {
+        "message": "A URL"
+    },
+    "ruleTargetSubstitution": {
+        "message": "A regex substitution"
+    },
+    "ruleTargetTransform": {
+        "message": "Changed parts of the URL"
+    },
+    "ruleTargetUrlLabel": {
+        "message": "Target URL"
+    },
+    "ruleSubstitution": {
+        "message": "Substitution"
+    },
+    "ruleSubstitutionHint": {
+        "message": "\\1 to \\9 insert the groups captured by the regular expression."
+    },
+    "ruleScheme": {
+        "message": "Scheme"
+    },
+    "ruleSchemeKeep": {
+        "message": "Keep"
+    },
+    "ruleSchemeHttp": {
+        "message": "http",
+        "description": "URL scheme. Not translated."
+    },
+    "ruleSchemeHttps": {
+        "message": "https",
+        "description": "URL scheme. Not translated."
+    },
+    "ruleHost": {
+        "message": "Host"
+    },
+    "rulePort": {
+        "message": "Port"
+    },
+    "rulePath": {
+        "message": "Path"
+    },
+    "ruleTransformHint": {
+        "message": "Empty fields keep that part of the original URL."
+    },
+    "ruleRequestHeaders": {
+        "message": "Request headers"
+    },
+    "ruleResponseHeaders": {
+        "message": "Response headers"
+    },
+    "ruleHeaderName": {
+        "message": "Header"
+    },
+    "ruleHeaderOperation": {
+        "message": "Operation"
+    },
+    "ruleHeaderValue": {
+        "message": "Value"
+    },
+    "ruleHeaderSet": {
+        "message": "Set"
+    },
+    "ruleHeaderRemove": {
+        "message": "Remove"
+    },
+    "ruleHeaderAppend": {
+        "message": "Append"
+    },
+    "ruleHeaderAdd": {
+        "message": "Add header"
+    },
+    "ruleHeaderDelete": {
+        "message": "Delete this header change",
+        "description": "Accessible name of the × button in a header row."
+    },
+    "ruleBlockHint": {
+        "message": "Matching requests fail as if the network blocked them."
+    },
     "settingsTitle": {
         "message": "Settings"
     },

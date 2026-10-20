@@ -4,8 +4,11 @@ import { RpcError, RpcErrorCodes, rpcResponse, type RpcRequest } from './protoco
 
 const INVALID_RESPONSE = 'invalid response';
 
-/** Calls a background method. Throws RpcError on failure */
-export const call = async <Params, Result>(method: RpcMethod<Params, Result>, params: Params): Promise<Result> => {
+/** Execute a background method. Throws RpcError on failure */
+export const executeRpc = async <Params, Result>(
+    method: RpcMethod<Params, Result>,
+    params: Params,
+): Promise<Result> => {
     const request: RpcRequest = { ik: 1, method: method.name, params };
 
     const raw: unknown = await chrome.runtime.sendMessage(request);
@@ -20,5 +23,6 @@ export const call = async <Params, Result>(method: RpcMethod<Params, Result>, pa
         throw new RpcError(response.value.error.code, response.value.error.message);
     }
 
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- only our background answers, with this method's result
     return response.value.result as Result;
 };

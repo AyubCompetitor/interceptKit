@@ -35,6 +35,213 @@
     "sectionTransfer": {
         "message": "Импорт и экспорт"
     },
+    "sitesHint": {
+        "message": "Правила работают только на сайтах, разрешённых здесь. Браузер проверяет доступ и к сайту запроса, и к странице, которая его отправила."
+    },
+    "sitesDomain": {
+        "message": "Домен"
+    },
+    "sitesDomainPlaceholder": {
+        "message": "example.com"
+    },
+    "sitesSubdomains": {
+        "message": "Вместе с поддоменами"
+    },
+    "sitesAllow": {
+        "message": "Разрешить доступ"
+    },
+    "sitesEmpty": {
+        "message": "Сайтов пока нет."
+    },
+    "sitesAllSites": {
+        "message": "Все сайты"
+    },
+    "sitesRemove": {
+        "message": "Убрать"
+    },
+    "sitesInvalidDomain": {
+        "message": "Введите домен, например example.com или localhost."
+    },
+    "sitesNotGranted": {
+        "message": "Доступ не выдан."
+    },
+    "sitesRequestFailed": {
+        "message": "Не удалось запросить доступ. Попробуйте ещё раз."
+    },
+    "sitesRemoveFailed": {
+        "message": "Не удалось убрать доступ. Попробуйте ещё раз."
+    },
+    "interceptionEnabled": {
+        "message": "Перехватывать запросы"
+    },
+    "interceptionSaveFailed": {
+        "message": "Не удалось переключить перехват. Попробуйте ещё раз."
+    },
+    "rulesAdd": {
+        "message": "Добавить правило"
+    },
+    "rulesHint": {
+        "message": "Срабатывает первое подходящее правило в списке. Правила действуют только на сайтах из раздела «Сайты»."
+    },
+    "rulesEmpty": {
+        "message": "Правил пока нет."
+    },
+    "rulesEdit": {
+        "message": "Изменить"
+    },
+    "rulesDelete": {
+        "message": "Удалить"
+    },
+    "rulesActionFailed": {
+        "message": "Не удалось обновить правило. Попробуйте ещё раз."
+    },
+    "rulesNewTitle": {
+        "message": "Новое правило"
+    },
+    "rulesEditTitle": {
+        "message": "Изменение правила"
+    },
+    "rulesCancel": {
+        "message": "Отмена"
+    },
+    "rulesSave": {
+        "message": "Сохранить"
+    },
+    "rulesSaveFailed": {
+        "message": "Не удалось сохранить правило: $1"
+    },
+    "rulesDeleteTitle": {
+        "message": "Удаление правила"
+    },
+    "rulesDeleteText": {
+        "message": "Удалить правило «$1»? Отменить это действие нельзя."
+    },
+    "ruleName": {
+        "message": "Название"
+    },
+    "ruleType": {
+        "message": "Действие"
+    },
+    "ruleTypeRedirect": {
+        "message": "Редирект"
+    },
+    "ruleTypeHeaders": {
+        "message": "Изменить заголовки"
+    },
+    "ruleTypeBlock": {
+        "message": "Заблокировать"
+    },
+    "ruleSyntax": {
+        "message": "Тип шаблона"
+    },
+    "ruleSyntaxFilter": {
+        "message": "Фильтр URL"
+    },
+    "ruleSyntaxRegex": {
+        "message": "Регулярное выражение"
+    },
+    "rulePattern": {
+        "message": "Шаблон URL"
+    },
+    "rulePatternHint": {
+        "message": "В фильтре URL || привязывает к домену, * означает любой текст, ^ — разделитель: ||api.example.com/v1/. Регулярные выражения пишутся в синтаксисе RE2."
+    },
+    "ruleConditions": {
+        "message": "Дополнительные условия"
+    },
+    "ruleMethods": {
+        "message": "Методы"
+    },
+    "ruleResourceTypes": {
+        "message": "Типы ресурсов"
+    },
+    "ruleResourceTypesHint": {
+        "message": "Если ничего не выбрано, правило действует на все типы, включая загрузку страниц."
+    },
+    "ruleInitiatorDomains": {
+        "message": "Только со страниц доменов"
+    },
+    "ruleInitiatorDomainsHint": {
+        "message": "Домены через запятую; их поддомены тоже учитываются."
+    },
+    "ruleTarget": {
+        "message": "Куда перенаправить"
+    },
+    "ruleTargetUrl": {
+        "message": "На URL"
+    },
+    "ruleTargetSubstitution": {
+        "message": "Подстановкой по регулярному выражению"
+    },
+    "ruleTargetTransform": {
+        "message": "Изменив части URL"
+    },
+    "ruleTargetUrlLabel": {
+        "message": "Адрес назначения"
+    },
+    "ruleSubstitution": {
+        "message": "Подстановка"
+    },
+    "ruleSubstitutionHint": {
+        "message": "\\1–\\9 вставляют группы, захваченные регулярным выражением."
+    },
+    "ruleScheme": {
+        "message": "Схема"
+    },
+    "ruleSchemeKeep": {
+        "message": "Без изменений"
+    },
+    "ruleSchemeHttp": {
+        "message": "http"
+    },
+    "ruleSchemeHttps": {
+        "message": "https"
+    },
+    "ruleHost": {
+        "message": "Хост"
+    },
+    "rulePort": {
+        "message": "Порт"
+    },
+    "rulePath": {
+        "message": "Путь"
+    },
+    "ruleTransformHint": {
+        "message": "Пустые поля оставляют соответствующую часть исходного URL."
+    },
+    "ruleRequestHeaders": {
+        "message": "Заголовки запроса"
+    },
+    "ruleResponseHeaders": {
+        "message": "Заголовки ответа"
+    },
+    "ruleHeaderName": {
+        "message": "Заголовок"
+    },
+    "ruleHeaderOperation": {
+        "message": "Операция"
+    },
+    "ruleHeaderValue": {
+        "message": "Значение"
+    },
+    "ruleHeaderSet": {
+        "message": "Задать"
+    },
+    "ruleHeaderRemove": {
+        "message": "Удалить"
+    },
+    "ruleHeaderAppend": {
+        "message": "Дописать"
+    },
+    "ruleHeaderAdd": {
+        "message": "Добавить заголовок"
+    },
+    "ruleHeaderDelete": {
+        "message": "Удалить это изменение заголовка"
+    },
+    "ruleBlockHint": {
+        "message": "Подходящие запросы завершаются ошибкой, как будто их заблокировала сеть."
+    },
     "settingsTitle": {
         "message": "Настройки"
     },

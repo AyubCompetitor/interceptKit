@@ -9,5 +9,7 @@ export const AppProviders: FCC = ({ children }) => {
         return null;
     }
 
-    return <I18nProvider locale={resolveLocale(settings.locale, getUILanguage())}>{children}</I18nProvider>;
+    const locale = resolveLocale(settings.locale, getUILanguage());
+
+    return <I18nProvider locale={locale}>{children}</I18nProvider>;
 };

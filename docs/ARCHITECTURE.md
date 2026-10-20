@@ -4,13 +4,13 @@ InterceptKit is a Manifest V3 extension for Chrome and Edge 140+. This document 
 
 ## Execution contexts
 
-| Context                     | Entry point                         | Runs                                        | Talks to                                                        |
-| --------------------------- | ----------------------------------- | ------------------------------------------- | --------------------------------------------------------------- |
-| Service worker (background) | `src/app/entrypoints/background.ts` | On demand; Chrome stops it after ~30 s idle | `chrome.storage`, later `declarativeNetRequest` and `scripting` |
-| Popup                       | `src/app/entrypoints/popup/`        | While the toolbar popup is open             | Storage (read), background (RPC)                                |
-| Dashboard (options page)    | `src/app/entrypoints/options/`      | In a tab                                    | Storage (read), background (RPC)                                |
-| API client                  | `src/app/entrypoints/api-client/`   | In a tab                                    | Later: the network, only for requests the user sends            |
-| Content scripts             | Later                               | Pages of sites where the user enabled mocks | Background (RPC), the page through `postMessage`                |
+| Context                     | Entry point                         | Runs                                        | Talks to                                                     |
+| --------------------------- | ----------------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
+| Service worker (background) | `src/app/entrypoints/background.ts` | On demand; Chrome stops it after ~30 s idle | `chrome.storage`, `declarativeNetRequest`, later `scripting` |
+| Popup                       | `src/app/entrypoints/popup/`        | While the toolbar popup is open             | Storage (read), background (RPC)                             |
+| Dashboard (options page)    | `src/app/entrypoints/options/`      | In a tab                                    | Storage (read), background (RPC), host access requests       |
+| API client                  | `src/app/entrypoints/api-client/`   | In a tab                                    | Later: the network, only for requests the user sends         |
+| Content scripts             | Later                               | Pages of sites where the user enabled mocks | Background (RPC), the page through `postMessage`             |
 
 ## Code layout: Feature-Sliced Design
 
@@ -31,7 +31,8 @@ Rules:
 - **Import only downwards.** No imports between slices of the same layer.
 - **Public API only.** A slice is imported through its `index.ts`. The aliases in `package.json` `imports` (`#entities/*` → `src/entities/*/index.ts`) make deep imports unresolvable for TypeScript, the bundler and the test runner alike. Inside a slice, use relative imports; `../../` out of a slice is rejected by the linter.
 - **Pages first.** Code lives in its page until it is genuinely needed in two places.
-- **Entities and `shared/lib` are universal.** They use no React, no `chrome.*`, no DOM and no network, so every context can import them, including a script running inside a web page, and they are unit-tested in Node. Contracts such as storage keys and RPC methods are declared in entities as plain data (`defineStore`, `defineMethod`); `shared/platform` and `shared/messaging` execute them.
+- **Segments by purpose.** `ui` holds what is displayed, including option labels; `model` holds data and business logic, such as the hooks that save rules or grant site access; `lib` holds library code with no business logic, such as modal state or bindings of form fields; `api` holds requests. A hook goes where its content belongs, not into a folder for hooks. Files are named after their domain (`ruleDraft.ts`), never `types.ts` or `utils.ts`.
+- **Entities and `shared/lib` are universal.** They use no React, no `chrome.*`, no DOM and no network, so every context can import them, including a script running inside a web page, and they are unit-tested in Node. Contracts such as storage keys and RPC methods are declared in entities as plain data (`defineStoreItem`, `defineMethod`); `shared/platform` and `shared/messaging` execute them.
 - **Network access** (`fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`) is allowed only in `src/pages/api-client/api/`.
 
 These rules are checked by `oxlint` (`.oxlintrc.json`): `no-restricted-imports` per layer, `no-restricted-globals` for purity and for network access.
@@ -51,7 +52,7 @@ Every value is validated on read and on write with the dependency-free validator
 
 ## Messaging
 
-Extension pages read storage directly and react to `chrome.storage.onChanged`. They never write interception settings themselves: they call the service worker, which is the only writer.
+Extension pages read storage directly and react to `chrome.storage.onChanged`. They never write interception settings themselves: they executeRpc the service worker, which is the only writer.
 
 ```
 page ──RPC (runtime.sendMessage)──▶ service worker ──▶ chrome.storage.local
@@ -60,9 +61,32 @@ page ──RPC (runtime.sendMessage)──▶ service worker ──▶ chrome.st
 ```
 
 - Envelope: `{ ik: 1, method, params }`, answered with `{ ok: true, result }` or `{ ok: false, error: { code, message } }`.
-- The router accepts only senders from this extension. Each method declares who may call it (extension pages, or also content scripts); the caller's origin is taken from what the browser reports, never from the message.
-- Parameters are validated before a handler runs; handler errors are logged and returned as a generic `internal` error.
+- The router accepts only senders from this extension. Each method declares who may executeRpc it (extension pages, or also content scripts); the caller's origin is taken from what the browser reports, never from the message.
+- Parameters are validated before a handler runs. A handler rejects bad input with `RpcError` and a reason; any other error is logged and returned as a generic `internal` error.
 - Writes go through a serial queue, so concurrent updates are never lost.
+
+## Rules
+
+Redirect, header and block rules are applied by the browser itself through `declarativeNetRequest`: the extension never sees request contents.
+
+```
+rules + settings + policy ──▶ selectActiveRules ──▶ compileRules ──▶ updateDynamicRules
+```
+
+- The service worker rebuilds the browser's dynamic rules when the extension is installed or the browser starts, and whenever rules, settings or the administrator's policy change. The sync runs in the same serial queue as writes and replaces all dynamic rules in one atomic update.
+- `selectActiveRules` drops disabled rules, everything when interception is switched off, and what the policy forbids (disabled features, user rules when `allowUserRules` is false).
+- `compileRules` is a pure function in `entities/rule`. The first rule in the list wins: priorities follow the order, because the browser leaves equal priorities unordered. A rule without resource types applies to all of them, including top-level pages.
+- Saving a rule checks what only the browser knows: whether RE2 can run its regex, and the limit of regex rules.
+- The dashboard edits a rule through a form state that keeps the fields of every rule type, so switching the type loses nothing. Saving sends the whole rule to the service worker; if it refuses, the editor shows the reason.
+- **Rules are inert without host access.** The browser applies a rule only when the extension has access to both the requested site and the page that made the request; nothing is granted at install.
+
+## Site access
+
+Host access is the user's decision, made one site at a time:
+
+- The dashboard's Sites section asks the browser for `*://<domain>/*`, or for `*://*.<domain>/*` with subdomains, which also covers the domain itself. Both cover any port. The browser shows its own prompt, and only inside the user's click.
+- The list shows what the browser has actually granted (`permissions.getAll`) and reloads on `permissions.onAdded` and `onRemoved`. There is no copy in storage that could drift from it.
+- Removing a site revokes the permission, and rules stop working there at once.
 
 ## Localization
 
@@ -97,5 +121,5 @@ dist/chrome-mv3/
 
 ## Testing
 
-- **Unit tests** ([Rstest](https://rstest.rs)) sit next to the code as `*.test.ts` and run in Node: validators, business rules, storage adapter, RPC router, migrations, localization.
-- **End-to-end tests** (Playwright) load the production build into Playwright's Chromium and check the manifest's permissions, storage access restriction, CSP and real user flows such as switching the interface language.
+- **Unit tests** ([Rstest](https://rstest.rs)) sit next to the code in `__tests__/` folders, with shared fixtures in `__tests__/mocks.ts`, and run in Node: validators, business rules, storage adapter, RPC router, migrations, localization.
+- **End-to-end tests** (Playwright) load the production build into Playwright's Chromium and check the manifest's permissions, storage access restriction, CSP and real user flows such as switching the interface language or editing rules. Playwright cannot answer the browser's permission prompt, so the Sites tests replace `chrome.permissions.request` and check what would have been requested.

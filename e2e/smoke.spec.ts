@@ -5,16 +5,16 @@ const EXTENSION_NAME = 'InterceptKit';
 
 const getExtensionPath = (extensionId: string) => `chrome-extension://${extensionId}/pages/`;
 
-test('manifest requests nothing but storage', async ({ serviceWorker }) => {
+test('manifest requests only the reviewed permissions', async ({ serviceWorker }) => {
     const manifest = await serviceWorker.evaluate(() => chrome.runtime.getManifest());
 
     expect(manifest.manifest_version).toBe(3);
 
-    expect(manifest.permissions).toEqual(['storage']);
+    expect(manifest.permissions).toEqual(['storage', 'declarativeNetRequestWithHostAccess']);
 
     expect(manifest.host_permissions ?? []).toEqual([]);
 
-    expect(manifest.optional_host_permissions ?? []).toEqual([]);
+    expect(manifest.optional_host_permissions).toEqual(['*://*/*']);
 
     expect(manifest.content_scripts ?? []).toEqual([]);
 
@@ -45,24 +45,16 @@ test('popup renders in English under an offline CSP', async ({ context, extensio
     expect(errors).toEqual([]);
 });
 
-test('dashboard switches the interface to Russian and remembers it', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    const errors = trackErrors(page);
-    const options = getExtensionPath(extensionId) + 'options.html';
+test('dashboard switches the interface to Russian and remembers it', async ({ optionsPage }) => {
+    await optionsPage.getByLabel('Interface language').selectOption('ru');
 
-    await page.goto(options);
+    await expect(optionsPage.getByRole('heading', { name: 'Настройки' })).toBeVisible();
 
-    await page.getByLabel('Interface language').selectOption('ru');
+    await expect(optionsPage.locator('html')).toHaveAttribute('lang', 'ru');
 
-    await expect(page.getByRole('heading', { name: 'Настройки' })).toBeVisible();
+    await optionsPage.reload();
 
-    await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
-
-    await page.reload();
-
-    await expect(page.getByLabel('Язык интерфейса')).toHaveValue('ru');
-
-    expect(errors).toEqual([]);
+    await expect(optionsPage.getByLabel('Язык интерфейса')).toHaveValue('ru');
 });
 
 test('API client page may use the network', async ({ context, extensionId }) => {

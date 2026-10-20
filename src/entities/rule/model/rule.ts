@@ -2,11 +2,12 @@ import {
     array,
     boolean,
     discriminatedUnion,
+    displayName,
     domainName,
+    isDuplicateValues,
     headerName,
     headerValue,
-    HTTP_METHODS,
-    httpMethod,
+    httpMethods,
     httpUrl,
     identifier,
     literal,
@@ -14,9 +15,12 @@ import {
     oneOf,
     optional,
     refine,
+    source,
     string,
+    SyntaxTypes,
     urlPattern,
     type HttpMethod,
+    type Source,
     type UrlPattern,
     type Validator,
 } from '#shared/lib';
@@ -51,6 +55,8 @@ export enum HeaderOperations {
 
 export type HeaderOperation = `${HeaderOperations}`;
 
+export const HEADER_OPERATIONS = Object.values(HeaderOperations);
+
 /** Which requests a rule applies to. An absent list means "any"; DNR rejects empty lists */
 export interface RequestMatch {
     /** Condition on the request URL */
@@ -72,22 +78,19 @@ export interface HeaderOp {
     readonly value?: string;
 }
 
-export type UrlKind = { readonly kind: 'url'; readonly url: string };
+export type UrlTarget = { readonly targetType: 'url'; readonly url: string };
 
-export type RgxSubsKind = { readonly kind: 'regexSubstitution'; readonly value: string };
+export type RgxSubstitutionTarget = { readonly targetType: 'regexSubstitution'; readonly value: string };
 
-export type TransformKind = {
-    readonly kind: 'transform';
+export type TransformTarget = {
+    readonly targetType: 'transform';
     readonly scheme?: 'http' | 'https';
     readonly host?: string;
     readonly port?: string;
     readonly path?: string;
 };
 
-export type RedirectTarget = UrlKind | RgxSubsKind | TransformKind;
-
-/** policy rules come from the administrator and are read-only in the UI */
-export type RuleSource = 'user' | 'policy';
+export type RedirectTarget = UrlTarget | RgxSubstitutionTarget | TransformTarget;
 
 interface RuleBase {
     /** Unique within the rule list */
@@ -97,20 +100,20 @@ interface RuleBase {
     /** Disabled rules are kept but not applied */
     readonly enabled: boolean;
     /** Who owns the rule */
-    readonly source: RuleSource;
+    readonly source: Source;
     /** Which requests the rule applies to */
     readonly match: RequestMatch;
 }
 
 export interface RedirectRule extends RuleBase {
-    /** Rule kind */
+    /** Rule type */
     readonly type: 'redirect';
-    /** Where matching requests go. */
+    /** Where matching requests go */
     readonly to: RedirectTarget;
 }
 
 export interface HeaderRule extends RuleBase {
-    /** Rule kind */
+    /** Rule type */
     readonly type: 'headers';
     /** Changes to request headers */
     readonly request: readonly HeaderOp[];
@@ -119,7 +122,7 @@ export interface HeaderRule extends RuleBase {
 }
 
 export interface BlockRule extends RuleBase {
-    /** Rule kind */
+    /** Rule type */
     readonly type: 'block';
 }
 
@@ -128,78 +131,177 @@ export type Rule = RedirectRule | HeaderRule | BlockRule;
 /** DNR allows at most 5 000 redirect/modifyHeaders ("unsafe") dynamic rules */
 export const MAX_RULES = 5000;
 
-const RULE_PATTERNS = {
+const RULE_RGXS = {
     PORT: /^\d{1,5}$/,
     PATH: /^\//,
 } as const;
 
+/** The only request headers DNR lets an extension append to */
+const APPENDABLE_REQUEST_HEADERS = new Set([
+    'accept',
+    'accept-encoding',
+    'accept-language',
+    'access-control-request-headers',
+    'cache-control',
+    'connection',
+    'content-language',
+    'cookie',
+    'forwarded',
+    'if-match',
+    'if-none-match',
+    'keep-alive',
+    'range',
+    'te',
+    'trailer',
+    'transfer-encoding',
+    'upgrade',
+    'user-agent',
+    'via',
+    'want-digest',
+    'x-forwarded-for',
+]);
+
+const RULE_ERRORS = {
+    REMOVE_WITH_VALUE: 'remove must not have a value',
+    NEEDS_VALUE: 'needs a value',
+    EMPTY_TRANSFORM: 'transform must change at least one URL part',
+    NO_HEADER_CHANGES: 'a headers rule must change at least one header',
+    APPEND_NOT_ALLOWED: 'cannot append to request header',
+    SUBSTITUTION_WITHOUT_REGEX: 'regexSubstitution needs a regex URL pattern',
+    DUPLICATE_ID: 'duplicate rule id',
+} as const;
+
+const isForbiddenAppend = (op: HeaderOp): boolean => {
+    const isAppend = op.operation === HeaderOperations.APPEND;
+
+    return isAppend && !APPENDABLE_REQUEST_HEADERS.has(op.name.toLowerCase());
+};
+
+const getHeaderOpError = (op: HeaderOp): NotRequired<string> => {
+    const hasValue = op.value !== undefined;
+
+    const isRemove = op.operation === HeaderOperations.REMOVE;
+
+    if (isRemove && hasValue) {
+        return RULE_ERRORS.REMOVE_WITH_VALUE;
+    }
+
+    if (!isRemove && !hasValue) {
+        return `${op.operation} ${RULE_ERRORS.NEEDS_VALUE}`;
+    }
+
+    return;
+};
+
+const getTransformError = (target: TransformTarget): NotRequired<string> => {
+    const parts = [target.scheme, target.host, target.port, target.path];
+
+    const hasChanges = parts.some(part => part !== undefined);
+
+    if (hasChanges) {
+        return;
+    }
+
+    return RULE_ERRORS.EMPTY_TRANSFORM;
+};
+
+const getHeaderRuleError = (rule: HeaderRule): NotRequired<string> => {
+    const hasChanges = rule.request.length + rule.response.length > 0;
+
+    if (!hasChanges) {
+        return RULE_ERRORS.NO_HEADER_CHANGES;
+    }
+
+    const forbiddenAppend = rule.request.find(isForbiddenAppend);
+
+    if (forbiddenAppend) {
+        return `${RULE_ERRORS.APPEND_NOT_ALLOWED} ${forbiddenAppend.name}`;
+    }
+
+    return;
+};
+
+const getSubstitutionError = (rule: Rule): NotRequired<string> => {
+    const isRgxPattern = rule.match.url.syntaxType === SyntaxTypes.RGX;
+    const isRgxSubstitution = rule.type === 'redirect' && rule.to.targetType === 'regexSubstitution';
+
+    if (!isRgxSubstitution || isRgxPattern) {
+        return;
+    }
+
+    return RULE_ERRORS.SUBSTITUTION_WITHOUT_REGEX;
+};
+
+const getDuplicateIdError = (rules: readonly Rule[]): NotRequired<string> => {
+    const ids = rules.map(rule => rule.id);
+
+    if (isDuplicateValues(ids)) {
+        return RULE_ERRORS.DUPLICATE_ID;
+    }
+
+    return;
+};
+
 const requestMatch: Validator<RequestMatch> = object({
     url: urlPattern,
-    methods: optional(array(httpMethod, { minLength: 1, maxLength: HTTP_METHODS.length })),
+    methods: optional(httpMethods),
     resourceTypes: optional(array(oneOf(RESOURCE_TYPES), { minLength: 1, maxLength: RESOURCE_TYPES.length })),
     initiatorDomains: optional(array(domainName, { minLength: 1, maxLength: 1000 })),
 });
 
-const headerOp: Validator<HeaderOp> = refine(
-    object({ name: headerName, operation: oneOf(Object.values(HeaderOperations)), value: optional(headerValue) }),
-    op => {
-        if (op.operation === HeaderOperations.REMOVE) {
-            return op.value === undefined ? undefined : 'remove must not have a value';
-        }
-
-        return op.value === undefined ? `${op.operation} needs a value` : undefined;
-    },
+const headerOp = refine(
+    object({ name: headerName, operation: oneOf(HEADER_OPERATIONS), value: optional(headerValue) }),
+    getHeaderOpError,
 );
 
-const redirectTarget: Validator<RedirectTarget> = discriminatedUnion('kind', {
-    url: object({ kind: literal('url'), url: httpUrl }),
-    regexSubstitution: object({ kind: literal('regexSubstitution'), value: string({ minLength: 1, maxLength: 2048 }) }),
-    transform: refine(
-        object({
-            kind: literal('transform'),
-            scheme: optional(oneOf(['http', 'https'])),
-            host: optional(domainName),
-            port: optional(string({ pattern: RULE_PATTERNS.PORT })),
-            path: optional(string({ maxLength: 2048, pattern: RULE_PATTERNS.PATH })),
-        }),
-        target =>
-            [target.scheme, target.host, target.port, target.path].some(part => part !== undefined)
-                ? undefined
-                : 'transform must change at least one URL part',
-    ),
+const transformTarget = refine(
+    object({
+        targetType: literal('transform'),
+        scheme: optional(oneOf(['http', 'https'])),
+        host: optional(domainName),
+        port: optional(string({ pattern: RULE_RGXS.PORT })),
+        path: optional(string({ maxLength: 2048, pattern: RULE_RGXS.PATH })),
+    }),
+    getTransformError,
+);
+
+const redirectTarget: Validator<RedirectTarget> = discriminatedUnion('targetType', {
+    url: object({ targetType: literal('url'), url: httpUrl }),
+    regexSubstitution: object({
+        targetType: literal('regexSubstitution'),
+        value: string({ minLength: 1, maxLength: 2048 }),
+    }),
+    transform: transformTarget,
 });
 
 const ruleBase = {
     id: identifier,
-    name: string({ minLength: 1, maxLength: 200 }),
+    name: displayName,
     enabled: boolean(),
-    source: oneOf(['user', 'policy']),
+    source,
     match: requestMatch,
 };
 
-export const ruleValidator: Validator<Rule> = refine(
-    discriminatedUnion('type', {
-        redirect: object({ ...ruleBase, type: literal('redirect'), to: redirectTarget }),
-        headers: refine(
-            object({
-                ...ruleBase,
-                type: literal('headers'),
-                request: array(headerOp, { maxLength: 100 }),
-                response: array(headerOp, { maxLength: 100 }),
-            }),
-            rule =>
-                rule.request.length + rule.response.length > 0
-                    ? undefined
-                    : 'a headers rule must change at least one header',
-        ),
-        block: object({ ...ruleBase, type: literal('block') }),
+const redirectRule = object({ ...ruleBase, type: literal('redirect'), to: redirectTarget });
+
+const headerRule = refine(
+    object({
+        ...ruleBase,
+        type: literal('headers'),
+        request: array(headerOp, { maxLength: 100 }),
+        response: array(headerOp, { maxLength: 100 }),
     }),
-    rule =>
-        rule.type === 'redirect' && rule.to.kind === 'regexSubstitution' && rule.match.url.kind !== 'regex'
-            ? 'regexSubstitution needs a regex URL pattern'
-            : undefined,
+    getHeaderRuleError,
 );
 
-export const rulesValidator: Validator<Rule[]> = refine(array(ruleValidator, { maxLength: MAX_RULES }), rules =>
-    new Set(rules.map(rule => rule.id)).size === rules.length ? undefined : 'duplicate rule id',
+const blockRule = object({ ...ruleBase, type: literal('block') });
+
+export const ruleValidator: Validator<Rule> = refine(
+    discriminatedUnion('type', { redirect: redirectRule, headers: headerRule, block: blockRule }),
+    getSubstitutionError,
+);
+
+export const rulesValidator: Validator<Rule[]> = refine(
+    array(ruleValidator, { maxLength: MAX_RULES }),
+    getDuplicateIdError,
 );

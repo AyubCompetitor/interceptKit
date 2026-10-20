@@ -7,7 +7,7 @@ import { useTranslation } from '#shared/i18n';
 import styles from './Modal.module.css';
 import { useModalRef } from './useModalRef.ts';
 
-interface DialogProps {
+interface ModalProps {
     /** Shows the dialog as modal while true */
     isOpen: boolean;
     /** Heading and accessible name of the dialog */
@@ -18,14 +18,14 @@ interface DialogProps {
     onClose: VoidFunction;
 }
 
-export const Modal: FCC<DialogProps> = ({ isOpen, onClose, title, footer, children }) => {
+export const Modal: FCC<ModalProps> = ({ isOpen, onClose, title, footer, children }) => {
     const titleId = useId();
 
     const { t } = useTranslation();
     const { modalRef, onModalClose } = useModalRef(isOpen);
 
     return (
-        <dialog aria-labelledby={titleId} className={styles.dialog} ref={modalRef} onClose={onClose}>
+        <dialog aria-labelledby={titleId} className={styles.modal} ref={modalRef} onClose={onClose}>
             <header className={styles.header}>
                 <h2 className={styles.title} id={titleId}>
                     {title}

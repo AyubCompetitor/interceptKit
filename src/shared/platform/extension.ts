@@ -10,3 +10,9 @@ export const openExtensionPage = async (path: string): Promise<void> => {
 };
 
 export const getUILanguage = (): string => chrome.i18n.getUILanguage();
+
+/** Calls listener when the extension is installed or updated and when the browser starts */
+export const watchExtensionStart = (listener: VoidFunction): void => {
+    chrome.runtime.onInstalled.addListener(listener);
+    chrome.runtime.onStartup.addListener(listener);
+};

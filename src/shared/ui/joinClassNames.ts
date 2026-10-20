@@ -1,4 +1,11 @@
-type ClassName = string | false | null | undefined;
+type ClassName = NotRequired<Nullable<string | false>>;
 
-export const joinClassNames = (...classNames: ClassName[]): NotRequired<string> =>
-    classNames.filter(Boolean).join(' ') || undefined;
+export const joinClassNames = (...classNames: ClassName[]): NotRequired<string> => {
+    const joinedClassNames = classNames.filter(Boolean).join(' ');
+
+    if (!joinedClassNames) {
+        return;
+    }
+
+    return joinedClassNames;
+};

@@ -1,22 +1,19 @@
-import { applySettingsPatch, settingsItem, settingsRpc } from '#entities/config';
+import { applySettingsPatch, settingsItem, settingsRpc, type SettingsPatch } from '#entities/config';
 import type { TaskQueue } from '#shared/lib';
 import type { Router } from '#shared/messaging';
 import { readItem, writeItem } from '#shared/platform';
 
-export const registerSettingsHandlers = (
-    router: Router,
-    storageReady: Promise<void>,
-    runExclusive: TaskQueue,
-): void => {
-    router.handle(settingsRpc.update, patch =>
-        runExclusive(async () => {
-            await storageReady;
+const updateSettings = async (patch: SettingsPatch, storageReady: Promise<void>) => {
+    await storageReady;
 
-            const next = applySettingsPatch(await readItem(settingsItem), patch);
+    const currentItem = await readItem(settingsItem);
+    const nextItem = applySettingsPatch(currentItem, patch);
 
-            await writeItem(settingsItem, next);
+    await writeItem(settingsItem, nextItem);
 
-            return next;
-        }),
-    );
+    return nextItem;
+};
+
+export const registerSettingsHandlers = (router: Router, storageReady: Promise<void>, enqueue: TaskQueue): void => {
+    router.on(settingsRpc.update, patch => enqueue(() => updateSettings(patch, storageReady)));
 };

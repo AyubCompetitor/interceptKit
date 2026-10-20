@@ -30,7 +30,9 @@ export const writeItem = async <T>(item: StoreItem<T>, value: T): Promise<void> 
     const result = validate(item.validator, value);
 
     if (!result.ok) {
-        throw new Error(`Refusing to store invalid ${item.key}: ${formatIssues(result.issues)}`);
+        const errorMessage = `Refusing to store invalid ${item.key}: ${formatIssues(result.issues)}`;
+
+        throw new Error(errorMessage);
     }
 
     await getStore(item.area).set({ [item.key]: result.value });
@@ -55,22 +57,39 @@ export const watchItem = <T>(item: StoreItem<T>, listener: (value: T) => void): 
     return () => chrome.storage.onChanged.removeListener(onChanged);
 };
 
-/** Whole-area access for schema migrations */
-export const readArea = async (name: Store): Promise<StoredData> => getStore(name).get(null);
+/** Whole-area access for schema migrations and the administrator's policy */
+export const readStoreData = async (name: Store): Promise<StoredData> => getStore(name).get(null);
 
-export const replaceArea = async (name: Store, data: StoredData): Promise<void> => {
-    const area = getStore(name);
-    const current = await area.get(null);
-    const removed = Object.keys(current).filter(key => !Object.hasOwn(data, key));
+/** Calls listener whenever anything in the area changes */
+export const watchStoreChanges = (name: Store, listener: VoidFunction): VoidFunction => {
+    const onChanged = (_changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
+        if (areaName === name) {
+            listener();
+        }
+    };
 
-    if (removed.length > 0) {
-        await area.remove(removed);
+    chrome.storage.onChanged.addListener(onChanged);
+
+    return () => chrome.storage.onChanged.removeListener(onChanged);
+};
+
+const getRemovedStoreKeys = (currentData: Record<string, unknown>, storedData: StoredData): string[] =>
+    Object.keys(currentData).filter(key => !Object.hasOwn(storedData, key));
+
+export const writeStoreData = async (name: Store, storedData: StoredData): Promise<void> => {
+    const store = getStore(name);
+    const currentStoreData = await store.get(null);
+
+    const removedKeys = getRemovedStoreKeys(currentStoreData, storedData);
+
+    if (removedKeys.length > 0) {
+        await store.remove(removedKeys);
     }
 
-    await area.set({ ...data });
+    await store.set({ ...storedData });
 };
 
 /** Closes storage.local to content scripts */
-export const restrictLocalStorageToExtension = async (): Promise<void> => {
+export const restrictLocalStore = async (): Promise<void> => {
     await chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
 };

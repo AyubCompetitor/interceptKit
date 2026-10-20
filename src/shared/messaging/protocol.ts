@@ -19,16 +19,26 @@ export enum RpcErrorCodes {
 
 export type RpcErrorCode = `${RpcErrorCodes}`;
 
-export type RpcOKResponse = { readonly ok: true; readonly result?: unknown };
+export type RpcErrorObject = Readonly<{
+    code: RpcErrorCode;
+    message: string;
+}>;
 
-export type RpcErrorResponse = {
-    readonly ok: false;
-    readonly error: { readonly code: RpcErrorCode; readonly message: string };
-};
+export type RpcOKResponse = Readonly<{
+    ok: true;
+    result?: unknown;
+}>;
+
+export type RpcErrorResponse = Readonly<{
+    ok: false;
+    error: RpcErrorObject;
+}>;
 
 export type RpcResponse = RpcOKResponse | RpcErrorResponse;
 
 export const RPC_ERROR_CODES = Object.values(RpcErrorCodes);
+
+const RPC_ERROR_NAME = 'RpcError';
 
 export const rpcRequest: Validator<RpcRequest> = object({
     ik: literal(1),
@@ -36,11 +46,17 @@ export const rpcRequest: Validator<RpcRequest> = object({
     params: optional(unknownValue),
 });
 
-const successResponse = object({ ok: literal(true), result: optional(unknownValue) });
+const successResponse = object({
+    ok: literal(true),
+    result: optional(unknownValue),
+});
 
 const failureResponse = object({
     ok: literal(false),
-    error: object({ code: oneOf(RPC_ERROR_CODES), message: string({ maxLength: 2000 }) }),
+    error: object({
+        code: oneOf(RPC_ERROR_CODES),
+        message: string({ maxLength: 2000 }),
+    }),
 });
 
 export const rpcResponse: Validator<RpcResponse> = (input, path) => {
@@ -55,15 +71,22 @@ export const rpcResponse: Validator<RpcResponse> = (input, path) => {
 
 export const rpcFailure = (code: RpcErrorCode, message: string): RpcResponse => ({
     ok: false,
-    error: { code, message },
+    error: {
+        code,
+        message,
+    },
 });
+
+export const throwRpcError = (code: RpcErrorCode, message: string) => {
+    throw new RpcError(code, message);
+};
 
 export class RpcError extends Error {
     readonly code: RpcErrorCode;
 
     constructor(code: RpcErrorCode, message: string) {
         super(message);
-        this.name = 'RpcError';
+        this.name = RPC_ERROR_NAME;
         this.code = code;
     }
 }

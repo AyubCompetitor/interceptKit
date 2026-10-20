@@ -6,9 +6,9 @@ import {
     type SettingsPatch,
 } from '../model/settings.ts';
 
-import { defineMethod, defineStore, Stores } from '#shared/lib';
+import { defineMethod, defineStoreItem, Stores } from '#shared/lib';
 
-export const settingsItem = defineStore<Settings>({
+export const settingsItem = defineStoreItem<Settings>({
     key: 'settings',
     area: Stores.LOCAL,
     fallback: DEFAULT_SETTINGS,

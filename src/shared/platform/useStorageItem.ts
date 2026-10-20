@@ -9,28 +9,22 @@ export const useStorageItem = <T>(item: StoreItem<T>) => {
     const [value, setValue] = useState<NotRequired<T>>();
 
     useEffect(() => {
+        /** Lives in the effect: a value that arrives after cleanup is dropped */
         let isActive = true;
 
-        const stopWatching = watchItem(item, next => {
-            if (isActive) {
-                setValue(next);
+        const onValueUpdate = (nextValue: T) => {
+            if (!isActive) {
+                return;
             }
-        });
 
-        readItem(item).then(
-            initial => {
-                if (isActive) {
-                    setValue(initial);
-                }
-            },
-            (error: unknown) => {
-                console.error(`[storage] cannot read ${item.key}`, error);
+            setValue(nextValue);
+        };
 
-                if (isActive) {
-                    setValue(item.fallback);
-                }
-            },
-        );
+        const stopWatching = watchItem(item, onValueUpdate);
+
+        readItem(item)
+            .then(onValueUpdate)
+            .catch(() => onValueUpdate(item.fallback));
 
         return () => {
             isActive = false;

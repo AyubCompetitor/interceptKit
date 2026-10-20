@@ -3,11 +3,13 @@ import { createRoot } from 'react-dom/client';
 
 import { AppProviders } from './AppProviders.tsx';
 
+const ROOT_MISSING_ERROR = '#root element is missing';
+
 export const mountPage = (page: ReactNode): void => {
     const container = document.getElementById('root');
 
     if (container === null) {
-        throw new Error('#root element is missing');
+        throw new Error(ROOT_MISSING_ERROR);
     }
 
     createRoot(container).render(

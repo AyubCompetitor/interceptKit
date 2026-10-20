@@ -1,4 +1,16 @@
-import { array, boolean, fail, identifier, literal, object, refine, string, type Validator } from '#shared/lib';
+import {
+    array,
+    boolean,
+    displayName,
+    fail,
+    isDuplicateValues,
+    identifier,
+    literal,
+    object,
+    refine,
+    string,
+    type Validator,
+} from '#shared/lib';
 
 /** A secret encrypted with AES-GCM under a key derived from the master password */
 export interface EncryptedValue {
@@ -30,15 +42,21 @@ export interface Environment {
     readonly variables: readonly EnvVariable[];
 }
 
-const ENV_PATTERNS = {
+const ENV_RGXS = {
     BASE64: /^[A-Za-z0-9+/]*={0,2}$/,
     VARIABLE_KEY: /^[A-Za-z_][A-Za-z0-9_.-]*$/,
 } as const;
 
+const ENV_ERRORS = {
+    INVALID_VALUE: 'expected a string or an encrypted value',
+    PLAIN_ENCRYPTED: 'only secret variables can be encrypted',
+    DUPLICATE_KEY: 'duplicate variable name',
+} as const;
+
 const encryptedValue: Validator<EncryptedValue> = object({
     v: literal(1),
-    iv: string({ minLength: 16, maxLength: 16, pattern: ENV_PATTERNS.BASE64 }),
-    ct: string({ minLength: 1, maxLength: 1_000_000, pattern: ENV_PATTERNS.BASE64 }),
+    iv: string({ minLength: 16, maxLength: 16, pattern: ENV_RGXS.BASE64 }),
+    ct: string({ minLength: 1, maxLength: 1_000_000, pattern: ENV_RGXS.BASE64 }),
 });
 
 const plainValue = string({ maxLength: 100_000 });
@@ -48,31 +66,50 @@ const variableValue: Validator<string | EncryptedValue> = (input, path) => {
         return plainValue(input, path);
     }
 
-    if (typeof input === 'object' && input !== null) {
+    const isObject = typeof input === 'object' && input !== null;
+
+    if (isObject) {
         return encryptedValue(input, path);
     }
 
-    return fail(path, 'expected a string or an encrypted value');
+    return fail(path, ENV_ERRORS.INVALID_VALUE);
+};
+
+const getEncryptionError = (variable: EnvVariable): NotRequired<string> => {
+    const isEncrypted = typeof variable.value !== 'string';
+
+    if (isEncrypted && !variable.secret) {
+        return ENV_ERRORS.PLAIN_ENCRYPTED;
+    }
+
+    return;
+};
+
+const getDuplicateKeyError = (environment: Environment): NotRequired<string> => {
+    const keys = environment.variables.map(variable => variable.key);
+
+    if (isDuplicateValues(keys)) {
+        return ENV_ERRORS.DUPLICATE_KEY;
+    }
+
+    return;
 };
 
 const variable: Validator<EnvVariable> = refine(
     object({
-        key: string({ minLength: 1, maxLength: 100, pattern: ENV_PATTERNS.VARIABLE_KEY }),
+        key: string({ minLength: 1, maxLength: 100, pattern: ENV_RGXS.VARIABLE_KEY }),
         enabled: boolean(),
         secret: boolean(),
         value: variableValue,
     }),
-    entry => (!entry.secret && typeof entry.value !== 'string' ? 'only secret variables can be encrypted' : undefined),
+    getEncryptionError,
 );
 
 export const environmentValidator: Validator<Environment> = refine(
     object({
         id: identifier,
-        name: string({ minLength: 1, maxLength: 200 }),
+        name: displayName,
         variables: array(variable, { maxLength: 1000 }),
     }),
-    environment =>
-        new Set(environment.variables.map(entry => entry.key)).size === environment.variables.length
-            ? undefined
-            : 'duplicate variable name',
+    getDuplicateKeyError,
 );

@@ -7,7 +7,7 @@ const DEFAULT_PREFERENCE = 'auto';
 type Preference = Locale | typeof DEFAULT_PREFERENCE;
 
 const getSupportedLanguage = (uiLanguage: string) => {
-    const [selectedLanguage] = uiLanguage.toLowerCase().split(LANGUAGE_SEPARATOR_RGX)
+    const [selectedLanguage] = uiLanguage.toLowerCase().split(LANGUAGE_SEPARATOR_RGX);
 
     const language = SUPPORTED_LOCALES.find(locale => locale === selectedLanguage);
 
@@ -17,7 +17,6 @@ const getSupportedLanguage = (uiLanguage: string) => {
 
     return language;
 };
-
 
 export const resolveLocale = (preference: Preference, uiLanguage: string): Locale => {
     if (preference !== DEFAULT_PREFERENCE) {

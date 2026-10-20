@@ -1,19 +1,21 @@
 import type { FC } from 'react';
 
 import { useTranslation } from '#shared/i18n';
-import { Flex, Spaces, useDocumentTitle } from '#shared/ui';
+import { createDocumentTitle, Flex, Spaces, Typography, TypographyColors, useDocumentTitle } from '#shared/ui';
 
 import styles from './ApiClientPage.module.css';
 
 export const ApiClientPage: FC = () => {
     const { t } = useTranslation();
+    const title = createDocumentTitle('apiClientTitle', 'extName', t);
 
-    useDocumentTitle(`${t('apiClientTitle')}: ${t('extName')}`);
+    useDocumentTitle(title);
 
     return (
         <Flex as='main' className={styles.apiClient} direction='column' gap={Spaces.XS}>
             <h1>{t('apiClientTitle')}</h1>
-            <p className={styles.placeholder}>{t('apiClientPlaceholder')}</p>
+
+            <Typography color={TypographyColors.HINT}>{t('apiClientPlaceholder')}</Typography>
         </Flex>
     );
 };

@@ -6,7 +6,7 @@ export default defineConfig({
     coverage: {
         provider: 'istanbul',
         include: ['src/**/*.{ts,tsx}'],
-        exclude: ['src/**/*.test.ts', 'src/app/entrypoints/**'],
+        exclude: ['src/**/__tests__/**', 'src/app/entrypoints/**'],
         reportsDirectory: 'coverage',
     },
 });

@@ -2,9 +2,9 @@ export type StoredData = Readonly<Record<string, unknown>>;
 
 export enum MigrationStatuses {
     FRESH = 'fresh',
-    CURR = 'current',
-    MGRTD = 'migrated',
-    NWR = 'newer',
+    CURRENT = 'current',
+    MIGRATED = 'migrated',
+    NEWER = 'newer',
 }
 
 /** One step of the storage schema upgrade */
@@ -17,18 +17,22 @@ export interface Migration {
 
 export type FreshResult = { readonly status: MigrationStatuses.FRESH; readonly version: number };
 
-export type CurrentResult = { readonly status: MigrationStatuses.CURR; readonly version: number };
+export type CurrentResult = { readonly status: MigrationStatuses.CURRENT; readonly version: number };
 
-export type MigratedResult = { readonly status: MigrationStatuses.MGRTD; readonly version: number; readonly data: StoredData };
+export type MigratedResult = {
+    readonly status: MigrationStatuses.MIGRATED;
+    readonly version: number;
+    readonly data: StoredData;
+};
 
-export type NeverResult = { readonly status: MigrationStatuses.NWR; readonly version: number };
+export type NewerResult = { readonly status: MigrationStatuses.NEWER; readonly version: number };
 
-export type MigrationOutcome = FreshResult | CurrentResult | MigratedResult | NeverResult;
+export type MigrationOutcome = FreshResult | CurrentResult | MigratedResult | NewerResult;
 
 const assertMigrationChain = (migrations: readonly Migration[], latest: number): void => {
-    migrations.forEach((migration, idx) => {
-        if (migration.version !== idx + 2) {
-            throw new Error(`Migration #${idx} must produce version ${idx + 2}`);
+    migrations.forEach((migration, index) => {
+        if (migration.version !== index + 2) {
+            throw new Error(`Migration #${index} must produce version ${index + 2}`);
         }
     });
 
@@ -54,14 +58,14 @@ export const runMigrations = (
 
     if (storedVersion > latest) {
         return {
-            status: MigrationStatuses.NWR,
+            status: MigrationStatuses.NEWER,
             version: storedVersion,
         };
     }
 
     if (storedVersion === latest) {
         return {
-            status: MigrationStatuses.CURR,
+            status: MigrationStatuses.CURRENT,
             version: latest,
         };
     }
@@ -72,7 +76,7 @@ export const runMigrations = (
     );
 
     return {
-        status: MigrationStatuses.MGRTD,
+        status: MigrationStatuses.MIGRATED,
         version: latest,
         data: migrated,
     };

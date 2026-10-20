@@ -1,0 +1,26 @@
+.row {
+    padding: var(--space-xs) var(--space-m);
+
+    & + & {
+        border-top: 1px solid var(--color-border);
+    }
+}
+
+.name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 500;
+}
+
+.type {
+    white-space: nowrap;
+}
+
+.pattern {
+    max-width: 40%;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-s);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

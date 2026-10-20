@@ -4,23 +4,24 @@ Every permission InterceptKit requests is listed here with the reason it needs i
 
 ## Requested at install
 
-| Permission | Warning shown to the user | Why it is needed                                                                                                                                                               |
-| ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `storage`  | None                      | Keeps rules, mocks, sites and settings in `chrome.storage.local`, short-lived state in `chrome.storage.session`, and reads administrator policy from `chrome.storage.managed`. |
+| Permission                            | Warning shown to the user | Why it is needed                                                                                                                                                               |
+| ------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `storage`                             | None                      | Keeps rules, mocks, sites and settings in `chrome.storage.local`, short-lived state in `chrome.storage.session`, and reads administrator policy from `chrome.storage.managed`. |
+| `declarativeNetRequestWithHostAccess` | None                      | Redirects, modifies headers of and blocks requests through declarative rules the browser applies itself. Rules take effect only on sites you granted access to.                |
 
 ## Host access
 
-None at install. The extension cannot see or change any website until you enable it for that site.
+None at install. `optional_host_permissions: *://*/*` only declares which sites the extension _may ask for_. You add each site in the dashboard's Sites section, where the browser asks for your approval in its own prompt, and you can remove it there at any time. Until then the extension cannot see or change that site.
+
+The browser checks host access both for the request and for the page that started it: a rule for `api.example.com` on requests from `app.example.com` works only after both sites are granted.
 
 ## Planned
 
 Each permission is added only in the version that starts using it.
 
-| Permission                            | Warning         | Why it will be needed                                                                                                      |
-| ------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `declarativeNetRequestWithHostAccess` | None            | Redirect, modify headers and block requests, only on sites you granted access to.                                          |
-| `optional_host_permissions: *://*/*`  | None at install | Declares which sites the extension _may ask for_. Nothing is granted at install; you approve each site when you enable it. |
-| `scripting`                           | None            | Registers the mock scripts on the sites where you turned mocks on.                                                         |
+| Permission  | Warning | Why it will be needed                                              |
+| ----------- | ------- | ------------------------------------------------------------------ |
+| `scripting` | None    | Registers the mock scripts on the sites where you turned mocks on. |
 
 ## Deliberately not requested
 

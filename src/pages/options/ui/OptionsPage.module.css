@@ -4,10 +4,6 @@
     padding: var(--space-xl);
 }
 
-.subtitle {
-    color: var(--color-text-muted);
-}
-
 .upcoming {
     margin: 0;
     padding-left: var(--space-xl);

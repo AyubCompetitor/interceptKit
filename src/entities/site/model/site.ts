@@ -1,4 +1,4 @@
-import { array, boolean, object, Protocols, refine, string, type Validator } from '#shared/lib';
+import { array, boolean, isDuplicateValues, object, PROTOCOLS, refine, string, type Validator } from '#shared/lib';
 
 export interface Site {
     /** Normalized origin, e.g. https://app.example.com */
@@ -9,6 +9,11 @@ export interface Site {
 
 export const MAX_SITES = 1000;
 
+const SITE_ERRORS = {
+    NOT_NORMALIZED: 'expected a normalized http(s) origin',
+    DUPLICATE_ORIGIN: 'duplicate site',
+} as const;
+
 export const parseOrigin = (input: string): NotRequired<string> => {
     if (!URL.canParse(input)) {
         return;
@@ -16,19 +21,40 @@ export const parseOrigin = (input: string): NotRequired<string> => {
 
     const url = new URL(input);
 
-    if (url.protocol !== Protocols.HTTP && url.protocol !== Protocols.HTTPS) {
+    const isValidProtocol = PROTOCOLS.includes(url.protocol);
+
+    if (!isValidProtocol) {
         return;
     }
 
     return url.origin;
 };
 
-const origin = refine(string({ minLength: 1, maxLength: 2048 }), value =>
-    parseOrigin(value) === value ? undefined : 'expected a normalized https origin',
-);
+const getOriginError = (value: string): NotRequired<string> => {
+    const isNormalized = parseOrigin(value) === value;
+
+    if (isNormalized) {
+        return;
+    }
+
+    return SITE_ERRORS.NOT_NORMALIZED;
+};
+
+const getDuplicateOriginError = (sites: readonly Site[]): NotRequired<string> => {
+    const origins = sites.map(site => site.origin);
+
+    if (!isDuplicateValues(origins)) {
+        return;
+    }
+
+    return SITE_ERRORS.DUPLICATE_ORIGIN;
+};
+
+const origin = refine(string({ minLength: 1, maxLength: 2048 }), getOriginError);
 
 export const siteValidator: Validator<Site> = object({ origin, mocks: boolean() });
 
-export const sitesValidator: Validator<Site[]> = refine(array(siteValidator, { maxLength: MAX_SITES }), sites =>
-    new Set(sites.map(site => site.origin)).size === sites.length ? undefined : 'duplicate site',
+export const sitesValidator: Validator<Site[]> = refine(
+    array(siteValidator, { maxLength: MAX_SITES }),
+    getDuplicateOriginError,
 );

@@ -1,0 +1,18 @@
+.pattern {
+    flex: 1;
+}
+
+.conditions {
+    padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+
+    &[open] > .summary {
+        margin-bottom: var(--space-m);
+    }
+}
+
+.summary {
+    cursor: pointer;
+    font-weight: 500;
+}

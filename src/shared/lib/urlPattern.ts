@@ -1,36 +1,71 @@
 import { discriminatedUnion, literal, object, refine, string, type Validator } from './validation.ts';
 
+export enum SyntaxTypes {
+    FILTER = 'filter',
+    RGX = 'regex',
+}
+
 /** URL condition */
 export interface UrlPattern {
     /** Syntax of the pattern */
-    readonly kind: 'filter' | 'regex';
+    readonly syntaxType: `${SyntaxTypes}`;
     /** The pattern itself */
     readonly value: string;
 }
 
-/** DNR accepts only printable ASCII in urlFilter */
 const URL_FILTER_RGX = /^[\x20-\x7e]+$/;
 
-const NOT_VALID_RGX_ERR = 'is not a valid regular expression';
+const RGX_PATTERN_ERRORS = {
+    NOT_VALID: 'is not a valid regular expression',
+    LEADING_WILDCARD: 'must not start with ||*, use * instead',
+};
 
-const compileRgx = (source: string): NotRequired<RegExp> => {
+const getUrlFilterError = (value: string): NotRequired<string> => {
+    const hasLeadingWildcard = value.startsWith('||*');
+
+    if (hasLeadingWildcard) {
+        return RGX_PATTERN_ERRORS.LEADING_WILDCARD;
+    }
+
+    return;
+};
+
+const isValidRgx = (source: string): boolean => {
     try {
-        return new RegExp(source);
+        return !!new RegExp(source);
     } catch {
-        return undefined;
+        return false;
     }
 };
 
-const checkRgx = (value: string): NotRequired<string> =>
-    compileRgx(value) === undefined ? NOT_VALID_RGX_ERR : undefined;
+const getRgxError = (value: string): NotRequired<string> => {
+    if (isValidRgx(value)) {
+        return;
+    }
 
-export const urlPattern: Validator<UrlPattern> = discriminatedUnion('kind', {
+    return RGX_PATTERN_ERRORS.NOT_VALID;
+};
+
+export const urlPattern: Validator<UrlPattern> = discriminatedUnion('syntaxType', {
     filter: object({
-        kind: literal('filter'),
-        value: string({ minLength: 1, maxLength: 2048, pattern: URL_FILTER_RGX }),
+        syntaxType: literal('filter'),
+        value: refine(
+            string({
+                minLength: 1,
+                maxLength: 2048,
+                pattern: URL_FILTER_RGX,
+            }),
+            getUrlFilterError,
+        ),
     }),
     regex: object({
-        kind: literal('regex'),
-        value: refine(string({ minLength: 1, maxLength: 2048 }), checkRgx),
+        syntaxType: literal('regex'),
+        value: refine(
+            string({
+                minLength: 1,
+                maxLength: 2048,
+            }),
+            getRgxError,
+        ),
     }),
 });

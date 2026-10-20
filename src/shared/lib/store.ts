@@ -3,6 +3,8 @@ import type { Validator } from './validation.ts';
 export enum Stores {
     LOCAL = 'local',
     SESSION = 'session',
+    /** Read-only area filled by the administrator's policy */
+    MANAGED = 'managed',
 }
 
 export type Store = `${Stores}`;
@@ -19,4 +21,4 @@ export interface StoreItem<T> {
     readonly fallback: T;
 }
 
-export const defineStore = <T>(item: StoreItem<T>): StoreItem<T> => Object.freeze(item);
+export const defineStoreItem = <T>(item: StoreItem<T>): StoreItem<T> => Object.freeze(item);

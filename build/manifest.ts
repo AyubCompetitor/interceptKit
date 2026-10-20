@@ -11,9 +11,9 @@ export const buildManifest = (): chrome.runtime.ManifestV3 => ({
     description: '__MSG_extDescription__',
     version: pkg.version,
     default_locale: 'en',
-    /** First version where storage.local.setAccessLevel() closes the area to content scripts. */
     minimum_chrome_version: '140',
-    permissions: ['storage'],
+    permissions: ['storage', 'declarativeNetRequestWithHostAccess'],
+    optional_host_permissions: ['*://*/*'],
     storage: { managed_schema: 'managed-schema.json' },
     background: { service_worker: 'background/background.js' },
     action: { default_title: '__MSG_extName__', default_popup: 'pages/popup.html' },
