@@ -1,4 +1,5 @@
-import { discriminatedUnion, literal, object, refine, string, type Validator } from './validation.ts';
+import { domainName } from './identifier.ts';
+import { discriminatedUnion, literal, object, refine, string, validate, type Validator } from './validation.ts';
 
 export enum SyntaxTypes {
     FILTER = 'filter',
@@ -14,6 +15,14 @@ export interface UrlPattern {
 }
 
 const URL_FILTER_RGX = /^[\x20-\x7e]+$/;
+
+/** Where a URL filter names its host; the host ends at a port, path, separator or wildcard */
+const URL_FILTER_HOST_RGXS = {
+    /** ||api.example.com/v1/ */
+    DOMAIN_ANCHOR: /^\|\|([^/:^*?|]+)/,
+    /** |https://api.example.com/ or https://api.example.com/ */
+    SCHEME: /^\|?[a-z][a-z\d+.-]*:\/\/([^/:^*?|]+)/i,
+} as const;
 
 const RGX_PATTERN_ERRORS = {
     NOT_VALID: 'is not a valid regular expression',
@@ -44,6 +53,29 @@ const getRgxError = (value: string): NotRequired<string> => {
     }
 
     return RGX_PATTERN_ERRORS.NOT_VALID;
+};
+
+/** Host a URL filter is tied to, such as api.example.com in ||api.example.com/; a regex gives no reliable host */
+export const getPatternHost = (pattern: UrlPattern): NotRequired<string> => {
+    if (pattern.syntaxType === SyntaxTypes.RGX) {
+        return;
+    }
+
+    const domainMatch = URL_FILTER_HOST_RGXS.DOMAIN_ANCHOR.exec(pattern.value);
+    const match = domainMatch ?? URL_FILTER_HOST_RGXS.SCHEME.exec(pattern.value);
+    const host = match?.[1]?.toLowerCase();
+
+    if (host === undefined) {
+        return;
+    }
+
+    const isValidHost = validate(domainName, host).ok;
+
+    if (!isValidHost) {
+        return;
+    }
+
+    return host;
 };
 
 export const urlPattern: Validator<UrlPattern> = discriminatedUnion('syntaxType', {

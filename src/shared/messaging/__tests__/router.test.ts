@@ -38,7 +38,7 @@ describe('createRouter', () => {
             expect(await createTestRouter().dispatch(request, EXTENSION_PAGE)).toMatchObject({
                 ok: false,
                 error: {
-                    code: 'bad_request',
+                    code: RpcErrorCodes.BAD_REQUEST,
                 },
             });
         });
@@ -47,7 +47,7 @@ describe('createRouter', () => {
             expect(await createTestRouter().dispatch(makeRequest('math/sub'), EXTENSION_PAGE)).toMatchObject({
                 ok: false,
                 error: {
-                    code: 'unknown_method',
+                    code: RpcErrorCodes.UNKNOWN_METHOD,
                 },
             });
         });
@@ -62,7 +62,7 @@ describe('createRouter', () => {
             expect(await router.dispatch(makeRequest('refuse'), EXTENSION_PAGE)).toEqual({
                 ok: false,
                 error: {
-                    code: 'bad_request',
+                    code: RpcErrorCodes.BAD_REQUEST,
                     message: 'unsupported regex',
                 },
             });
@@ -80,7 +80,7 @@ describe('createRouter', () => {
             expect(await router.dispatch(makeRequest('boom'), EXTENSION_PAGE)).toEqual({
                 ok: false,
                 error: {
-                    code: 'internal',
+                    code: RpcErrorCodes.INTERNAL,
                     message: 'internal error',
                 },
             });
@@ -97,7 +97,7 @@ describe('createRouter', () => {
             expect(await createTestRouter().dispatch(request, sender)).toMatchObject({
                 ok: false,
                 error: {
-                    code: 'forbidden',
+                    code: RpcErrorCodes.FORBIDDEN,
                 },
             });
         });
@@ -108,7 +108,7 @@ describe('createRouter', () => {
             expect(await createTestRouter().dispatch(request, CONTENT_SCRIPT)).toMatchObject({
                 ok: false,
                 error: {
-                    code: 'forbidden',
+                    code: RpcErrorCodes.FORBIDDEN,
                 },
             });
         });

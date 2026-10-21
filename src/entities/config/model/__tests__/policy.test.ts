@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { FEATURES, isFeatureEnabled, readPolicy } from '../policy.ts';
+import { Features, FEATURES, isFeatureEnabled, readPolicy } from '../policy.ts';
 
 describe('readPolicy', () => {
     it('treats a missing policy as no restrictions', () => {
@@ -8,16 +8,16 @@ describe('readPolicy', () => {
     });
 
     it('keeps valid fields', () => {
-        const { policy, issues } = readPolicy({ disabledFeatures: ['mocks'], allowedHosts: ['*.corp.example'] });
+        const { policy, issues } = readPolicy({ disabledFeatures: [Features.MOCKS], allowedHosts: ['*.corp.example'] });
 
         expect(issues).toEqual([]);
 
-        expect(policy).toEqual({ disabledFeatures: ['mocks'], allowedHosts: ['*.corp.example'] });
+        expect(policy).toEqual({ disabledFeatures: [Features.MOCKS], allowedHosts: ['*.corp.example'] });
     });
 
     it('fails closed on broken restrictive fields and reports them', () => {
         const { policy, issues } = readPolicy({
-            disabledFeatures: 'mocks',
+            disabledFeatures: Features.MOCKS,
             allowedHosts: ['https://bad'],
             allowUserRules: 'yes',
             requireVault: 0,
@@ -43,11 +43,11 @@ describe('readPolicy', () => {
 });
 
 describe('isFeatureEnabled', () => {
-    const { policy } = readPolicy({ disabledFeatures: ['mocks'] });
+    const { policy } = readPolicy({ disabledFeatures: [Features.MOCKS] });
 
     it.each([
-        { feature: 'mocks', expected: false },
-        { feature: 'redirect', expected: true },
+        { feature: Features.MOCKS, expected: false },
+        { feature: Features.REDIRECT, expected: true },
     ] as const)('$feature -> $expected', ({ feature, expected }) => {
         expect(isFeatureEnabled(policy, feature)).toBe(expected);
     });

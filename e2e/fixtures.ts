@@ -79,6 +79,30 @@ export const test = base.extend<ExtensionFixtures>({
 
 export { expect } from '@playwright/test';
 
+/** Attribute of <body> where the stubbed prompt leaves the origins it was asked for */
+export const REQUESTED_ORIGINS = 'data-requested-origins';
+
+/**
+ * Playwright cannot answer the browser's permission prompt, so the request is replaced
+ * with a refusal that leaves the requested origins on <body> for the test to read.
+ */
+export const stubAccessRequest = () => {
+    Object.defineProperty(chrome.permissions, 'request', {
+        value: async ({ origins = [] }: chrome.permissions.Permissions) => {
+            document.body.dataset.requestedOrigins = origins.join(' ');
+
+            return false;
+        },
+    });
+};
+
+/** Opens a dashboard section from the sidebar */
+export const openSection = async (page: Page, name: string) => {
+    await page.getByRole('link', { name, exact: true }).click();
+
+    await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
+};
+
 /** Collects console errors and uncaught exceptions, including CSP violations. */
 export function trackErrors(page: Page): string[] {
     const errors: string[] = [];

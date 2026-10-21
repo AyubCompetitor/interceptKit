@@ -1,12 +1,28 @@
 .field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: var(--space-s);
     min-width: 0;
+}
+
+.control {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+
+    & > input,
+    & > select {
+        width: 100%;
+    }
 }
 
 .label {
     color: var(--color-text-muted);
     font-size: var(--font-size-s);
-    font-weight: 500;
+    font-weight: 600;
+}
+
+.hint {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-s);
 }

@@ -1,7 +1,9 @@
+import { HttpMethods } from '#shared/lib';
+
 /** Raw API client request as it comes from storage or an import; a POST with a JSON body unless overridden */
 export const makeRequest = (overrides: Record<string, unknown> = {}) => ({
     id: 'q1',
-    method: 'POST',
+    method: HttpMethods.POST,
     url: '{{baseUrl}}/users',
     query: [],
     headers: [{ key: 'Authorization', value: 'Bearer {{token}}', enabled: true }],

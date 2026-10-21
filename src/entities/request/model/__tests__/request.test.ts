@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { validate } from '#shared/lib';
+import { HttpMethods, validate } from '#shared/lib';
 
 import { apiRequestValidator } from '../request.ts';
 
@@ -11,12 +11,12 @@ describe('apiRequestValidator', () => {
         expect(validate(apiRequestValidator, makeRequest()).ok).toBe(true);
     });
 
-    it.each(['GET', 'HEAD'])('rejects a body on %s', method => {
+    it.each([HttpMethods.GET, HttpMethods.HEAD])('rejects a body on %s', method => {
         expect(validate(apiRequestValidator, makeRequest({ method })).ok).toBe(false);
     });
 
     it('accepts GET without a body', () => {
-        const request = makeRequest({ method: 'GET', body: { bodyType: 'none' } });
+        const request = makeRequest({ method: HttpMethods.GET, body: { bodyType: 'none' } });
 
         expect(validate(apiRequestValidator, request).ok).toBe(true);
     });

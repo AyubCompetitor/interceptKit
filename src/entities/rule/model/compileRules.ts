@@ -1,16 +1,19 @@
 import { SyntaxTypes, type HttpMethod } from '#shared/lib';
 
-import type {
-    DnrAction,
-    DnrCondition,
-    DnrHeaderInfo,
-    DnrModifyHeadersAction,
-    DnrRedirect,
-    DnrRequestMethod,
-    DnrRule,
+import {
+    DnrTypes,
+    type DnrAction,
+    type DnrCondition,
+    type DnrHeaderInfo,
+    type DnrModifyHeadersAction,
+    type DnrRedirect,
+    type DnrRequestMethod,
+    type DnrRule,
 } from './dnr.ts';
 import {
     RESOURCE_TYPES,
+    RuleTargetTypes,
+    RuleTypes,
     type HeaderOp,
     type HeaderRule,
     type RedirectTarget,
@@ -67,12 +70,16 @@ const mapHeaderOpToInfo = (op: HeaderOp): DnrHeaderInfo => {
 };
 
 const mapTargetToRedirect = (target: RedirectTarget): DnrRedirect => {
-    if (target.targetType === 'url') {
-        return { url: target.url };
+    if (target.targetType === RuleTargetTypes.URL) {
+        return {
+            url: target.url,
+        };
     }
 
-    if (target.targetType === 'regexSubstitution') {
-        return { regexSubstitution: target.value };
+    if (target.targetType === RuleTargetTypes.RGX_SUBSTITUTION) {
+        return {
+            regexSubstitution: target.value,
+        };
     }
 
     const { targetType: _targetType, ...transform } = target;
@@ -81,7 +88,7 @@ const mapTargetToRedirect = (target: RedirectTarget): DnrRedirect => {
 };
 
 const mapRuleToHeadersAction = (rule: HeaderRule): DnrModifyHeadersAction => {
-    const action: DnrModifyHeadersAction = { type: 'modifyHeaders' };
+    const action: DnrModifyHeadersAction = { type: DnrTypes.MODIFY_HEADERS };
 
     if (rule.request.length > 0) {
         action.requestHeaders = rule.request.map(mapHeaderOpToInfo);
@@ -95,13 +102,15 @@ const mapRuleToHeadersAction = (rule: HeaderRule): DnrModifyHeadersAction => {
 };
 
 const mapRuleToAction = (rule: Rule): DnrAction => {
-    if (rule.type === 'block') {
-        return { type: 'block' };
+    if (rule.type === RuleTypes.BLOCK) {
+        return {
+            type: DnrTypes.BLOCK,
+        };
     }
 
-    if (rule.type === 'redirect') {
+    if (rule.type === RuleTypes.REDIRECT) {
         return {
-            type: 'redirect',
+            type: DnrTypes.REDIRECT,
             redirect: mapTargetToRedirect(rule.to),
         };
     }

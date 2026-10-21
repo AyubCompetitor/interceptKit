@@ -1,7 +1,10 @@
 import { describe, expect, it } from '@rstest/core';
 
+import { HttpMethods } from '#shared/lib';
+
 import { compileRules } from '../compileRules.ts';
-import { RESOURCE_TYPES } from '../rule.ts';
+import { DnrTypes } from '../dnr.ts';
+import { HeaderOperations, RESOURCE_TYPES, ResourceTypes, RuleTargetTypes, RuleTypes } from '../rule.ts';
 
 import { makeValidRule, REGEX_MATCH, URL_FILTER_MATCH } from './mocks.ts';
 
@@ -37,8 +40,8 @@ describe('compileRules', () => {
         it('keeps the chosen resource types and domains, with methods in lowercase', () => {
             const match = {
                 ...URL_FILTER_MATCH,
-                methods: ['GET', 'POST'],
-                resourceTypes: ['xmlhttprequest'],
+                methods: [HttpMethods.GET, HttpMethods.POST],
+                resourceTypes: [ResourceTypes.XMLHTTPREQUEST],
                 initiatorDomains: ['app.example.com'],
             };
 
@@ -47,7 +50,7 @@ describe('compileRules', () => {
             expect(compiled?.condition).toEqual({
                 urlFilter: '||api.example.com/',
                 requestMethods: ['get', 'post'],
-                resourceTypes: ['xmlhttprequest'],
+                resourceTypes: [ResourceTypes.XMLHTTPREQUEST],
                 initiatorDomains: ['app.example.com'],
             });
         });
@@ -58,29 +61,35 @@ describe('compileRules', () => {
             {
                 name: 'a block rule',
                 overrides: {},
-                action: { type: 'block' },
+                action: { type: DnrTypes.BLOCK },
             },
             {
                 name: 'a redirect to a URL',
-                overrides: { type: 'redirect', to: { targetType: 'url', url: 'https://staging.example.com/' } },
-                action: { type: 'redirect', redirect: { url: 'https://staging.example.com/' } },
+                overrides: {
+                    type: RuleTypes.REDIRECT,
+                    to: { targetType: RuleTargetTypes.URL, url: 'https://staging.example.com/' },
+                },
+                action: { type: DnrTypes.REDIRECT, redirect: { url: 'https://staging.example.com/' } },
             },
             {
                 name: 'a redirect with a URL transform',
                 overrides: {
-                    type: 'redirect',
-                    to: { targetType: 'transform', host: 'staging.example.com', port: '8080' },
+                    type: RuleTypes.REDIRECT,
+                    to: { targetType: RuleTargetTypes.TRANSFORM, host: 'staging.example.com', port: '8080' },
                 },
-                action: { type: 'redirect', redirect: { transform: { host: 'staging.example.com', port: '8080' } } },
+                action: {
+                    type: DnrTypes.REDIRECT,
+                    redirect: { transform: { host: 'staging.example.com', port: '8080' } },
+                },
             },
             {
                 name: 'a regex substitution',
                 overrides: {
-                    type: 'redirect',
+                    type: RuleTypes.REDIRECT,
                     match: REGEX_MATCH,
-                    to: { targetType: 'regexSubstitution', value: 'https://new.example.com/\\1' },
+                    to: { targetType: RuleTargetTypes.RGX_SUBSTITUTION, value: 'https://new.example.com/\\1' },
                 },
-                action: { type: 'redirect', redirect: { regexSubstitution: 'https://new.example.com/\\1' } },
+                action: { type: DnrTypes.REDIRECT, redirect: { regexSubstitution: 'https://new.example.com/\\1' } },
             },
         ])('compiles $name', ({ overrides, action }) => {
             const [compiled] = compileRules([makeValidRule(overrides)]);
@@ -90,32 +99,32 @@ describe('compileRules', () => {
 
         it('compiles header changes with lowercase names and no value for remove', () => {
             const rule = makeValidRule({
-                type: 'headers',
-                request: [{ name: 'X-Debug', operation: 'set', value: '1' }],
-                response: [{ name: 'Server', operation: 'remove' }],
+                type: RuleTypes.HEADERS,
+                request: [{ name: 'X-Debug', operation: HeaderOperations.SET, value: '1' }],
+                response: [{ name: 'Server', operation: HeaderOperations.REMOVE }],
             });
 
             const [compiled] = compileRules([rule]);
 
             expect(compiled?.action).toEqual({
-                type: 'modifyHeaders',
-                requestHeaders: [{ header: 'x-debug', operation: 'set', value: '1' }],
-                responseHeaders: [{ header: 'server', operation: 'remove' }],
+                type: DnrTypes.MODIFY_HEADERS,
+                requestHeaders: [{ header: 'x-debug', operation: HeaderOperations.SET, value: '1' }],
+                responseHeaders: [{ header: 'server', operation: HeaderOperations.REMOVE }],
             });
         });
 
         it('leaves out the side of header changes that is empty', () => {
             const rule = makeValidRule({
-                type: 'headers',
-                request: [{ name: 'Cookie', operation: 'append', value: 'debug=1' }],
+                type: RuleTypes.HEADERS,
+                request: [{ name: 'Cookie', operation: HeaderOperations.APPEND, value: 'debug=1' }],
                 response: [],
             });
 
             const [compiled] = compileRules([rule]);
 
             expect(compiled?.action).toEqual({
-                type: 'modifyHeaders',
-                requestHeaders: [{ header: 'cookie', operation: 'append', value: 'debug=1' }],
+                type: DnrTypes.MODIFY_HEADERS,
+                requestHeaders: [{ header: 'cookie', operation: HeaderOperations.APPEND, value: 'debug=1' }],
             });
         });
     });

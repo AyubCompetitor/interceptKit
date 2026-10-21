@@ -1,0 +1,21 @@
+.layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.content {
+    width: 100%;
+    max-width: 960px;
+    padding: var(--space-xxl) var(--space-xxl) var(--space-xxxl);
+}
+
+@media (width < 840px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .content {
+        padding: var(--space-xl) var(--space-l) var(--space-xxl);
+    }
+}

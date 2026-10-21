@@ -1,16 +1,8 @@
 import type { ChangeEvent } from 'react';
 
-import type {
-    HeaderOpDraft,
-    RuleDraft,
-    RuleDraftChange,
-    RuleType,
-    SchemeChoice,
-    SyntaxType,
-    TargetType,
-} from '../model/ruleDraft.ts';
+import type { HeaderOpDraft, RuleDraft, RuleDraftChange, SchemeChoice, SyntaxType } from '../model/ruleDraft.ts';
 
-import type { ResourceType } from '#entities/rule';
+import type { ResourceType, RuleTargetType, RuleType } from '#entities/rule';
 import type { HttpMethod } from '#shared/lib';
 
 import { toggleValue } from './toggleValue.ts';
@@ -44,7 +36,7 @@ export const useRuleDraftFields = (draft: RuleDraft, onDraftChange: RuleDraftCha
         onDraftChange({ initiatorDomains: event.target.value });
     };
 
-    const onTargetTypeChange = (targetType: TargetType) => {
+    const onTargetTypeChange = (targetType: RuleTargetType) => {
         onDraftChange({ targetType });
     };
 

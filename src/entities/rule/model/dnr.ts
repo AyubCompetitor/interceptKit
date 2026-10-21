@@ -2,6 +2,12 @@ import type { HttpMethod } from '#shared/lib';
 
 import type { HeaderOperation, ResourceType } from './rule.ts';
 
+export enum DnrTypes {
+    REDIRECT = 'redirect',
+    MODIFY_HEADERS = 'modifyHeaders',
+    BLOCK = 'block',
+}
+
 /** Lowercase method names, the form DNR conditions use */
 export type DnrRequestMethod = Lowercase<HttpMethod>;
 
@@ -51,19 +57,19 @@ export interface DnrRedirect {
 
 export interface DnrBlockAction {
     /** Action type */
-    type: 'block';
+    type: DnrTypes.BLOCK;
 }
 
 export interface DnrRedirectAction {
     /** Action type */
-    type: 'redirect';
+    type: DnrTypes.REDIRECT;
     /** Where the request goes instead */
     redirect: DnrRedirect;
 }
 
 export interface DnrModifyHeadersAction {
     /** Action type */
-    type: 'modifyHeaders';
+    type: DnrTypes.MODIFY_HEADERS;
     /** Changes to request headers; omitted when there are none */
     requestHeaders?: DnrHeaderInfo[];
     /** Changes to response headers; omitted when there are none */

@@ -1,0 +1,7 @@
+.step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--color-border);
+}

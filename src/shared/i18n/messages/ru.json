@@ -3,10 +3,10 @@
         "message": "InterceptKit"
     },
     "extDescription": {
-        "message": "Редиректы, заголовки, блокировка и моки HTTP-запросов плюс лёгкий API-клиент. Без серверов, аккаунтов и телеметрии."
+        "message": "Редиректы, подмена заголовков, блокировка и моки HTTP-запросов, а также простой API-клиент. Без серверов, аккаунтов и телеметрии."
     },
     "popupTagline": {
-        "message": "Ваши запросы — ваши правила. Все данные остаются в браузере."
+        "message": "Перенаправляйте, меняйте и блокируйте запросы. Все данные остаются в браузере."
     },
     "popupOpenDashboard": {
         "message": "Открыть панель управления"
@@ -14,77 +14,65 @@
     "popupOpenApiClient": {
         "message": "Открыть API-клиент"
     },
-    "dashboardSubtitle": {
-        "message": "Правила, моки и настройки"
+    "navLabel": {
+        "message": "Разделы панели"
     },
-    "dashboardUpcomingTitle": {
-        "message": "Скоро появится"
+    "navSoon": {
+        "message": "Скоро"
     },
-    "sectionRules": {
-        "message": "Редиректы, заголовки и блокировка"
+    "rulesTitle": {
+        "message": "Правила"
     },
-    "sectionMocks": {
-        "message": "Моки API"
-    },
-    "sectionSites": {
+    "sitesTitle": {
         "message": "Сайты"
     },
-    "sectionPolicy": {
+    "settingsTitle": {
+        "message": "Настройки"
+    },
+    "mocksTitle": {
+        "message": "Моки API"
+    },
+    "policyTitle": {
         "message": "Политика организации"
     },
-    "sectionTransfer": {
+    "transferTitle": {
         "message": "Импорт и экспорт"
     },
-    "sitesHint": {
-        "message": "Правила работают только на сайтах, разрешённых здесь. Браузер проверяет доступ и к сайту запроса, и к странице, которая его отправила."
+    "interceptionLabel": {
+        "message": "Перехват запросов"
     },
-    "sitesDomain": {
-        "message": "Домен"
+    "interceptionOn": {
+        "message": "Включённые правила работают на разрешённых сайтах."
     },
-    "sitesDomainPlaceholder": {
-        "message": "example.com"
+    "interceptionOff": {
+        "message": "Пауза: правила не применяются."
     },
-    "sitesSubdomains": {
-        "message": "Вместе с поддоменами"
+    "interceptionPaused": {
+        "message": "Перехват на паузе, поэтому правила сейчас не действуют."
     },
-    "sitesAllow": {
-        "message": "Разрешить доступ"
-    },
-    "sitesEmpty": {
-        "message": "Сайтов пока нет."
-    },
-    "sitesAllSites": {
-        "message": "Все сайты"
-    },
-    "sitesRemove": {
-        "message": "Убрать"
-    },
-    "sitesInvalidDomain": {
-        "message": "Введите домен, например example.com или localhost."
-    },
-    "sitesNotGranted": {
-        "message": "Доступ не выдан."
-    },
-    "sitesRequestFailed": {
-        "message": "Не удалось запросить доступ. Попробуйте ещё раз."
-    },
-    "sitesRemoveFailed": {
-        "message": "Не удалось убрать доступ. Попробуйте ещё раз."
-    },
-    "interceptionEnabled": {
-        "message": "Перехватывать запросы"
+    "interceptionTurnOn": {
+        "message": "Включить"
     },
     "interceptionSaveFailed": {
         "message": "Не удалось переключить перехват. Попробуйте ещё раз."
     },
+    "rulesDescription": {
+        "message": "Перенаправляйте запросы, меняйте их заголовки или блокируйте. Если запросу подходят несколько правил, сработает то, что выше в списке."
+    },
     "rulesAdd": {
-        "message": "Добавить правило"
+        "message": "Новое правило"
     },
-    "rulesHint": {
-        "message": "Срабатывает первое подходящее правило в списке. Правила действуют только на сайтах из раздела «Сайты»."
+    "rulesNoSites": {
+        "message": "Правила работают только на разрешённых сайтах, а вы пока не разрешили ни одного."
     },
-    "rulesEmpty": {
-        "message": "Правил пока нет."
+    "rulesOpenSites": {
+        "message": "Разрешить сайт"
+    },
+    "rulesEmptyTitle": {
+        "message": "Правил пока нет"
+    },
+    "rulesEmptyText": {
+        "message": "Правило находит запросы по URL и перенаправляет их, меняет заголовки или блокирует."
     },
     "rulesEdit": {
         "message": "Изменить"
@@ -95,11 +83,35 @@
     "rulesActionFailed": {
         "message": "Не удалось обновить правило. Попробуйте ещё раз."
     },
+    "ruleNoAccess": {
+        "message": "У InterceptKit нет доступа к $1, поэтому там правило пока не работает."
+    },
+    "ruleAllowAccess": {
+        "message": "Разрешить"
+    },
+    "ruleBadgeRedirect": {
+        "message": "Редирект"
+    },
+    "ruleBadgeHeaders": {
+        "message": "Заголовки"
+    },
+    "ruleBadgeBlock": {
+        "message": "Блокировка"
+    },
+    "ruleSummaryRedirect": {
+        "message": "На $1"
+    },
+    "ruleSummaryTransform": {
+        "message": "Меняет URL: $1"
+    },
+    "ruleSummaryHeaders": {
+        "message": "Меняет $1"
+    },
     "rulesNewTitle": {
         "message": "Новое правило"
     },
     "rulesEditTitle": {
-        "message": "Изменение правила"
+        "message": "Редактирование правила"
     },
     "rulesCancel": {
         "message": "Отмена"
@@ -111,25 +123,43 @@
         "message": "Не удалось сохранить правило: $1"
     },
     "rulesDeleteTitle": {
-        "message": "Удаление правила"
+        "message": "Удалить правило?"
     },
     "rulesDeleteText": {
-        "message": "Удалить правило «$1»? Отменить это действие нельзя."
+        "message": "Правило «$1» будет удалено без возможности восстановления."
     },
     "ruleName": {
         "message": "Название"
+    },
+    "ruleNamePlaceholder": {
+        "message": "Например, тестовый API"
+    },
+    "ruleStepMatch": {
+        "message": "Какие запросы"
+    },
+    "ruleStepAction": {
+        "message": "Что с ними сделать"
     },
     "ruleType": {
         "message": "Действие"
     },
     "ruleTypeRedirect": {
-        "message": "Редирект"
+        "message": "Перенаправить"
     },
     "ruleTypeHeaders": {
         "message": "Изменить заголовки"
     },
     "ruleTypeBlock": {
         "message": "Заблокировать"
+    },
+    "ruleTypeRedirectHint": {
+        "message": "Отправляет подходящие запросы на другой URL."
+    },
+    "ruleTypeHeadersHint": {
+        "message": "Задаёт, дополняет или удаляет заголовки подходящих запросов и ответов на них."
+    },
+    "ruleTypeBlockHint": {
+        "message": "Подходящие запросы не уходят в сеть и завершаются ошибкой."
     },
     "ruleSyntax": {
         "message": "Тип шаблона"
@@ -143,8 +173,17 @@
     "rulePattern": {
         "message": "Шаблон URL"
     },
-    "rulePatternHint": {
-        "message": "В фильтре URL || привязывает к домену, * означает любой текст, ^ — разделитель: ||api.example.com/v1/. Регулярные выражения пишутся в синтаксисе RE2."
+    "rulePatternFilterHint": {
+        "message": "|| — начало домена, * — любые символы, ^ — разделитель вроде / или ?."
+    },
+    "rulePatternRegexHint": {
+        "message": "Синтаксис RE2, как в Chrome. Группы в скобках можно подставить в адрес перенаправления."
+    },
+    "rulePatternFilterPlaceholder": {
+        "message": "||api.example.com/v1/"
+    },
+    "rulePatternRegexPlaceholder": {
+        "message": "^https://api\\.example\\.com/(.*)"
     },
     "ruleConditions": {
         "message": "Дополнительные условия"
@@ -152,17 +191,68 @@
     "ruleMethods": {
         "message": "Методы"
     },
+    "ruleMethodsHint": {
+        "message": "Если ничего не выбрать, подойдёт любой метод."
+    },
     "ruleResourceTypes": {
         "message": "Типы ресурсов"
     },
     "ruleResourceTypesHint": {
-        "message": "Если ничего не выбрано, правило действует на все типы, включая загрузку страниц."
+        "message": "Если ничего не выбрать, подойдут все типы, включая загрузку самих страниц."
+    },
+    "resourceTypeMainFrame": {
+        "message": "Страницы"
+    },
+    "resourceTypeSubFrame": {
+        "message": "Фреймы"
+    },
+    "resourceTypeStylesheet": {
+        "message": "Стили"
+    },
+    "resourceTypeScript": {
+        "message": "Скрипты"
+    },
+    "resourceTypeImage": {
+        "message": "Изображения"
+    },
+    "resourceTypeFont": {
+        "message": "Шрифты"
+    },
+    "resourceTypeObject": {
+        "message": "Плагины"
+    },
+    "resourceTypeXhr": {
+        "message": "Fetch и XHR"
+    },
+    "resourceTypePing": {
+        "message": "Пинги и beacon"
+    },
+    "resourceTypeCspReport": {
+        "message": "Отчёты CSP"
+    },
+    "resourceTypeMedia": {
+        "message": "Аудио и видео"
+    },
+    "resourceTypeWebsocket": {
+        "message": "WebSocket"
+    },
+    "resourceTypeWebtransport": {
+        "message": "WebTransport"
+    },
+    "resourceTypeWebbundle": {
+        "message": "Web Bundles"
+    },
+    "resourceTypeOther": {
+        "message": "Прочее"
     },
     "ruleInitiatorDomains": {
-        "message": "Только со страниц доменов"
+        "message": "Только запросы со страниц доменов"
     },
     "ruleInitiatorDomainsHint": {
-        "message": "Домены через запятую; их поддомены тоже учитываются."
+        "message": "Домены через запятую. Поддомены тоже учитываются."
+    },
+    "ruleInitiatorDomainsPlaceholder": {
+        "message": "app.example.com, admin.example.com"
     },
     "ruleTarget": {
         "message": "Куда перенаправить"
@@ -171,25 +261,34 @@
         "message": "На URL"
     },
     "ruleTargetSubstitution": {
-        "message": "Подстановкой по регулярному выражению"
+        "message": "По регулярному выражению"
     },
     "ruleTargetTransform": {
-        "message": "Изменив части URL"
+        "message": "На изменённый URL"
     },
     "ruleTargetUrlLabel": {
-        "message": "Адрес назначения"
+        "message": "Новый URL"
+    },
+    "ruleTargetUrlPlaceholder": {
+        "message": "https://staging.example.com/"
     },
     "ruleSubstitution": {
-        "message": "Подстановка"
+        "message": "Шаблон подстановки"
     },
     "ruleSubstitutionHint": {
-        "message": "\\1–\\9 вставляют группы, захваченные регулярным выражением."
+        "message": "\\1–\\9 вставляют группы, найденные регулярным выражением."
+    },
+    "ruleSubstitutionPlaceholder": {
+        "message": "https://new.example.com/\\1"
+    },
+    "ruleSubstitutionNeedsRegex": {
+        "message": "Для подстановки нужны группы из регулярного выражения. Выберите выше тип шаблона «Регулярное выражение»."
     },
     "ruleScheme": {
-        "message": "Схема"
+        "message": "Протокол"
     },
     "ruleSchemeKeep": {
-        "message": "Без изменений"
+        "message": "Не менять"
     },
     "ruleSchemeHttp": {
         "message": "http"
@@ -207,7 +306,7 @@
         "message": "Путь"
     },
     "ruleTransformHint": {
-        "message": "Пустые поля оставляют соответствующую часть исходного URL."
+        "message": "Если оставить поле пустым, эта часть исходного URL не изменится."
     },
     "ruleRequestHeaders": {
         "message": "Заголовки запроса"
@@ -215,11 +314,14 @@
     "ruleResponseHeaders": {
         "message": "Заголовки ответа"
     },
+    "ruleHeadersEmpty": {
+        "message": "Изменений пока нет."
+    },
     "ruleHeaderName": {
         "message": "Заголовок"
     },
     "ruleHeaderOperation": {
-        "message": "Операция"
+        "message": "Действие"
     },
     "ruleHeaderValue": {
         "message": "Значение"
@@ -237,13 +339,52 @@
         "message": "Добавить заголовок"
     },
     "ruleHeaderDelete": {
-        "message": "Удалить это изменение заголовка"
+        "message": "Удалить строку"
     },
-    "ruleBlockHint": {
-        "message": "Подходящие запросы завершаются ошибкой, как будто их заблокировала сеть."
+    "sitesDescription": {
+        "message": "InterceptKit работает только на сайтах, которые вы разрешили. Браузер проверяет доступ и к сайту, куда уходит запрос, и к странице, которая его отправляет."
     },
-    "settingsTitle": {
-        "message": "Настройки"
+    "sitesDomain": {
+        "message": "Домен"
+    },
+    "sitesDomainPlaceholder": {
+        "message": "example.com"
+    },
+    "sitesSubdomains": {
+        "message": "Вместе с поддоменами"
+    },
+    "sitesAllow": {
+        "message": "Разрешить доступ"
+    },
+    "sitesEmptyTitle": {
+        "message": "Сайтов пока нет"
+    },
+    "sitesEmptyText": {
+        "message": "Введите домен выше — браузер попросит подтвердить доступ."
+    },
+    "sitesAllSites": {
+        "message": "Все сайты"
+    },
+    "sitesWithSubdomains": {
+        "message": "и поддомены"
+    },
+    "sitesRemove": {
+        "message": "Убрать"
+    },
+    "sitesInvalidDomain": {
+        "message": "Введите домен, например example.com или localhost."
+    },
+    "sitesNotGranted": {
+        "message": "Доступ не предоставлен."
+    },
+    "sitesRequestFailed": {
+        "message": "Не удалось запросить доступ. Попробуйте ещё раз."
+    },
+    "sitesRemoveFailed": {
+        "message": "Не удалось отозвать доступ. Попробуйте ещё раз."
+    },
+    "settingsDescription": {
+        "message": "Как InterceptKit выглядит в этом браузере."
     },
     "settingsLanguage": {
         "message": "Язык интерфейса"
@@ -257,14 +398,32 @@
     "languageRussian": {
         "message": "Русский"
     },
+    "settingsTheme": {
+        "message": "Тема"
+    },
+    "themeDark": {
+        "message": "Тёмная"
+    },
+    "themeLight": {
+        "message": "Светлая"
+    },
+    "themeSystem": {
+        "message": "Как в системе"
+    },
+    "settingsPrivacy": {
+        "message": "Правила и настройки хранятся только в этом браузере. У InterceptKit нет серверов, аккаунтов и телеметрии."
+    },
     "settingsSaveFailed": {
         "message": "Не удалось сохранить настройку. Попробуйте ещё раз."
     },
     "apiClientTitle": {
         "message": "API-клиент"
     },
+    "apiClientSoonTitle": {
+        "message": "Появится в одной из следующих версий"
+    },
     "apiClientPlaceholder": {
-        "message": "Конструктор запросов появится в следующих версиях."
+        "message": "Здесь можно будет собирать и отправлять HTTP-запросы, переключать окружения и просматривать историю."
     },
     "dialogClose": {
         "message": "Закрыть"

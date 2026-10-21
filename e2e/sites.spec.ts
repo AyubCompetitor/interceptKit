@@ -1,22 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { expect, test } from './fixtures.ts';
-
-const REQUESTED_ORIGINS = 'data-requested-origins';
-
-/**
- * Playwright cannot answer the browser's permission prompt, so the request is replaced
- * with a refusal that leaves the requested origins on <body> for the test to read.
- */
-const stubAccessRequest = () => {
-    Object.defineProperty(chrome.permissions, 'request', {
-        value: async ({ origins = [] }: chrome.permissions.Permissions) => {
-            document.body.dataset.requestedOrigins = origins.join(' ');
-
-            return false;
-        },
-    });
-};
+import { expect, openSection, REQUESTED_ORIGINS, stubAccessRequest, test } from './fixtures.ts';
 
 const requestAccess = async (page: Page, domain: string) => {
     await page.evaluate(stubAccessRequest);
@@ -27,19 +11,23 @@ const requestAccess = async (page: Page, domain: string) => {
 };
 
 test('a domain is requested with its subdomains through the browser prompt', async ({ optionsPage }) => {
-    await expect(optionsPage.getByText('No sites yet.')).toBeVisible();
+    await openSection(optionsPage, 'Sites');
+
+    await expect(optionsPage.getByText('No sites yet', { exact: true })).toBeVisible();
 
     await requestAccess(optionsPage, 'https://Example.com/login');
 
     await expect(optionsPage.locator('body')).toHaveAttribute(REQUESTED_ORIGINS, '*://*.example.com/*');
 
-    await expect(optionsPage.getByRole('alert')).toHaveText('Access was not granted.');
+    await expect(optionsPage.getByRole('alert')).toHaveText("Access wasn't granted.");
 });
 
 test('an invalid domain is refused without asking the browser', async ({ optionsPage }) => {
+    await openSection(optionsPage, 'Sites');
+
     await requestAccess(optionsPage, 'not a domain');
 
-    await expect(optionsPage.getByRole('alert')).toHaveText('Enter a domain such as example.com or localhost.');
+    await expect(optionsPage.getByRole('alert')).toHaveText('Enter a domain, for example example.com or localhost.');
 
     await expect(optionsPage.locator('body')).not.toHaveAttribute(REQUESTED_ORIGINS);
 });

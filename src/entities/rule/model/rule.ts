@@ -25,6 +25,22 @@ import {
     type Validator,
 } from '#shared/lib';
 
+export enum RuleTargetTypes {
+    URL = 'url',
+    RGX_SUBSTITUTION = 'regexSubstitution',
+    TRANSFORM = 'transform',
+}
+
+export type RuleTargetType = `${RuleTargetTypes}`;
+
+export enum RuleTypes {
+    REDIRECT = 'redirect',
+    HEADERS = 'headers',
+    BLOCK = 'block',
+}
+
+export type RuleType = `${RuleTypes}`;
+
 export enum ResourceTypes {
     MAIN_FRAME = 'main_frame',
     SUB_FRAME = 'sub_frame',
@@ -78,12 +94,12 @@ export interface HeaderOp {
     readonly value?: string;
 }
 
-export type UrlTarget = { readonly targetType: 'url'; readonly url: string };
+export type UrlTarget = { readonly targetType: RuleTargetTypes.URL; readonly url: string };
 
-export type RgxSubstitutionTarget = { readonly targetType: 'regexSubstitution'; readonly value: string };
+export type RgxSubstitutionTarget = { readonly targetType: RuleTargetTypes.RGX_SUBSTITUTION; readonly value: string };
 
 export type TransformTarget = {
-    readonly targetType: 'transform';
+    readonly targetType: RuleTargetTypes.TRANSFORM;
     readonly scheme?: 'http' | 'https';
     readonly host?: string;
     readonly port?: string;
@@ -107,14 +123,14 @@ interface RuleBase {
 
 export interface RedirectRule extends RuleBase {
     /** Rule type */
-    readonly type: 'redirect';
+    readonly type: RuleTypes.REDIRECT;
     /** Where matching requests go */
     readonly to: RedirectTarget;
 }
 
 export interface HeaderRule extends RuleBase {
     /** Rule type */
-    readonly type: 'headers';
+    readonly type: RuleTypes.HEADERS;
     /** Changes to request headers */
     readonly request: readonly HeaderOp[];
     /** Changes to response headers */
@@ -123,7 +139,7 @@ export interface HeaderRule extends RuleBase {
 
 export interface BlockRule extends RuleBase {
     /** Rule type */
-    readonly type: 'block';
+    readonly type: RuleTypes.BLOCK;
 }
 
 export type Rule = RedirectRule | HeaderRule | BlockRule;
@@ -223,7 +239,8 @@ const getHeaderRuleError = (rule: HeaderRule): NotRequired<string> => {
 
 const getSubstitutionError = (rule: Rule): NotRequired<string> => {
     const isRgxPattern = rule.match.url.syntaxType === SyntaxTypes.RGX;
-    const isRgxSubstitution = rule.type === 'redirect' && rule.to.targetType === 'regexSubstitution';
+    const isRgxSubstitution =
+        rule.type === RuleTypes.REDIRECT && rule.to.targetType === RuleTargetTypes.RGX_SUBSTITUTION;
 
     if (!isRgxSubstitution || isRgxPattern) {
         return;
@@ -256,7 +273,7 @@ const headerOp = refine(
 
 const transformTarget = refine(
     object({
-        targetType: literal('transform'),
+        targetType: literal(RuleTargetTypes.TRANSFORM),
         scheme: optional(oneOf(['http', 'https'])),
         host: optional(domainName),
         port: optional(string({ pattern: RULE_RGXS.PORT })),
@@ -266,9 +283,9 @@ const transformTarget = refine(
 );
 
 const redirectTarget: Validator<RedirectTarget> = discriminatedUnion('targetType', {
-    url: object({ targetType: literal('url'), url: httpUrl }),
+    url: object({ targetType: literal(RuleTargetTypes.URL), url: httpUrl }),
     regexSubstitution: object({
-        targetType: literal('regexSubstitution'),
+        targetType: literal(RuleTargetTypes.RGX_SUBSTITUTION),
         value: string({ minLength: 1, maxLength: 2048 }),
     }),
     transform: transformTarget,
@@ -282,22 +299,27 @@ const ruleBase = {
     match: requestMatch,
 };
 
-const redirectRule = object({ ...ruleBase, type: literal('redirect'), to: redirectTarget });
+const redirectRule = object({ ...ruleBase, type: literal(RuleTypes.REDIRECT), to: redirectTarget });
 
 const headerRule = refine(
     object({
         ...ruleBase,
-        type: literal('headers'),
+        type: literal(RuleTypes.HEADERS),
         request: array(headerOp, { maxLength: 100 }),
         response: array(headerOp, { maxLength: 100 }),
     }),
     getHeaderRuleError,
 );
 
-const blockRule = object({ ...ruleBase, type: literal('block') });
+const blockRule = object({ ...ruleBase, type: literal(RuleTypes.BLOCK) });
 
 export const ruleValidator: Validator<Rule> = refine(
-    discriminatedUnion('type', { redirect: redirectRule, headers: headerRule, block: blockRule }),
+    discriminatedUnion('type', {
+        redirect: redirectRule,
+        headers: headerRule,
+        block: blockRule,
+    }),
+
     getSubstitutionError,
 );
 

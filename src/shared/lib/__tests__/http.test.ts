@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { headerName, headerValue, httpMethod, httpMethods, httpUrl } from '../http.ts';
+import { headerName, headerValue, httpMethod, HttpMethods, httpMethods, httpUrl } from '../http.ts';
 import { validate } from '../validation.ts';
 
 describe('headerName', () => {
@@ -49,7 +49,7 @@ describe('httpMethod', () => {
 
 describe('httpMethods', () => {
     it('accepts a list of known methods', () => {
-        expect(validate(httpMethods, ['GET', 'POST']).ok).toBe(true);
+        expect(validate(httpMethods, [HttpMethods.GET, HttpMethods.POST]).ok).toBe(true);
     });
 
     it('rejects an empty list, which DNR does not accept', () => {

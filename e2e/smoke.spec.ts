@@ -1,4 +1,4 @@
-import { expect, test, trackErrors } from './fixtures.ts';
+import { expect, openSection, test, trackErrors } from './fixtures.ts';
 
 const CSP_META = 'meta[http-equiv="Content-Security-Policy"]';
 const EXTENSION_NAME = 'InterceptKit';
@@ -46,7 +46,9 @@ test('popup renders in English under an offline CSP', async ({ context, extensio
 });
 
 test('dashboard switches the interface to Russian and remembers it', async ({ optionsPage }) => {
-    await optionsPage.getByLabel('Interface language').selectOption('ru');
+    await openSection(optionsPage, 'Settings');
+
+    await optionsPage.getByRole('combobox', { name: 'Interface language', exact: true }).selectOption('ru');
 
     await expect(optionsPage.getByRole('heading', { name: 'Настройки' })).toBeVisible();
 
@@ -54,7 +56,25 @@ test('dashboard switches the interface to Russian and remembers it', async ({ op
 
     await optionsPage.reload();
 
-    await expect(optionsPage.getByLabel('Язык интерфейса')).toHaveValue('ru');
+    await expect(optionsPage.getByRole('combobox', { name: 'Язык интерфейса', exact: true })).toHaveValue('ru');
+});
+
+test('dashboard is dark by default and remembers another theme', async ({ optionsPage }) => {
+    const lightTheme = optionsPage.getByRole('radio', { name: 'Light', exact: true });
+
+    await expect(optionsPage.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    await openSection(optionsPage, 'Settings');
+
+    await lightTheme.click();
+
+    await expect(lightTheme).toBeChecked();
+
+    await expect(optionsPage.locator('html')).toHaveAttribute('data-theme', 'light');
+
+    await optionsPage.reload();
+
+    await expect(optionsPage.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
 test('API client page may use the network', async ({ context, extensionId }) => {

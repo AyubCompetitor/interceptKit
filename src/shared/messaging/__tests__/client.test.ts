@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@rstest/core';
 
 import { executeRpc } from '../client.ts';
-import { RpcError } from '../protocol.ts';
+import { RpcError, RpcErrorCodes } from '../protocol.ts';
 
 import { addMethod, installFakeRuntime } from './mocks.ts';
 
@@ -15,13 +15,13 @@ describe('executeRpc', () => {
     });
 
     it('turns an error response into RpcError with its code and message', async () => {
-        installFakeRuntime({ ok: false, error: { code: 'forbidden', message: 'not allowed' } });
+        installFakeRuntime({ ok: false, error: { code: RpcErrorCodes.FORBIDDEN, message: 'not allowed' } });
 
         const request = executeRpc(addMethod, { a: 1, b: 1 });
 
         await expect(request).rejects.toBeInstanceOf(RpcError);
 
-        await expect(request).rejects.toMatchObject({ code: 'forbidden', message: 'not allowed' });
+        await expect(request).rejects.toMatchObject({ code: RpcErrorCodes.FORBIDDEN, message: 'not allowed' });
     });
 
     it.each([undefined, 'oops', { ok: 'yes' }])(
@@ -29,7 +29,7 @@ describe('executeRpc', () => {
         async response => {
             installFakeRuntime(response);
 
-            await expect(executeRpc(addMethod, { a: 1, b: 1 })).rejects.toMatchObject({ code: 'internal' });
+            await expect(executeRpc(addMethod, { a: 1, b: 1 })).rejects.toMatchObject({ code: RpcErrorCodes.INTERNAL });
         },
     );
 });

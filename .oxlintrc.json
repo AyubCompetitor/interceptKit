@@ -275,6 +275,23 @@
             }
         },
         {
+            "files": ["src/pages/*/*/*/*"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "regex": "^[.][.]/[.][.]/[.][.]/",
+                                "message": "A file in a component folder reaches its slice with ../../; leave the slice through its public API (#layer/slice), not ../../../."
+                            },
+                            { "group": ["#pages/*"], "message": "FSD: no cross-imports between pages." }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
             "files": ["src/app/**"],
             "rules": { "no-restricted-imports": "off" }
         },

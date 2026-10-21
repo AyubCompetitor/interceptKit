@@ -1,11 +1,13 @@
 import { describe, expect, it } from '@rstest/core';
 
+import { Locales } from '#shared/config';
+
 import { createTFunction, formatMessage } from '../translator.ts';
 
 describe('createTFunction', () => {
     it.each([
-        { locale: 'en', expected: 'Settings' },
-        { locale: 'ru', expected: 'Настройки' },
+        { locale: Locales.en, expected: 'Settings' },
+        { locale: Locales.ru, expected: 'Настройки' },
     ] as const)('returns the $locale message', ({ locale, expected }) => {
         expect(createTFunction(locale)('settingsTitle')).toBe(expected);
     });

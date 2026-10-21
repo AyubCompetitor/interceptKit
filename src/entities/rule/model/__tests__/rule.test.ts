@@ -2,7 +2,7 @@ import { describe, expect, it } from '@rstest/core';
 
 import { validate } from '#shared/lib';
 
-import { rulesValidator, ruleValidator } from '../rule.ts';
+import { HeaderOperations, rulesValidator, RuleTargetTypes, RuleTypes, ruleValidator } from '../rule.ts';
 
 import { makeHeaderRule, makeRule, REGEX_MATCH, URL_FILTER_MATCH } from './mocks.ts';
 
@@ -10,18 +10,24 @@ describe('ruleValidator', () => {
     describe('rule types', () => {
         it.each([
             {
-                type: 'redirect',
-                rule: makeRule({ type: 'redirect', to: { targetType: 'url', url: 'https://staging.example.com/' } }),
+                type: RuleTypes.REDIRECT,
+                rule: makeRule({
+                    type: RuleTypes.REDIRECT,
+                    to: {
+                        targetType: RuleTargetTypes.URL,
+                        url: 'https://staging.example.com/',
+                    },
+                }),
             },
             {
-                type: 'headers',
+                type: RuleTypes.HEADERS,
                 rule: makeHeaderRule(
-                    [{ name: 'X-Debug', operation: 'set', value: '1' }],
-                    [{ name: 'Server', operation: 'remove' }],
+                    [{ name: 'X-Debug', operation: HeaderOperations.SET, value: '1' }],
+                    [{ name: 'Server', operation: HeaderOperations.REMOVE }],
                 ),
             },
             {
-                type: 'block',
+                type: RuleTypes.BLOCK,
                 rule: makeRule(),
             },
         ])('accepts a $type rule', ({ rule }) => {
@@ -40,28 +46,33 @@ describe('ruleValidator', () => {
     describe('redirects', () => {
         it('refuses non-http targets', () => {
             // oxlint-disable-next-line no-script-url -- the test proves such targets are rejected
-            const rule = makeRule({ type: 'redirect', to: { targetType: 'url', url: 'javascript:alert(1)' } });
+            const to = { targetType: RuleTargetTypes.URL, url: 'javascript:alert(1)' };
 
-            expect(validate(ruleValidator, rule).ok).toBe(false);
+            expect(validate(ruleValidator, makeRule({ type: RuleTypes.REDIRECT, to })).ok).toBe(false);
         });
 
         it('requires a regex URL pattern for regexSubstitution', () => {
-            const to = { targetType: 'regexSubstitution', value: 'https://new.example.com/\\1' };
+            const to = {
+                targetType: RuleTargetTypes.RGX_SUBSTITUTION,
+                value: 'https://new.example.com/\\1',
+            };
+            const filterRule = makeRule({ type: RuleTypes.REDIRECT, to });
+            const regexRule = makeRule({ type: RuleTypes.REDIRECT, to, match: REGEX_MATCH });
 
-            expect(validate(ruleValidator, makeRule({ type: 'redirect', to })).ok).toBe(false);
+            expect(validate(ruleValidator, filterRule).ok).toBe(false);
 
-            expect(validate(ruleValidator, makeRule({ type: 'redirect', to, match: REGEX_MATCH })).ok).toBe(true);
+            expect(validate(ruleValidator, regexRule).ok).toBe(true);
         });
     });
 
     describe('header operations', () => {
         it.each([
-            { name: 'set without a value', op: { name: 'A', operation: 'set' } },
-            { name: 'remove with a value', op: { name: 'A', operation: 'remove', value: 'x' } },
-            { name: 'a value with CR/LF', op: { name: 'A', operation: 'set', value: 'x\r\nB: 1' } },
+            { name: 'set without a value', op: { name: 'A', operation: HeaderOperations.SET } },
+            { name: 'remove with a value', op: { name: 'A', operation: HeaderOperations.REMOVE, value: 'x' } },
+            { name: 'a value with CR/LF', op: { name: 'A', operation: HeaderOperations.SET, value: 'x\r\nB: 1' } },
             {
                 name: 'append to a request header DNR does not allow',
-                op: { name: 'X-Custom', operation: 'append', value: '1' },
+                op: { name: 'X-Custom', operation: HeaderOperations.APPEND, value: '1' },
             },
         ])('rejects $name', ({ op }) => {
             expect(validate(ruleValidator, makeHeaderRule([op])).ok).toBe(false);
@@ -74,13 +85,13 @@ describe('ruleValidator', () => {
         it.each([
             {
                 name: 'an allowed request header in any case',
-                request: [{ name: 'Cookie', operation: 'append', value: 'a=1' }],
+                request: [{ name: 'Cookie', operation: HeaderOperations.APPEND, value: 'a=1' }],
                 response: [],
             },
             {
                 name: 'any response header',
                 request: [],
-                response: [{ name: 'X-Custom', operation: 'append', value: '1' }],
+                response: [{ name: 'X-Custom', operation: HeaderOperations.APPEND, value: '1' }],
             },
         ])('allows append to $name', ({ request, response }) => {
             expect(validate(ruleValidator, makeHeaderRule(request, response)).ok).toBe(true);

@@ -1,6 +1,8 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { buildRule, createRuleDraft, updateHeaderOp, type HeaderOpDraft } from '../ruleDraft.ts';
+import { buildRule, countDraftConditions, createRuleDraft, updateHeaderOp, type HeaderOpDraft } from '../ruleDraft.ts';
+
+import { HeaderOperations, RuleTypes } from '#entities/rule';
 
 import {
     BLOCK_RULE,
@@ -12,8 +14,8 @@ import {
 } from './mocks.ts';
 
 const HEADER_ROWS: HeaderOpDraft[] = [
-    { key: 'a', name: 'X-A', operation: 'set', value: '1' },
-    { key: 'b', name: 'X-B', operation: 'set', value: '2' },
+    { key: 'a', name: 'X-A', operation: HeaderOperations.SET, value: '1' },
+    { key: 'b', name: 'X-B', operation: HeaderOperations.SET, value: '2' },
 ];
 
 describe('rule drafts', () => {
@@ -31,7 +33,7 @@ describe('rule drafts', () => {
     it('start a new rule as an enabled redirect with a fresh id', () => {
         const draft = createRuleDraft(undefined);
 
-        expect(draft).toMatchObject({ name: '', enabled: true, type: 'redirect' });
+        expect(draft).toMatchObject({ name: '', enabled: true, type: RuleTypes.REDIRECT });
 
         expect(draft.id).not.toBe(createRuleDraft(undefined).id);
     });
@@ -49,16 +51,36 @@ describe('rule drafts', () => {
     });
 
     it('drop the value of a header that is removed', () => {
-        const removal: HeaderOpDraft = { key: 'a', name: ' Server ', operation: 'remove', value: 'nginx' };
+        const removal: HeaderOpDraft = {
+            key: 'a',
+            name: ' Server ',
+            operation: HeaderOperations.REMOVE,
+            value: 'nginx',
+        };
         const draft = { ...createRuleDraft(HEADER_RULE), requestHeaders: [], responseHeaders: [removal] };
 
-        expect(buildRule(draft)).toMatchObject({ response: [{ name: 'Server', operation: 'remove' }] });
+        expect(buildRule(draft)).toMatchObject({ response: [{ name: 'Server', operation: HeaderOperations.REMOVE }] });
     });
 
     it('keep the fields of another rule type while the type changes', () => {
-        const draft = { ...createRuleDraft(URL_REDIRECT_RULE), type: 'block' as const };
+        const draft = { ...createRuleDraft(URL_REDIRECT_RULE), type: RuleTypes.BLOCK };
 
-        expect(buildRule({ ...draft, type: 'redirect' })).toEqual(URL_REDIRECT_RULE);
+        expect(buildRule({ ...draft, type: RuleTypes.REDIRECT })).toEqual(URL_REDIRECT_RULE);
+    });
+});
+
+describe('countDraftConditions', () => {
+    it.each([
+        { name: 'a rule without conditions', rule: BLOCK_RULE, count: 0 },
+        { name: 'a rule with every condition', rule: CONDITIONS_RULE, count: 3 },
+    ])('counts $count for $name', ({ rule, count }) => {
+        expect(countDraftConditions(createRuleDraft(rule))).toBe(count);
+    });
+
+    it('ignores initiator domains made of separators only', () => {
+        const draft = { ...createRuleDraft(BLOCK_RULE), initiatorDomains: ' , ' };
+
+        expect(countDraftConditions(draft)).toBe(0);
     });
 });
 
@@ -66,7 +88,7 @@ describe('updateHeaderOp', () => {
     it('changes only the row with the key', () => {
         expect(updateHeaderOp(HEADER_ROWS, 'b', { value: '3' })).toEqual([
             HEADER_ROWS[0],
-            { key: 'b', name: 'X-B', operation: 'set', value: '3' },
+            { key: 'b', name: 'X-B', operation: HeaderOperations.SET, value: '3' },
         ]);
     });
 });

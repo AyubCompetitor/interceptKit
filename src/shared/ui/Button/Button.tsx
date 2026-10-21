@@ -12,6 +12,8 @@ interface ButtonProps extends ComponentProps<'button'> {
     size?: ButtonSize;
     /** Stretches the button to the width of its container */
     isBlock?: boolean;
+    /** A square button with an icon only; give it an aria-label */
+    isIconOnly?: boolean;
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, NotRequired<string>> = {
@@ -30,6 +32,7 @@ export const Button: FC<ButtonProps> = ({
     variant = ButtonVariants.SECONDARY,
     size = ButtonSizes.MEDIUM,
     isBlock = false,
+    isIconOnly = false,
     type = 'button',
     className,
     ...rest
@@ -40,6 +43,7 @@ export const Button: FC<ButtonProps> = ({
             VARIANT_CLASSES[variant],
             SIZE_CLASSES[size],
             isBlock && styles.block,
+            isIconOnly && styles.iconOnly,
             className,
         )}
         type={type}

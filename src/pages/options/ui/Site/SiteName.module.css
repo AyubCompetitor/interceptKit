@@ -1,0 +1,10 @@
+.name {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    min-width: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}

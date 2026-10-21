@@ -20,6 +20,7 @@
         "build": "rsbuild build",
         "typecheck": "tsc -p tsconfig.json",
         "lint": "oxlint --type-aware --deny-warnings",
+        "lint:fix": "oxlint --type-aware --deny-warnings --fix && prettier --write .",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "test": "rstest run",

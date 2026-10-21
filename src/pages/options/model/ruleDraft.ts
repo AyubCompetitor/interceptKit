@@ -1,18 +1,18 @@
 import {
     HeaderOperations,
+    RuleTargetTypes,
+    RuleTypes,
     type HeaderOp,
     type HeaderOperation,
     type RedirectTarget,
     type RequestMatch,
     type ResourceType,
     type Rule,
+    type RuleTargetType,
+    type RuleType,
     type TransformTarget,
 } from '#entities/rule';
 import { getRandomUUID, Sources, SyntaxTypes, type HttpMethod, type UrlPattern } from '#shared/lib';
-
-export type RuleType = Rule['type'];
-
-export type TargetType = RedirectTarget['targetType'];
 
 export type SyntaxType = UrlPattern['syntaxType'];
 
@@ -54,7 +54,7 @@ export interface RuleDraft {
     readonly initiatorDomains: string;
 
     /** Which redirect target the rule uses */
-    readonly targetType: TargetType;
+    readonly targetType: RuleTargetType;
     /** Target of a redirect to a URL */
     readonly url: string;
     /** Target of a redirect by regex substitution */
@@ -74,6 +74,14 @@ export interface RuleDraft {
     readonly responseHeaders: readonly HeaderOpDraft[];
 }
 
+/** Props of a group of fields in the rule form */
+export interface DraftFields {
+    /** Current form state */
+    draft: RuleDraft;
+    /** Merges changed fields into the form state */
+    onDraftChange: RuleDraftChange;
+}
+
 export type RuleDraftPatch = Partial<RuleDraft>;
 
 /** Merges changed fields into the form state */
@@ -88,13 +96,13 @@ const DOMAIN_SEPARATOR_RGX = /[\s,]+/;
 const NEW_RULE_DRAFT: Omit<RuleDraft, 'id'> = {
     name: '',
     enabled: true,
-    type: 'redirect',
+    type: RuleTypes.REDIRECT,
     syntaxType: SyntaxTypes.FILTER,
     pattern: '',
     methods: [],
     resourceTypes: [],
     initiatorDomains: '',
-    targetType: 'url',
+    targetType: RuleTargetTypes.URL,
     url: '',
     regexSubstitution: '',
     scheme: '',
@@ -120,22 +128,22 @@ const mapHeaderOpToDraft = (op: HeaderOp): HeaderOpDraft => ({
 });
 
 const getTargetFields = (target: RedirectTarget): RuleDraftPatch => {
-    if (target.targetType === 'url') {
+    if (target.targetType === RuleTargetTypes.URL) {
         return {
-            targetType: 'url',
+            targetType: RuleTargetTypes.URL,
             url: target.url,
         };
     }
 
-    if (target.targetType === 'regexSubstitution') {
+    if (target.targetType === RuleTargetTypes.RGX_SUBSTITUTION) {
         return {
-            targetType: 'regexSubstitution',
+            targetType: RuleTargetTypes.RGX_SUBSTITUTION,
             regexSubstitution: target.value,
         };
     }
 
     return {
-        targetType: 'transform',
+        targetType: RuleTargetTypes.TRANSFORM,
         scheme: target.scheme ?? '',
         host: target.host ?? '',
         port: target.port ?? '',
@@ -144,11 +152,11 @@ const getTargetFields = (target: RedirectTarget): RuleDraftPatch => {
 };
 
 const getActionFields = (rule: Rule): RuleDraftPatch => {
-    if (rule.type === 'redirect') {
+    if (rule.type === RuleTypes.REDIRECT) {
         return getTargetFields(rule.to);
     }
 
-    if (rule.type === 'headers') {
+    if (rule.type === RuleTypes.HEADERS) {
         return {
             requestHeaders: rule.request.map(mapHeaderOpToDraft),
             responseHeaders: rule.response.map(mapHeaderOpToDraft),
@@ -187,6 +195,15 @@ const parseDomainList = (text: string): string[] => {
     return domains.filter(domain => domain !== '');
 };
 
+/** How many optional conditions narrow the rule: methods, resource types and initiator domains */
+export const countDraftConditions = (draft: RuleDraft): number => {
+    const hasMethods = draft.methods.length > 0;
+    const hasResourceTypes = draft.resourceTypes.length > 0;
+    const hasInitiatorDomains = parseDomainList(draft.initiatorDomains).length > 0;
+
+    return [hasMethods, hasResourceTypes, hasInitiatorDomains].filter(Boolean).length;
+};
+
 /** DNR rejects empty condition lists, so an empty choice is left out and means "any" */
 const buildMatch = (draft: RuleDraft): RequestMatch => {
     const initiatorDomains = parseDomainList(draft.initiatorDomains);
@@ -207,10 +224,17 @@ const buildHeaderOp = (draft: HeaderOpDraft): HeaderOp => {
     const name = draft.name.trim();
 
     if (draft.operation === HeaderOperations.REMOVE) {
-        return { name, operation: draft.operation };
+        return {
+            name,
+            operation: draft.operation,
+        };
     }
 
-    return { name, operation: draft.operation, value: draft.value };
+    return {
+        name,
+        operation: draft.operation,
+        value: draft.value,
+    };
 };
 
 /** Empty fields keep that part of the original URL */
@@ -221,7 +245,7 @@ const buildTransformTarget = (draft: RuleDraft): TransformTarget => {
     const path = draft.path.trim();
 
     return {
-        targetType: 'transform',
+        targetType: RuleTargetTypes.TRANSFORM,
         ...(scheme !== '' && { scheme }),
         ...(host !== '' && { host }),
         ...(port !== '' && { port }),
@@ -230,12 +254,12 @@ const buildTransformTarget = (draft: RuleDraft): TransformTarget => {
 };
 
 const buildTarget = (draft: RuleDraft): RedirectTarget => {
-    if (draft.targetType === 'url') {
-        return { targetType: 'url', url: draft.url.trim() };
+    if (draft.targetType === RuleTargetTypes.URL) {
+        return { targetType: RuleTargetTypes.URL, url: draft.url.trim() };
     }
 
-    if (draft.targetType === 'regexSubstitution') {
-        return { targetType: 'regexSubstitution', value: draft.regexSubstitution.trim() };
+    if (draft.targetType === RuleTargetTypes.RGX_SUBSTITUTION) {
+        return { targetType: RuleTargetTypes.RGX_SUBSTITUTION, value: draft.regexSubstitution.trim() };
     }
 
     return buildTransformTarget(draft);
@@ -251,20 +275,27 @@ export const buildRule = (draft: RuleDraft): Rule => {
         match: buildMatch(draft),
     };
 
-    if (draft.type === 'block') {
-        return { ...base, type: 'block' };
-    }
-
-    if (draft.type === 'headers') {
+    if (draft.type === RuleTypes.BLOCK) {
         return {
             ...base,
-            type: 'headers',
+            type: RuleTypes.BLOCK,
+        };
+    }
+
+    if (draft.type === RuleTypes.HEADERS) {
+        return {
+            ...base,
+            type: RuleTypes.HEADERS,
             request: draft.requestHeaders.map(buildHeaderOp),
             response: draft.responseHeaders.map(buildHeaderOp),
         };
     }
 
-    return { ...base, type: 'redirect', to: buildTarget(draft) };
+    return {
+        ...base,
+        type: RuleTypes.REDIRECT,
+        to: buildTarget(draft),
+    };
 };
 
 export const updateHeaderOp = (

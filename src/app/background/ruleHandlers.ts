@@ -3,6 +3,8 @@ import {
     rulesItem,
     rulesRpc,
     rulesValidator,
+    RuleTargetTypes,
+    RuleTypes,
     upsertRule,
     type Rule,
     type RuleIdParams,
@@ -24,7 +26,8 @@ const getRegexError = async (rule: Rule, rules: readonly Rule[]): Promise<NotReq
         return;
     }
 
-    const isRgxSubstitution = rule.type === 'redirect' && rule.to.targetType === 'regexSubstitution';
+    const isRgxSubstitution =
+        rule.type === RuleTypes.REDIRECT && rule.to.targetType === RuleTargetTypes.RGX_SUBSTITUTION;
 
     const { reason, isSupported } = await getRegexSupport(rule.match.url.value, isRgxSubstitution);
 

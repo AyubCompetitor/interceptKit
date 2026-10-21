@@ -1,4 +1,8 @@
 .popup {
-    width: 320px;
+    width: 340px;
     padding: var(--space-l);
+}
+
+.title {
+    font-size: inherit;
 }

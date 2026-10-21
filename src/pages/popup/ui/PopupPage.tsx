@@ -1,21 +1,28 @@
 import type { FC } from 'react';
 
+import { InterceptionSwitch } from '#features/interception-switch';
 import { useTranslation } from '#shared/i18n';
 import { EXTENSION_PAGES, openExtensionPage, openOptionsPage } from '#shared/platform';
-import { Button, ButtonVariants, Flex, Spaces, Typography, TypographyColors, useDocumentTitle } from '#shared/ui';
+import {
+    Brand,
+    Button,
+    ButtonVariants,
+    Flex,
+    Spaces,
+    Typography,
+    TypographyColors,
+    TypographySizes,
+    useDocumentTitle,
+} from '#shared/ui';
 
 import styles from './PopupPage.module.css';
 
-const logError = (error: unknown): void => {
-    console.error(error);
+const onDashboardOpen = () => {
+    openOptionsPage().catch(console.error);
 };
 
-const openDashboard = (): void => {
-    openOptionsPage().catch(logError);
-};
-
-const openApiClient = (): void => {
-    openExtensionPage(EXTENSION_PAGES.API_CLIENT).catch(logError);
+const onApiClientOpen = () => {
+    openExtensionPage(EXTENSION_PAGES.API_CLIENT).catch(console.error);
 };
 
 export const PopupPage: FC = () => {
@@ -26,17 +33,25 @@ export const PopupPage: FC = () => {
 
     return (
         <Flex as='main' className={styles.popup} direction='column' gap={Spaces.L}>
-            <Flex direction='column' gap={Spaces.XS}>
-                <h1>{title}</h1>
-                <Typography color={TypographyColors.HINT}>{t('popupTagline')}</Typography>
+            <Flex direction='column' gap={Spaces.S}>
+                <h1 className={styles.title}>
+                    <Brand />
+                </h1>
+                <Typography color={TypographyColors.HINT} size={TypographySizes.SMALL}>
+                    {t('popupTagline')}
+                </Typography>
             </Flex>
 
+            <InterceptionSwitch />
+
             <Flex direction='column' gap={Spaces.S}>
-                <Button variant={ButtonVariants.PRIMARY} onClick={openDashboard}>
+                <Button variant={ButtonVariants.PRIMARY} isBlock onClick={onDashboardOpen}>
                     {t('popupOpenDashboard')}
                 </Button>
 
-                <Button onClick={openApiClient}>{t('popupOpenApiClient')}</Button>
+                <Button isBlock onClick={onApiClientOpen}>
+                    {t('popupOpenApiClient')}
+                </Button>
             </Flex>
         </Flex>
     );

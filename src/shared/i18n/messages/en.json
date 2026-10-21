@@ -8,7 +8,7 @@
         "description": "Store and extensions page description. At most 132 characters."
     },
     "popupTagline": {
-        "message": "Your requests, your rules. Everything stays in your browser."
+        "message": "Redirect, change and block requests. Everything stays in your browser."
     },
     "popupOpenDashboard": {
         "message": "Open dashboard"
@@ -16,78 +16,67 @@
     "popupOpenApiClient": {
         "message": "Open API client"
     },
-    "dashboardSubtitle": {
-        "message": "Rules, mocks and settings"
+    "navLabel": {
+        "message": "Dashboard sections",
+        "description": "Accessible name of the sidebar navigation."
     },
-    "dashboardUpcomingTitle": {
-        "message": "Coming next"
+    "navSoon": {
+        "message": "Coming soon",
+        "description": "Title of the sidebar group with sections from later versions."
     },
-    "sectionRules": {
-        "message": "Redirects, headers and blocking"
+    "rulesTitle": {
+        "message": "Rules"
     },
-    "sectionMocks": {
-        "message": "Mock API"
-    },
-    "sectionSites": {
+    "sitesTitle": {
         "message": "Sites"
     },
-    "sectionPolicy": {
+    "settingsTitle": {
+        "message": "Settings"
+    },
+    "mocksTitle": {
+        "message": "Mock API"
+    },
+    "policyTitle": {
         "message": "Organization policy"
     },
-    "sectionTransfer": {
+    "transferTitle": {
         "message": "Import and export"
     },
-    "sitesHint": {
-        "message": "Rules work only on sites you allow here. The browser checks access to both the requested site and the page that sent the request."
-    },
-    "sitesDomain": {
-        "message": "Domain"
-    },
-    "sitesDomainPlaceholder": {
-        "message": "example.com",
-        "description": "Sample domain in an empty input. Not translated."
-    },
-    "sitesSubdomains": {
-        "message": "Include subdomains"
-    },
-    "sitesAllow": {
-        "message": "Allow access"
-    },
-    "sitesEmpty": {
-        "message": "No sites yet."
-    },
-    "sitesAllSites": {
-        "message": "All sites"
-    },
-    "sitesRemove": {
-        "message": "Remove"
-    },
-    "sitesInvalidDomain": {
-        "message": "Enter a domain such as example.com or localhost."
-    },
-    "sitesNotGranted": {
-        "message": "Access was not granted."
-    },
-    "sitesRequestFailed": {
-        "message": "Could not request access. Try again."
-    },
-    "sitesRemoveFailed": {
-        "message": "Could not remove access. Try again."
-    },
-    "interceptionEnabled": {
+    "interceptionLabel": {
         "message": "Intercept requests"
     },
+    "interceptionOn": {
+        "message": "Enabled rules work on allowed sites."
+    },
+    "interceptionOff": {
+        "message": "Paused: no rule applies."
+    },
+    "interceptionPaused": {
+        "message": "Interception is paused, so none of these rules apply right now."
+    },
+    "interceptionTurnOn": {
+        "message": "Turn on"
+    },
     "interceptionSaveFailed": {
-        "message": "Could not switch interception. Try again."
+        "message": "Couldn't switch interception. Try again."
+    },
+    "rulesDescription": {
+        "message": "Redirect requests, change their headers or block them. If several rules match a request, the one higher in the list wins."
     },
     "rulesAdd": {
-        "message": "Add rule"
+        "message": "New rule"
     },
-    "rulesHint": {
-        "message": "The first matching rule in the list wins. Rules work only on sites allowed under Sites."
+    "rulesNoSites": {
+        "message": "Rules only work on sites you allow, and you haven't allowed any yet."
     },
-    "rulesEmpty": {
-        "message": "No rules yet."
+    "rulesOpenSites": {
+        "message": "Allow a site"
+    },
+    "rulesEmptyTitle": {
+        "message": "No rules yet"
+    },
+    "rulesEmptyText": {
+        "message": "A rule picks requests by their URL and redirects them, changes their headers or blocks them."
     },
     "rulesEdit": {
         "message": "Edit"
@@ -96,7 +85,38 @@
         "message": "Delete"
     },
     "rulesActionFailed": {
-        "message": "Could not update the rule. Try again."
+        "message": "Couldn't update the rule. Try again."
+    },
+    "ruleNoAccess": {
+        "message": "InterceptKit has no access to $1, so the rule doesn't work there yet.",
+        "description": "$1 is a host name, such as api.example.com."
+    },
+    "ruleAllowAccess": {
+        "message": "Allow"
+    },
+    "ruleBadgeRedirect": {
+        "message": "Redirect",
+        "description": "Short name of the action in the rule list."
+    },
+    "ruleBadgeHeaders": {
+        "message": "Headers",
+        "description": "Short name of the action in the rule list."
+    },
+    "ruleBadgeBlock": {
+        "message": "Block",
+        "description": "Short name of the action in the rule list."
+    },
+    "ruleSummaryRedirect": {
+        "message": "To $1",
+        "description": "$1 is the redirect target, such as a URL."
+    },
+    "ruleSummaryTransform": {
+        "message": "Changes the URL: $1",
+        "description": "$1 lists the changed parts, such as Port: 8080."
+    },
+    "ruleSummaryHeaders": {
+        "message": "Changes $1",
+        "description": "$1 lists header names, such as X-Debug, Cookie."
     },
     "rulesNewTitle": {
         "message": "New rule"
@@ -111,18 +131,27 @@
         "message": "Save"
     },
     "rulesSaveFailed": {
-        "message": "Could not save the rule: $1",
+        "message": "Couldn't save the rule: $1",
         "description": "$1 is the technical reason, in English."
     },
     "rulesDeleteTitle": {
-        "message": "Delete rule"
+        "message": "Delete rule?"
     },
     "rulesDeleteText": {
-        "message": "Delete the rule “$1”? This cannot be undone.",
+        "message": "The rule “$1” will be deleted. This can't be undone.",
         "description": "$1 is the rule name."
     },
     "ruleName": {
         "message": "Name"
+    },
+    "ruleNamePlaceholder": {
+        "message": "For example, Staging API"
+    },
+    "ruleStepMatch": {
+        "message": "Which requests"
+    },
+    "ruleStepAction": {
+        "message": "What to do with them"
     },
     "ruleType": {
         "message": "Action"
@@ -136,6 +165,15 @@
     "ruleTypeBlock": {
         "message": "Block"
     },
+    "ruleTypeRedirectHint": {
+        "message": "Sends matching requests to another URL."
+    },
+    "ruleTypeHeadersHint": {
+        "message": "Sets, appends or removes headers of matching requests and their responses."
+    },
+    "ruleTypeBlockHint": {
+        "message": "Matching requests never reach the network and fail with an error."
+    },
     "ruleSyntax": {
         "message": "Pattern type"
     },
@@ -148,8 +186,19 @@
     "rulePattern": {
         "message": "URL pattern"
     },
-    "rulePatternHint": {
-        "message": "In a URL filter, || anchors a domain, * matches any text and ^ a separator: ||api.example.com/v1/. Regular expressions use the RE2 syntax."
+    "rulePatternFilterHint": {
+        "message": "|| anchors a domain, * matches any characters and ^ matches a separator such as / or ?."
+    },
+    "rulePatternRegexHint": {
+        "message": "RE2 syntax, as in Chrome. Groups in parentheses can be reused in a redirect."
+    },
+    "rulePatternFilterPlaceholder": {
+        "message": "||api.example.com/v1/",
+        "description": "Sample URL filter. Not translated."
+    },
+    "rulePatternRegexPlaceholder": {
+        "message": "^https://api\\.example\\.com/(.*)",
+        "description": "Sample regular expression. Not translated."
     },
     "ruleConditions": {
         "message": "More conditions"
@@ -157,17 +206,72 @@
     "ruleMethods": {
         "message": "Methods"
     },
+    "ruleMethodsHint": {
+        "message": "Select none to match any method."
+    },
     "ruleResourceTypes": {
         "message": "Resource types"
     },
     "ruleResourceTypesHint": {
-        "message": "With none selected, the rule applies to every type, page loads included."
+        "message": "Select none to match every type, page loads included."
+    },
+    "resourceTypeMainFrame": {
+        "message": "Pages"
+    },
+    "resourceTypeSubFrame": {
+        "message": "Frames"
+    },
+    "resourceTypeStylesheet": {
+        "message": "Stylesheets"
+    },
+    "resourceTypeScript": {
+        "message": "Scripts"
+    },
+    "resourceTypeImage": {
+        "message": "Images"
+    },
+    "resourceTypeFont": {
+        "message": "Fonts"
+    },
+    "resourceTypeObject": {
+        "message": "Plugins"
+    },
+    "resourceTypeXhr": {
+        "message": "Fetch and XHR"
+    },
+    "resourceTypePing": {
+        "message": "Pings and beacons"
+    },
+    "resourceTypeCspReport": {
+        "message": "CSP reports"
+    },
+    "resourceTypeMedia": {
+        "message": "Audio and video"
+    },
+    "resourceTypeWebsocket": {
+        "message": "WebSocket",
+        "description": "Technology name. Not translated."
+    },
+    "resourceTypeWebtransport": {
+        "message": "WebTransport",
+        "description": "Technology name. Not translated."
+    },
+    "resourceTypeWebbundle": {
+        "message": "Web Bundles",
+        "description": "Technology name. Not translated."
+    },
+    "resourceTypeOther": {
+        "message": "Other"
     },
     "ruleInitiatorDomains": {
-        "message": "Only from pages on"
+        "message": "Only requests from pages on"
     },
     "ruleInitiatorDomainsHint": {
-        "message": "Domains separated by commas; their subdomains are included."
+        "message": "Separate domains with commas. Their subdomains are included."
+    },
+    "ruleInitiatorDomainsPlaceholder": {
+        "message": "app.example.com, admin.example.com",
+        "description": "Sample domains. Not translated."
     },
     "ruleTarget": {
         "message": "Redirect to"
@@ -179,16 +283,27 @@
         "message": "A regex substitution"
     },
     "ruleTargetTransform": {
-        "message": "Changed parts of the URL"
+        "message": "A modified URL"
     },
     "ruleTargetUrlLabel": {
-        "message": "Target URL"
+        "message": "New URL"
+    },
+    "ruleTargetUrlPlaceholder": {
+        "message": "https://staging.example.com/",
+        "description": "Sample URL. Not translated."
     },
     "ruleSubstitution": {
         "message": "Substitution"
     },
     "ruleSubstitutionHint": {
         "message": "\\1 to \\9 insert the groups captured by the regular expression."
+    },
+    "ruleSubstitutionPlaceholder": {
+        "message": "https://new.example.com/\\1",
+        "description": "Sample substitution. Not translated."
+    },
+    "ruleSubstitutionNeedsRegex": {
+        "message": "A substitution needs groups from a regular expression. Switch the pattern type above to Regular expression."
     },
     "ruleScheme": {
         "message": "Scheme"
@@ -214,13 +329,16 @@
         "message": "Path"
     },
     "ruleTransformHint": {
-        "message": "Empty fields keep that part of the original URL."
+        "message": "Leave a field empty to keep that part of the original URL."
     },
     "ruleRequestHeaders": {
         "message": "Request headers"
     },
     "ruleResponseHeaders": {
         "message": "Response headers"
+    },
+    "ruleHeadersEmpty": {
+        "message": "No changes yet."
     },
     "ruleHeaderName": {
         "message": "Header"
@@ -244,14 +362,55 @@
         "message": "Add header"
     },
     "ruleHeaderDelete": {
-        "message": "Delete this header change",
+        "message": "Delete row",
         "description": "Accessible name of the × button in a header row."
     },
-    "ruleBlockHint": {
-        "message": "Matching requests fail as if the network blocked them."
+    "sitesDescription": {
+        "message": "InterceptKit works only on sites you allow. The browser checks access to both the site a request goes to and the page that sends it."
     },
-    "settingsTitle": {
-        "message": "Settings"
+    "sitesDomain": {
+        "message": "Domain"
+    },
+    "sitesDomainPlaceholder": {
+        "message": "example.com",
+        "description": "Sample domain in an empty input. Not translated."
+    },
+    "sitesSubdomains": {
+        "message": "Include subdomains"
+    },
+    "sitesAllow": {
+        "message": "Allow access"
+    },
+    "sitesEmptyTitle": {
+        "message": "No sites yet"
+    },
+    "sitesEmptyText": {
+        "message": "Enter a domain above. The browser will ask you to confirm access."
+    },
+    "sitesAllSites": {
+        "message": "All sites"
+    },
+    "sitesWithSubdomains": {
+        "message": "and subdomains",
+        "description": "Badge next to a domain whose subdomains are allowed too."
+    },
+    "sitesRemove": {
+        "message": "Remove"
+    },
+    "sitesInvalidDomain": {
+        "message": "Enter a domain, for example example.com or localhost."
+    },
+    "sitesNotGranted": {
+        "message": "Access wasn't granted."
+    },
+    "sitesRequestFailed": {
+        "message": "Couldn't request access. Try again."
+    },
+    "sitesRemoveFailed": {
+        "message": "Couldn't remove access. Try again."
+    },
+    "settingsDescription": {
+        "message": "How InterceptKit looks in this browser."
     },
     "settingsLanguage": {
         "message": "Interface language"
@@ -267,14 +426,32 @@
         "message": "Русский",
         "description": "Language name in that language. Not translated."
     },
+    "settingsTheme": {
+        "message": "Theme"
+    },
+    "themeDark": {
+        "message": "Dark"
+    },
+    "themeLight": {
+        "message": "Light"
+    },
+    "themeSystem": {
+        "message": "System"
+    },
+    "settingsPrivacy": {
+        "message": "Rules and settings are stored only in this browser. InterceptKit has no servers, accounts or telemetry."
+    },
     "settingsSaveFailed": {
-        "message": "Could not save the setting. Try again."
+        "message": "Couldn't save the setting. Try again."
     },
     "apiClientTitle": {
         "message": "API client"
     },
+    "apiClientSoonTitle": {
+        "message": "Coming in a later version"
+    },
     "apiClientPlaceholder": {
-        "message": "The request builder arrives in a later version."
+        "message": "Here you'll build and send HTTP requests, switch environments and look through the history."
     },
     "dialogClose": {
         "message": "Close",

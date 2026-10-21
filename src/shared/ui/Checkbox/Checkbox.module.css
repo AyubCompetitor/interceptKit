@@ -1,14 +1,17 @@
 .checkbox {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-xs);
-    min-height: 32px;
+    gap: var(--space-s);
+    min-height: var(--control-height-m);
+    font-size: var(--font-size-m);
     cursor: pointer;
 }
 
 .box {
-    min-height: auto;
+    flex: none;
+    width: 18px;
+    height: 18px;
     margin: 0;
-    padding: 0;
-    accent-color: var(--color-accent);
+    accent-color: var(--color-primary);
+    cursor: pointer;
 }

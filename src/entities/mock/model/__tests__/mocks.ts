@@ -1,3 +1,5 @@
+import { HttpMethods, Sources, SyntaxTypes } from '#shared/lib';
+
 export const makeMockResponse = (overrides: Record<string, unknown> = {}) => ({
     status: 200,
     headers: [],
@@ -12,7 +14,7 @@ export const makeMock = (responseOverrides: Record<string, unknown> = {}) => ({
     id: 'm1',
     name: 'Users',
     enabled: true,
-    source: 'user',
-    match: { url: { syntaxType: 'filter', value: '||api.example.com/users' }, methods: ['GET'] },
+    source: Sources.USER,
+    match: { url: { syntaxType: SyntaxTypes.FILTER, value: '||api.example.com/users' }, methods: [HttpMethods.GET] },
     response: makeMockResponse(responseOverrides),
 });

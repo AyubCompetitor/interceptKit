@@ -1,0 +1,13 @@
+/** The fields sit right in the table grid of the list */
+.row {
+    display: contents;
+
+    & > input,
+    & > select {
+        width: 100%;
+    }
+}
+
+.code {
+    font-family: var(--font-mono);
+}
