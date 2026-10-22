@@ -22,13 +22,22 @@ import {
     type Validator,
 } from '#shared/lib';
 
+export enum MockBodyTypes {
+    JSON = 'json',
+    TEXT = 'text',
+}
+
+export type MockBodyType = `${MockBodyTypes}`;
+
+export const MOCK_BODY_TYPES = Object.values(MockBodyTypes);
+
 export interface MockResponse {
     /** 200–599, the range new Response() accepts */
     readonly status: number;
     /** Response headers */
     readonly headers: readonly KeyValue[];
     /** json bodies must parse */
-    readonly bodyType: 'json' | 'text';
+    readonly bodyType: MockBodyType;
     /** Response body as text */
     readonly body: string;
     /** Delay before the response, in milliseconds */
@@ -92,7 +101,7 @@ const getMockResponseError = (response: MockResponse): NotRequired<string> => {
         return `status ${response.status} ${MOCK_ERRORS.BODY_NOT_ALLOWED}`;
     }
 
-    const isJsonBody = response.bodyType === 'json';
+    const isJsonBody = response.bodyType === MockBodyTypes.JSON;
 
     if (isJsonBody && hasBody && !isJson(response.body)) {
         return MOCK_ERRORS.INVALID_JSON;
@@ -113,18 +122,18 @@ const getDuplicateIdError = (mocks: readonly Mock[]): NotRequired<string> => {
 
 const mockHeader = object({ key: headerName, value: headerValue, enabled: boolean() });
 
-const mockResponse: Validator<MockResponse> = refine(
+export const mockResponse: Validator<MockResponse> = refine(
     object({
         status: number({ integer: true, min: 200, max: 599 }),
         headers: array(mockHeader, { maxLength: 100 }),
-        bodyType: oneOf(['json', 'text']),
+        bodyType: oneOf(MOCK_BODY_TYPES),
         body: string({ maxLength: MAX_MOCK_BODY_LENGTH }),
         delayMs: number({ integer: true, min: 0, max: 60_000 }),
     }),
     getMockResponseError,
 );
 
-const mockMatch = object({
+export const mockMatch: Validator<MockMatch> = object({
     url: urlPattern,
     methods: optional(httpMethods),
 });

@@ -17,7 +17,7 @@
         "resolveJsonModule": true,
         "noEmit": true,
         "skipLibCheck": true,
-        "types": ["chrome", "@rsbuild/core/types"]
+        "types": ["chrome", "@rsbuild/core/types", "node"]
     },
     "include": ["@types", "src", "build", "e2e", "rsbuild.config.ts", "rstest.config.ts", "playwright.config.ts"]
 }

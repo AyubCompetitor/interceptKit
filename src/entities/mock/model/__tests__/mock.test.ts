@@ -2,7 +2,7 @@ import { describe, expect, it } from '@rstest/core';
 
 import { validate } from '#shared/lib';
 
-import { mocksValidator, mockValidator } from '../mock.ts';
+import { MockBodyTypes, mocksValidator, mockValidator } from '../mock.ts';
 
 import { makeMock } from './mocks.ts';
 
@@ -13,7 +13,7 @@ describe('mockValidator', () => {
 
     it.each([
         { name: 'status 204 with an empty body', response: { status: 204, body: '' } },
-        { name: 'a text body that is not JSON', response: { bodyType: 'text', body: '{' } },
+        { name: 'a text body that is not JSON', response: { bodyType: MockBodyTypes.TEXT, body: '{' } },
     ])('accepts $name', ({ response }) => {
         expect(validate(mockValidator, makeMock(response)).ok).toBe(true);
     });

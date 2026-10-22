@@ -70,5 +70,13 @@ export default defineConfig(({ env }) => ({
             performance: { chunkSplit: { strategy: 'all-in-one' } },
             dev: { writeToDisk: true, hmr: false, liveReload: false },
         },
+        /** Scripts the browser injects into web pages: self-contained files, no HTML, no dev client */
+        content: {
+            source: { entry: { interceptor: entry('interceptor.ts') } },
+            output: { target: 'web', distPath: { root: `${OUT}/content`, js: '' } },
+            performance: { chunkSplit: { strategy: 'all-in-one' } },
+            tools: { htmlPlugin: false },
+            dev: { writeToDisk: true, hmr: false, liveReload: false },
+        },
     },
 }));

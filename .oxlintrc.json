@@ -296,6 +296,51 @@
             "rules": { "no-restricted-imports": "off" }
         },
         {
+            "files": ["src/app/interceptor/**", "src/app/entrypoints/interceptor.ts"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "group": ["#*/*", "!#entities/mock", "!#shared/lib"],
+                                "message": "The interceptor runs in the page's main world: it may use only the mock entity and shared/lib."
+                            },
+                            {
+                                "group": ["react", "react/*", "react-dom", "react-dom/*"],
+                                "message": "The interceptor runs in the page's main world: no UI code."
+                            }
+                        ]
+                    }
+                ],
+                "no-restricted-globals": [
+                    "error",
+                    {
+                        "name": "chrome",
+                        "message": "The interceptor runs in the page's main world, where extension APIs do not exist."
+                    },
+                    {
+                        "name": "browser",
+                        "message": "The interceptor runs in the page's main world, where extension APIs do not exist."
+                    },
+                    { "name": "fetch", "message": "Pass requests on to the fetch taken before page scripts ran." },
+                    {
+                        "name": "XMLHttpRequest",
+                        "message": "Pass requests on to the XHR taken before page scripts ran."
+                    },
+                    { "name": "WebSocket", "message": "The interceptor answers the page's requests and sends none." },
+                    { "name": "EventSource", "message": "The interceptor answers the page's requests and sends none." },
+                    {
+                        "name": "WebTransport",
+                        "message": "The interceptor answers the page's requests and sends none."
+                    },
+                    { "name": "localStorage", "message": "The page's storage belongs to the page." },
+                    { "name": "sessionStorage", "message": "The page's storage belongs to the page." },
+                    { "name": "indexedDB", "message": "The page's storage belongs to the page." }
+                ]
+            }
+        },
+        {
             "files": ["src/pages/api-client/api/**"],
             "rules": { "no-restricted-globals": "off" }
         },

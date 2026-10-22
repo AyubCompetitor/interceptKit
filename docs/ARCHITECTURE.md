@@ -4,13 +4,14 @@ InterceptKit is a Manifest V3 extension for Chrome and Edge 140+. This document 
 
 ## Execution contexts
 
-| Context                     | Entry point                         | Runs                                        | Talks to                                                     |
-| --------------------------- | ----------------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
-| Service worker (background) | `src/app/entrypoints/background.ts` | On demand; Chrome stops it after ~30 s idle | `chrome.storage`, `declarativeNetRequest`, later `scripting` |
-| Popup                       | `src/app/entrypoints/popup/`        | While the toolbar popup is open             | Storage (read), background (RPC)                             |
-| Dashboard (options page)    | `src/app/entrypoints/options/`      | In a tab                                    | Storage (read), background (RPC), host access requests       |
-| API client                  | `src/app/entrypoints/api-client/`   | In a tab                                    | Later: the network, only for requests the user sends         |
-| Content scripts             | Later                               | Pages of sites where the user enabled mocks | Background (RPC), the page through `postMessage`             |
+| Context                      | Entry point                          | Runs                                                                                  | Talks to                                                     |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Service worker (background)  | `src/app/entrypoints/background.ts`  | On demand; Chrome stops it after ~30 s idle                                           | `chrome.storage`, `declarativeNetRequest`, later `scripting` |
+| Popup                        | `src/app/entrypoints/popup/`         | While the toolbar popup is open                                                       | Storage (read), background (RPC)                             |
+| Dashboard (options page)     | `src/app/entrypoints/options/`       | In a tab                                                                              | Storage (read), background (RPC), host access requests       |
+| API client                   | `src/app/entrypoints/api-client/`    | In a tab                                                                              | Later: the network, only for requests the user sends         |
+| Interceptor (content script) | `src/app/entrypoints/interceptor.ts` | Main world of pages with mocks on, before page scripts; registered from the next step | Only the page: receives mocks through `postMessage`          |
+| Bridge (content script)      | Later                                | The extension's isolated world on the same pages                                      | Background (RPC), the interceptor through `postMessage`      |
 
 ## Code layout: Feature-Sliced Design
 
@@ -80,6 +81,27 @@ rules + settings + policy ──▶ selectActiveRules ──▶ compileRules ─
 - The dashboard edits a rule through a form state that keeps the fields of every rule type, so switching the type loses nothing. Saving sends the whole rule to the service worker; if it refuses, the editor shows the reason.
 - **Rules are inert without host access.** The browser applies a rule only when the extension has access to both the requested site and the page that made the request; nothing is granted at install.
 
+## Mocks
+
+The browser's declarative rules cannot replace a response body, so mocks are served by a script in the page itself. The interceptor runs in the page's main world before any page script and replaces `fetch` and `XMLHttpRequest`. A request that matches a mock gets the mock's status, headers and body after its delay; any other request goes to the browser's own `fetch` or XHR, taken before page scripts ran.
+
+```
+service worker ──RPC──▶ bridge (isolated world) ──postMessage──▶ interceptor (main world) ──▶ fetch / XHR of the page
+```
+
+- The interceptor imports only `entities/mock` and `shared/lib`, and has no `chrome.*` at all: the linter allows nothing else there.
+- Mocks reach the page as `{ ik: 1, mocks }` with only what answering needs: the URL pattern, methods and the response. Names, owners and disabled headers stay in the extension. The interceptor validates every message, since page scripts can post the same shape.
+- **Page scripts can read the mocks.** Never put secrets into a mock.
+- URL patterns match the way the browser's rules do: the same `||`, `|`, `^` and `*` syntax, case-insensitive (`buildUrlPatternRgx` in `shared/lib`). The first matching mock in the list wins.
+- Until the first mock list arrives, requests wait, so a page's first requests are mocked too. Without a list they go to the network after 2 seconds.
+- A mocked XHR fires the same events in the same order as a real one, including on abort; `fetch` aborted during the delay rejects with `AbortError`.
+
+Known limitations, as with any in-page interception:
+
+- Not intercepted: requests from service workers and web workers of the page, navigations, `<img>`, `<script>` and CSS loads, `sendBeacon`, `WebSocket`, `EventSource`, and requests made before the interceptor was injected.
+- Synchronous XHR is never mocked: it cannot wait. `xhr.timeout` does not apply to a mocked response, and `responseType: 'document'` gives `null`.
+- A page can detect the replacement: `fetch` and `XMLHttpRequest` are not the native functions, mocked events are not trusted (`isTrusted` is false), and the page's microtasks run after the whole sequence of mocked events rather than between their listeners.
+
 ## Site access
 
 Host access is the user's decision, made one site at a time:
@@ -102,7 +124,8 @@ dist/chrome-mv3/
 ├── managed-schema.json  Administrator policy schema (from public/)
 ├── _locales/            UI and manifest strings
 ├── pages/               popup.html, options.html, api-client.html and their assets
-└── background/          background.js: one self-contained file
+├── background/          background.js: one self-contained file
+└── content/             interceptor.js: one self-contained file for web pages, without chrome.* or eval
 ```
 
 - The manifest sets a strict CSP for extension pages: `script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'`.
@@ -123,3 +146,6 @@ dist/chrome-mv3/
 
 - **Unit tests** ([Rstest](https://rstest.rs)) sit next to the code in `__tests__/` folders, with shared fixtures in `__tests__/mocks.ts`, and run in Node: validators, business rules, storage adapter, RPC router, migrations, localization.
 - **End-to-end tests** (Playwright) load the production build into Playwright's Chromium and check the manifest's permissions, storage access restriction, CSP and real user flows such as switching the interface language or editing rules. Playwright cannot answer the browser's permission prompt, so the Sites tests replace `chrome.permissions.request` and check what would have been requested.
+- **Interception tests** (`e2e/interception.spec.ts`) check the effect of rules on real requests. A local HTTP server (`e2e/testServer.ts`, Node's `node:http` on `127.0.0.1` with a random port) serves a test page and echoes every other request back with the headers it received. The tests load a copy of the build with install-time access to `http://127.0.0.1/*`, so the shipped manifest stays unchanged. They cover a block rule on fetches and navigations, redirects to a URL, a regex substitution and a URL transform, and request and response header changes. The browser maps a second host, `foreign.test`, to the same server, but the extension has no access to it. A request from a page on that host passes even when a rule blocks its URL: a rule acts only when the extension has access to both the request URL and the page that started it.
+- **Interceptor tests** (`e2e/interceptor.spec.ts`) inject the built `content/interceptor.js` into the test page before its scripts, post a mock list the way the bridge does, and check `fetch` and XHR in the real browser. A mocked XHR is compared with a real request to the test server, so its events must match the browser's own.
+- **Type checking** runs two programs. `tsconfig.json` covers the whole repository with Node typings for configs, unit tests and e2e. `tsconfig.browser.json` covers `src` without tests and without Node typings, so extension code cannot use Node APIs by accident.

@@ -1,10 +1,10 @@
-import type { Locator, Page, Worker } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { DnrTypes, HeaderOperations, ResourceTypes, RuleTargetTypes, RuleTypes } from '#entities/rule';
 import { Sources, SyntaxTypes } from '#shared/lib';
 import { RpcErrorCodes } from '#shared/messaging';
 
-import { expect, REQUESTED_ORIGINS, stubAccessRequest, test } from './fixtures.ts';
+import { callBackground, expect, getDynamicRules, REQUESTED_ORIGINS, stubAccessRequest, test } from './fixtures.ts';
 
 const BLOCK_RULE = {
     id: 'ads',
@@ -79,13 +79,6 @@ interface RuleBasics {
     /** URL pattern of the requests */
     pattern: string;
 }
-
-/** Calls a background method the way extension pages do */
-const callBackground = (page: Page, method: string, params: unknown) =>
-    page.evaluate(message => chrome.runtime.sendMessage(message), { ik: 1, method, params });
-
-const getDynamicRules = (serviceWorker: Worker) =>
-    serviceWorker.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
 
 /** Controls sit inside their labels, so a label's text also holds a select's options: look them up by role */
 const getTextbox = (scope: Locator, name: string) => scope.getByRole('textbox', { name, exact: true });
