@@ -2,12 +2,15 @@ import { useRef } from 'react';
 
 import { sendRequest } from '../api/sendRequest.ts';
 
-import { buildOutgoingRequest, type OutgoingRequest } from '#entities/request';
+import type { Environment } from '#entities/environment';
+import { buildOutgoingRequest, type ApiRequest, type ApiResponse, type OutgoingRequest } from '#entities/request';
 import { buildHostPattern, isHostCovered } from '#entities/site';
 import { formatIssues } from '#shared/lib';
 import { requestHostAccess, useHostPatterns } from '#shared/platform';
 
+import { addHistoryEntry, buildHistoryEntry } from './historyEntries.ts';
 import { buildApiRequest, type RequestDraft } from './requestDraft.ts';
+import { resolveRequestVariables } from './requestVariables.ts';
 import { IDLE_STATE, SENDING_STATE, SendStateTypes, type SendState } from './sendState.ts';
 
 const ABORT_ERROR = 'AbortError';
@@ -29,26 +32,56 @@ const mapErrorToSendState = (error: unknown): SendState => {
     return { stateType: SendStateTypes.FAILED, reason: UNKNOWN_ERROR };
 };
 
+const logHistoryFailure = (error: unknown) =>
+    console.warn('[api-client] the request was not added to the history', error);
+
+/** The history keeps the request as typed: templates, never the values of variables */
+const saveToHistory = (typedRequest: ApiRequest, sentAt: number, response: NotRequired<ApiResponse>) => {
+    addHistoryEntry(buildHistoryEntry(typedRequest, sentAt, response)).catch(logHistoryFailure);
+};
+
 /** Sends the requests of the tabs; access to a host is asked for inside the user's click, before anything else */
 export const useRequestSender = (onSendStateChange: (tabId: string, sendState: SendState) => void) => {
     const patterns = useHostPatterns();
     const controllers = useRef(new Map<string, AbortController>());
 
-    const sendOutgoing = (tabId: string, outgoing: OutgoingRequest) => {
+    const sendOutgoing = (tabId: string, outgoing: OutgoingRequest, typedRequest: ApiRequest) => {
         const controller = new AbortController();
+        const sentAt = Date.now();
 
         controllers.current.set(tabId, controller);
 
         onSendStateChange(tabId, SENDING_STATE);
 
-        sendRequest(outgoing, controller.signal)
-            .then(response => onSendStateChange(tabId, { stateType: SendStateTypes.RECEIVED, response }))
-            .catch((error: unknown) => onSendStateChange(tabId, mapErrorToSendState(error)));
+        const onResponse = (response: ApiResponse) => {
+            onSendStateChange(tabId, { stateType: SendStateTypes.RECEIVED, response });
+            saveToHistory(typedRequest, sentAt, response);
+        };
+
+        /** A cancelled request does not go to the history */
+        const onFailure = (error: unknown) => {
+            onSendStateChange(tabId, mapErrorToSendState(error));
+
+            if (!isAbortError(error)) {
+                saveToHistory(typedRequest, sentAt, undefined);
+            }
+        };
+
+        sendRequest(outgoing, controller.signal).then(onResponse).catch(onFailure);
     };
 
-    const onRequestSend = (draft: RequestDraft) => {
+    const onRequestSend = (draft: RequestDraft, environment: NotRequired<Environment>) => {
         const tabId = draft.id;
-        const result = buildOutgoingRequest(buildApiRequest(draft));
+        const typedRequest = buildApiRequest(draft);
+        const { request, missingNames } = resolveRequestVariables(typedRequest, environment);
+
+        if (missingNames.length > 0) {
+            onSendStateChange(tabId, { stateType: SendStateTypes.MISSING_VARIABLES, names: missingNames });
+
+            return;
+        }
+
+        const result = buildOutgoingRequest(request);
 
         if (!result.ok) {
             onSendStateChange(tabId, { stateType: SendStateTypes.INVALID, reason: formatIssues(result.issues) });
@@ -61,7 +94,7 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
         const isCovered = patterns !== undefined && isHostCovered(hostname, patterns);
 
         if (isCovered) {
-            sendOutgoing(tabId, outgoing);
+            sendOutgoing(tabId, outgoing, typedRequest);
 
             return;
         }
@@ -75,7 +108,7 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
                 return;
             }
 
-            sendOutgoing(tabId, outgoing);
+            sendOutgoing(tabId, outgoing, typedRequest);
         };
 
         requestHostAccess(buildHostPattern(hostname, false))

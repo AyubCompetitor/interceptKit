@@ -6,7 +6,14 @@ import {
     type RequestBody,
     type RequestBodyType,
 } from '#entities/request';
-import { getRandomUUID, HttpMethods, mapRowToKeyValue, type HttpMethod, type KeyValueRow } from '#shared/lib';
+import {
+    getRandomUUID,
+    HttpMethods,
+    mapKeyValueToRow,
+    mapRowToKeyValue,
+    type HttpMethod,
+    type KeyValueRow,
+} from '#shared/lib';
 
 /** Every field of a request tab; each body format keeps its own text, so switching the format loses nothing */
 export interface RequestDraft {
@@ -49,7 +56,18 @@ export interface RequestDraftFields {
     onDraftChange: RequestDraftChange;
 }
 
+/** Fields that hold the body in each of its formats */
+type DraftBodyFields = Pick<RequestDraft, 'bodyType' | 'jsonBody' | 'rawBody' | 'rawContentType' | 'formFields'>;
+
 const DEFAULT_RAW_TYPE = 'text/plain';
+
+/** Every format empty, so the one chosen later starts clean */
+const EMPTY_BODY_FIELDS: Omit<DraftBodyFields, 'bodyType'> = {
+    jsonBody: '',
+    rawBody: '',
+    rawContentType: DEFAULT_RAW_TYPE,
+    formFields: [],
+};
 
 const NEW_REQUEST_DRAFT: Omit<RequestDraft, 'id'> = {
     method: HttpMethods.GET,
@@ -57,10 +75,7 @@ const NEW_REQUEST_DRAFT: Omit<RequestDraft, 'id'> = {
     query: [],
     headers: [],
     bodyType: RequestBodyTypes.NONE,
-    jsonBody: '',
-    rawBody: '',
-    rawContentType: DEFAULT_RAW_TYPE,
-    formFields: [],
+    ...EMPTY_BODY_FIELDS,
     sendCookies: false,
 };
 
@@ -109,4 +124,40 @@ export const buildApiRequest = (draft: RequestDraft): ApiRequest => ({
     headers: draft.headers.map(mapRowToKeyValue),
     body: buildBody(draft),
     sendCookies: draft.sendCookies,
+});
+
+/** The body goes into the field of its format; the other formats start empty */
+const mapBodyToDraft = (body: RequestBody): DraftBodyFields => {
+    const emptyFields: DraftBodyFields = { ...EMPTY_BODY_FIELDS, bodyType: body.bodyType };
+
+    if (body.bodyType === RequestBodyTypes.JSON) {
+        return { ...emptyFields, jsonBody: body.text };
+    }
+
+    if (body.bodyType === RequestBodyTypes.RAW) {
+        return { ...emptyFields, rawBody: body.text, rawContentType: body.contentType };
+    }
+
+    if (body.bodyType === RequestBodyTypes.FORM) {
+        return { ...emptyFields, formFields: body.fields.map(mapKeyValueToRow) };
+    }
+
+    return emptyFields;
+};
+
+/** The tab of a saved request, under the same id */
+export const mapRequestToDraft = (request: ApiRequest): RequestDraft => ({
+    id: request.id,
+    method: request.method,
+    url: request.url,
+    query: request.query.map(mapKeyValueToRow),
+    headers: request.headers.map(mapKeyValueToRow),
+    ...mapBodyToDraft(request.body),
+    sendCookies: request.sendCookies,
+});
+
+/** A new tab with a copy of the request, for example from the history */
+export const copyRequestToDraft = (request: ApiRequest): RequestDraft => ({
+    ...mapRequestToDraft(request),
+    id: getRandomUUID(),
 });

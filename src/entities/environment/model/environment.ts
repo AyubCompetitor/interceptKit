@@ -42,8 +42,11 @@ export interface Environment {
     readonly variables: readonly EnvVariable[];
 }
 
+export const MAX_ENVIRONMENTS = 100;
+
 const ENV_RGXS = {
     BASE64: /^[A-Za-z0-9+/]*={0,2}$/,
+    /** The same name rule as the {{name}} templates in requests */
     VARIABLE_KEY: /^[A-Za-z_][A-Za-z0-9_.-]*$/,
 } as const;
 
@@ -51,7 +54,10 @@ const ENV_ERRORS = {
     INVALID_VALUE: 'expected a string or an encrypted value',
     PLAIN_ENCRYPTED: 'only secret variables can be encrypted',
     DUPLICATE_KEY: 'duplicate variable name',
+    DUPLICATE_ID: 'duplicate environment id',
 } as const;
+
+export const isEncryptedValue = (value: string | EncryptedValue): value is EncryptedValue => typeof value !== 'string';
 
 const encryptedValue: Validator<EncryptedValue> = object({
     v: literal(1),
@@ -76,9 +82,7 @@ const variableValue: Validator<string | EncryptedValue> = (input, path) => {
 };
 
 const getEncryptionError = (variable: EnvVariable): NotRequired<string> => {
-    const isEncrypted = typeof variable.value !== 'string';
-
-    if (isEncrypted && !variable.secret) {
+    if (isEncryptedValue(variable.value) && !variable.secret) {
         return ENV_ERRORS.PLAIN_ENCRYPTED;
     }
 
@@ -112,4 +116,19 @@ export const environmentValidator: Validator<Environment> = refine(
         variables: array(variable, { maxLength: 1000 }),
     }),
     getDuplicateKeyError,
+);
+
+const getDuplicateIdError = (environments: readonly Environment[]): NotRequired<string> => {
+    const ids = environments.map(environment => environment.id);
+
+    if (isDuplicateValues(ids)) {
+        return ENV_ERRORS.DUPLICATE_ID;
+    }
+
+    return;
+};
+
+export const environmentsValidator: Validator<Environment[]> = refine(
+    array(environmentValidator, { maxLength: MAX_ENVIRONMENTS }),
+    getDuplicateIdError,
 );

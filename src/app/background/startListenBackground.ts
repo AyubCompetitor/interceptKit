@@ -2,6 +2,7 @@ import { createQueue } from '#shared/lib';
 import { createRouter } from '#shared/messaging';
 import { restrictLocalStore } from '#shared/platform';
 
+import { registerEnvironmentHandlers } from './environmentHandlers.ts';
 import { registerMockHandlers } from './mockHandlers.ts';
 import { startMockSync } from './mockSync.ts';
 import { registerRuleHandlers } from './ruleHandlers.ts';
@@ -32,6 +33,7 @@ export const startListenBackground: VoidFunction = () => {
     registerRuleHandlers(router, storageReady, enqueue);
     registerMockHandlers(router, storageReady, enqueue);
     registerSiteHandlers(router, storageReady, enqueue);
+    registerEnvironmentHandlers(router, storageReady, enqueue);
 
     startRuleSync(storageReady, enqueue);
     startMockSync(storageReady, enqueue);

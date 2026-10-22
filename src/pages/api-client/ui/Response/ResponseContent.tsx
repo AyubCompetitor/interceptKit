@@ -24,6 +24,8 @@ interface ResponseContentProps {
     onAccessRequest: VoidFunction;
 }
 
+const NAME_SEPARATOR = ', ';
+
 /** What the panel shows for each stage of sending */
 export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessRequest }) => {
     const { t } = useTranslation();
@@ -43,6 +45,14 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
             <Notice action={accessButton} tone={NoticeTones.WARNING}>
                 {t('apiClientNoAccess', sendState.host)}
             </Notice>
+        );
+    }
+
+    if (sendState.stateType === SendStateTypes.MISSING_VARIABLES) {
+        return (
+            <Typography color={TypographyColors.DANGER} role='alert'>
+                {t('apiClientMissingVariables', sendState.names.join(NAME_SEPARATOR))}
+            </Typography>
         );
     }
 

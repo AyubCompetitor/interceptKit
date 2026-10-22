@@ -1,0 +1,15 @@
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+    min-width: 0;
+    padding: var(--space-l) var(--space-l) var(--space-xl);
+    border-right: 1px solid var(--color-border);
+}
+
+@media (width < 840px) {
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+    }
+}

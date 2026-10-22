@@ -5,3 +5,5 @@ export * from './dnr.ts';
 export * from './permissions.ts';
 export * from './scripting.ts';
 export * from './useHostPatterns.ts';
+export * from './database.ts';
+export * from './useDatabaseRecords.ts';

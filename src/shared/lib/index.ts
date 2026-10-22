@@ -4,6 +4,7 @@ export * from './urlPattern.ts';
 export * from './identifier.ts';
 export * from './source.ts';
 export * from './store.ts';
+export * from './database.ts';
 export * from './rpcMethod.ts';
 export * from './createQueue.ts';
 export * from './isDuplicateValues.ts';

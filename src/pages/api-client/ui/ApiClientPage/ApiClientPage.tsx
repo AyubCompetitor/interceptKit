@@ -6,10 +6,11 @@ import { useTranslation } from '#shared/i18n';
 import { Brand, createDocumentTitle, useDocumentTitle } from '#shared/ui';
 
 import styles from './ApiClientPage.module.css';
-import { RequestForm } from '../Request/RequestForm.tsx';
-import { ResponsePanel } from '../Response/ResponsePanel.tsx';
-import { RequestTabBar } from '../Tabs/RequestTabBar.tsx';
+import { EnvironmentSelect } from '../Environment/EnvironmentSelect.tsx';
+import { RequestWorkspace } from '../Request/RequestWorkspace.tsx';
+import { ApiClientSidebar } from '../Sidebar/ApiClientSidebar.tsx';
 
+/** The tabs live here: the history in the sidebar opens its requests in them */
 export const ApiClientPage: FC = () => {
     const { t } = useTranslation();
     const {
@@ -17,6 +18,7 @@ export const ApiClientPage: FC = () => {
         activeTab,
         isSending,
         onTabOpen,
+        onRequestOpen,
         onTabSelect,
         onRequestTabClose,
         onDraftChange,
@@ -32,27 +34,28 @@ export const ApiClientPage: FC = () => {
             <header className={styles.header}>
                 <Brand />
                 <h1 className={styles.title}>{t('apiClientTitle')}</h1>
+                <div className={styles.tools}>
+                    <EnvironmentSelect />
+                </div>
             </header>
 
-            <main className={styles.content}>
-                <RequestTabBar
-                    activeId={activeTab.draft.id}
-                    tabs={tabs}
-                    onClose={onRequestTabClose}
-                    onOpen={onTabOpen}
-                    onSelect={onTabSelect}
-                />
+            <div className={styles.layout}>
+                <ApiClientSidebar onRequestOpen={onRequestOpen} />
 
-                <RequestForm
-                    draft={activeTab.draft}
-                    isSending={isSending}
-                    onCancel={onActiveRequestCancel}
-                    onDraftChange={onDraftChange}
-                    onSend={onActiveRequestSend}
-                />
-
-                <ResponsePanel sendState={activeTab.sendState} onAccessRequest={onActiveRequestSend} />
-            </main>
+                {activeTab && (
+                    <RequestWorkspace
+                        activeTab={activeTab}
+                        isSending={isSending}
+                        tabs={tabs}
+                        onCancel={onActiveRequestCancel}
+                        onDraftChange={onDraftChange}
+                        onSend={onActiveRequestSend}
+                        onTabClose={onRequestTabClose}
+                        onTabOpen={onTabOpen}
+                        onTabSelect={onTabSelect}
+                    />
+                )}
+            </div>
         </div>
     );
 };

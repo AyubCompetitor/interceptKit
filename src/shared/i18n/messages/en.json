@@ -770,6 +770,135 @@
     "apiClientAllowAccess": {
         "message": "Allow and send"
     },
+    "apiClientSidebar": {
+        "message": "History and environments"
+    },
+    "apiClientHistory": {
+        "message": "History"
+    },
+    "apiClientHistoryHint": {
+        "message": "Requests you send show up here, the last $1 of them. They are kept as typed, with {{variables}} but without their values.",
+        "description": "$1 is the number of requests the history keeps."
+    },
+    "apiClientHistoryNoResponse": {
+        "message": "No response"
+    },
+    "apiClientHistoryDelete": {
+        "message": "Delete from history"
+    },
+    "apiClientHistoryClear": {
+        "message": "Clear history"
+    },
+    "apiClientHistoryClearTitle": {
+        "message": "Clear the history?"
+    },
+    "apiClientHistoryClearText": {
+        "message": "Every request in the history will be deleted. Open tabs stay as they are."
+    },
+    "apiClientHistoryCancel": {
+        "message": "Cancel"
+    },
+    "apiClientHistoryActionFailed": {
+        "message": "Couldn't change the history. Try again."
+    },
+    "apiClientMissingVariables": {
+        "message": "No value for $1: choose an environment that has these variables, or add them to it.",
+        "description": "$1 is a comma-separated list of variable names."
+    },
+    "apiClientEnvironment": {
+        "message": "Environment"
+    },
+    "apiClientNoEnvironment": {
+        "message": "No environment"
+    },
+    "apiClientEnvironments": {
+        "message": "Environments"
+    },
+    "apiClientEnvironmentsEmpty": {
+        "message": "An environment keeps values such as {{baseUrl}} or {{token}} for one stage. Choose the environment at the top of the page."
+    },
+    "apiClientEnvironmentAdd": {
+        "message": "New environment"
+    },
+    "apiClientEnvironmentActive": {
+        "message": "In use"
+    },
+    "apiClientEnvironmentVariableCount": {
+        "message": "Variables: $1",
+        "description": "$1 is a number."
+    },
+    "apiClientEnvironmentEdit": {
+        "message": "Edit environment"
+    },
+    "apiClientEnvironmentEditNamed": {
+        "message": "Edit $1",
+        "description": "$1 is the name of an environment."
+    },
+    "apiClientEnvironmentDelete": {
+        "message": "Delete environment"
+    },
+    "apiClientEnvironmentDeleteNamed": {
+        "message": "Delete $1",
+        "description": "$1 is the name of an environment."
+    },
+    "apiClientEnvironmentsActionFailed": {
+        "message": "Couldn't change the environments. Try again."
+    },
+    "apiClientEnvironmentNewTitle": {
+        "message": "New environment"
+    },
+    "apiClientEnvironmentEditTitle": {
+        "message": "Edit environment"
+    },
+    "apiClientEnvironmentName": {
+        "message": "Name"
+    },
+    "apiClientEnvironmentNamePlaceholder": {
+        "message": "Staging"
+    },
+    "apiClientEnvironmentCancel": {
+        "message": "Cancel"
+    },
+    "apiClientEnvironmentSave": {
+        "message": "Save"
+    },
+    "apiClientEnvironmentSaveFailed": {
+        "message": "Couldn't save the environment: $1",
+        "description": "$1 is the technical reason, in English."
+    },
+    "apiClientEnvironmentDeleteTitle": {
+        "message": "Delete environment?"
+    },
+    "apiClientEnvironmentDeleteText": {
+        "message": "The environment “$1” and its variables will be deleted. This can't be undone."
+    },
+    "apiClientVariables": {
+        "message": "Variables"
+    },
+    "apiClientVariableKey": {
+        "message": "Variable"
+    },
+    "apiClientVariableEnabled": {
+        "message": "Use the variable"
+    },
+    "apiClientVariableSecret": {
+        "message": "Secret"
+    },
+    "apiClientVariableEncrypted": {
+        "message": "Encrypted"
+    },
+    "apiClientVariableAdd": {
+        "message": "Add variable"
+    },
+    "apiClientVariableDelete": {
+        "message": "Delete variable"
+    },
+    "apiClientVariablesHint": {
+        "message": "A request uses a variable as {{name}}: in the URL, parameters, headers and body."
+    },
+    "apiClientSecretsWarning": {
+        "message": "Secret values are hidden on the screen, but this browser's profile keeps them unencrypted. Encryption with a master password comes in a later version."
+    },
     "dialogClose": {
         "message": "Close",
         "description": "Accessible name of the button that closes a dialog."

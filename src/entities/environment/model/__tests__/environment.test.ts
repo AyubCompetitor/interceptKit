@@ -2,7 +2,7 @@ import { describe, expect, it } from '@rstest/core';
 
 import { validate } from '#shared/lib';
 
-import { environmentValidator } from '../environment.ts';
+import { environmentsValidator, environmentValidator } from '../environment.ts';
 
 import { ENCRYPTED_VALUE, makeEnvironment, makeVariable, SECRET_VARIABLE } from './mocks.ts';
 
@@ -30,5 +30,17 @@ describe('environmentValidator', () => {
         },
     ])('rejects $name', ({ variables }) => {
         expect(validate(environmentValidator, makeEnvironment(variables)).ok).toBe(false);
+    });
+});
+
+describe('environmentsValidator', () => {
+    it('rejects two environments with one id', () => {
+        expect(validate(environmentsValidator, [makeEnvironment(), makeEnvironment()]).ok).toBe(false);
+    });
+
+    it('accepts environments with their own ids', () => {
+        const production = { ...makeEnvironment(), id: 'e2', name: 'Production' };
+
+        expect(validate(environmentsValidator, [makeEnvironment(), production]).ok).toBe(true);
     });
 });

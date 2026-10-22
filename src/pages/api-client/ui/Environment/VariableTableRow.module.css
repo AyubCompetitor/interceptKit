@@ -1,0 +1,17 @@
+/** The fields sit right in the grid of the table */
+.row {
+    display: contents;
+
+    & > input {
+        width: 100%;
+    }
+}
+
+.code {
+    font-family: var(--font-mono);
+}
+
+/** Hidden from people looking at the screen, shown while being typed */
+.masked:not(:focus) {
+    -webkit-text-security: disc;
+}

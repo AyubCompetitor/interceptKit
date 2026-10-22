@@ -1,0 +1,37 @@
+.row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-s);
+    padding: var(--space-s) 0;
+
+    & + & {
+        border-top: 1px solid var(--color-border);
+    }
+}
+
+.details {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/** As tall as the buttons, so the name lines up with them */
+.title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    min-height: var(--control-height-s);
+}
+
+.name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.actions {
+    display: flex;
+    flex: none;
+    gap: var(--space-xs);
+}

@@ -10,6 +10,8 @@ export enum SendStateTypes {
     RECEIVED = 'received',
     /** The request cannot go as typed */
     INVALID = 'invalid',
+    /** The request uses variables that have no value */
+    MISSING_VARIABLES = 'missingVariables',
     /** The request went, but no response came back */
     FAILED = 'failed',
     /** The user refused access to the host */
@@ -42,6 +44,13 @@ interface InvalidState {
     readonly reason: string;
 }
 
+interface MissingVariablesState {
+    /** The request uses variables that have no value */
+    readonly stateType: SendStateTypes.MISSING_VARIABLES;
+    /** Names of those variables */
+    readonly names: readonly string[];
+}
+
 interface FailedState {
     /** No response came back */
     readonly stateType: SendStateTypes.FAILED;
@@ -56,7 +65,8 @@ interface NoAccessState {
     readonly host: string;
 }
 
-export type SendState = IdleState | SendingState | ReceivedState | InvalidState | FailedState | NoAccessState;
+export type SendState =
+    IdleState | SendingState | ReceivedState | InvalidState | MissingVariablesState | FailedState | NoAccessState;
 
 export const IDLE_STATE: SendState = { stateType: SendStateTypes.IDLE };
 

@@ -1,6 +1,18 @@
 import type { Page } from '@playwright/test';
 
-import { expect, networkTest, REQUESTED_ORIGINS, stubAccessRequest, trackErrors } from './fixtures.ts';
+import type { Environment } from '#entities/environment';
+import {
+    apiClientDatabase,
+    historyStore,
+    openRequestsStore,
+    OPEN_REQUESTS_KEY,
+    RequestBodyTypes,
+} from '#entities/request';
+import { API_CLIENT_CONFIG } from '#shared/config';
+import { HttpMethods } from '#shared/lib';
+import { RpcErrorCodes } from '#shared/messaging';
+
+import { callBackground, expect, networkTest, REQUESTED_ORIGINS, stubAccessRequest, trackErrors } from './fixtures.ts';
 import { FOREIGN_HOST, LOOPBACK_HOST, type TestServer } from './testServer.ts';
 
 interface ApiClientFixtures {
@@ -17,7 +29,40 @@ const PATHS = {
     COOKIES_OFF: '/api-client/cookies-off',
     COOKIES_ON: '/api-client/cookies-on',
     TABS: '/api-client/tabs',
+    ENVIRONMENT: '/api-client/environment',
+    HISTORY: '/api-client/history',
 } as const;
+
+/** Where the page keeps its database, for tests that read or fill it directly */
+const DATABASE = {
+    NAME: apiClientDatabase.name,
+    HISTORY: historyStore.name,
+    OPEN_REQUESTS: openRequestsStore.name,
+    OPEN_REQUESTS_KEY,
+} as const;
+
+/** An old entry for the history, the way the page stores it */
+const makeOldEntry = (index: number) => ({
+    id: `old-${index}`,
+    sentAt: index,
+    request: {
+        id: `old-${index}`,
+        method: HttpMethods.GET,
+        url: `https://old.test/${index}`,
+        query: [],
+        headers: [],
+        body: { bodyType: RequestBodyTypes.NONE },
+        sendCookies: false,
+    },
+    response: { status: 200, durationMs: 1, size: 1 },
+});
+
+/** Saved straight through the background, for tests that start with an environment */
+const STAGING: Environment = {
+    id: 'staging',
+    name: 'Staging',
+    variables: [{ key: 'token', value: 'abc', enabled: true, secret: true }],
+};
 
 const SESSION_COOKIE = {
     name: 'session',
@@ -64,6 +109,93 @@ const sendRequest = async (page: Page, url: string) => {
 
     await page.getByRole('button', { name: 'Send', exact: true }).click();
 };
+
+const getEnvironmentSelect = (page: Page) => page.getByRole('combobox', { name: 'Environment', exact: true });
+
+/** Creates an environment in the editor: the first row is there already, the second one is a secret */
+const createEnvironment = async (page: Page, baseUrl: string) => {
+    await page.getByRole('button', { name: 'New environment', exact: true }).click();
+
+    const editor = page.getByRole('dialog', { name: 'New environment' });
+    const keys = editor.getByRole('textbox', { name: 'Variable', exact: true });
+    const values = editor.getByRole('textbox', { name: 'Value', exact: true });
+
+    await editor.getByRole('textbox', { name: 'Name', exact: true }).fill('Staging');
+
+    await keys.first().fill('baseUrl');
+
+    await values.first().fill(baseUrl);
+
+    await editor.getByRole('button', { name: 'Add variable', exact: true }).click();
+
+    await keys.last().fill('token');
+
+    await values.last().fill('abc');
+
+    await editor.getByRole('checkbox', { name: 'Secret', exact: true }).last().click();
+
+    /** A secret is hidden while its field has no focus */
+    await expect(values.last()).toHaveCSS('-webkit-text-security', 'disc');
+
+    await editor.getByRole('button', { name: 'Save', exact: true }).click();
+
+    await expect(editor).toBeHidden();
+};
+
+const getHistoryPanel = (page: Page) => page.getByRole('region', { name: 'History' });
+
+/** Puts entries straight into the database of the page, which has created it by then */
+const fillHistory = async (page: Page, entries: readonly object[]) => {
+    await page.evaluate(
+        async ({ database, records }) => {
+            const connection = await new Promise<IDBDatabase>((resolve, reject) => {
+                const request = indexedDB.open(database.NAME);
+
+                request.addEventListener('success', () => resolve(request.result));
+                request.addEventListener('error', () => reject(request.error));
+            });
+
+            const transaction = connection.transaction(database.HISTORY, 'readwrite');
+
+            for (const record of records) {
+                transaction.objectStore(database.HISTORY).put(record);
+            }
+
+            await new Promise((resolve, reject) => {
+                transaction.addEventListener('complete', resolve);
+                transaction.addEventListener('error', () => reject(transaction.error));
+            });
+
+            connection.close();
+        },
+        { database: DATABASE, records: entries },
+    );
+};
+
+/** URLs of the open tabs as the page saved them */
+const readSavedUrls = (page: Page) =>
+    page.evaluate(async database => {
+        const connection = await new Promise<IDBDatabase>((resolve, reject) => {
+            const request = indexedDB.open(database.NAME);
+
+            request.addEventListener('success', () => resolve(request.result));
+            request.addEventListener('error', () => reject(request.error));
+        });
+
+        const record = await new Promise<{ requests: { url: string }[] } | undefined>((resolve, reject) => {
+            const request = connection
+                .transaction(database.OPEN_REQUESTS)
+                .objectStore(database.OPEN_REQUESTS)
+                .get(database.OPEN_REQUESTS_KEY);
+
+            request.addEventListener('success', () => resolve(request.result));
+            request.addEventListener('error', () => reject(request.error));
+        });
+
+        connection.close();
+
+        return record?.requests.map(request => request.url) ?? [];
+    }, DATABASE);
 
 /** What reached the server at the path; polled, since the server answers a moment after the click */
 const getReceived = (testServer: TestServer, path: string) => {
@@ -183,5 +315,139 @@ apiClientTest.describe('tabs', () => {
         await expect(tabs.getByRole('listitem')).toHaveCount(1);
 
         await expect(getUrlField(apiClientPage)).toHaveValue('');
+    });
+});
+
+apiClientTest.describe('environments', () => {
+    apiClientTest('fill the variables of the chosen environment', async ({ apiClientPage, testServer }) => {
+        await openSection(apiClientPage, 'Environments');
+
+        await createEnvironment(apiClientPage, testServer.origin);
+
+        await expect(apiClientPage.getByRole('region', { name: 'Environments' })).toContainText('Staging');
+
+        await getEnvironmentSelect(apiClientPage).selectOption({ label: 'Staging' });
+
+        await openSection(apiClientPage, 'Headers');
+
+        await addRow(apiClientPage, 'Add header', 'Header', 'Authorization', 'Bearer {{token}}');
+
+        await sendRequest(apiClientPage, `{{baseUrl}}${PATHS.ENVIRONMENT}`);
+
+        await getReceived(testServer, PATHS.ENVIRONMENT).toMatchObject({ headers: { authorization: 'Bearer abc' } });
+
+        await expect(getTabBar(apiClientPage).getByRole('button', { name: 'GET {{baseUrl}}' })).toBeVisible();
+    });
+
+    apiClientTest('name the variables that have no value', async ({ apiClientPage }) => {
+        await sendRequest(apiClientPage, '{{baseUrl}}/users/{{id}}');
+
+        await expect(getResponsePanel(apiClientPage)).toContainText('No value for baseUrl, id');
+    });
+
+    apiClientTest('keep the choice after a reload until the environment is deleted', async ({ apiClientPage }) => {
+        await callBackground(apiClientPage, 'environments/save', STAGING);
+
+        await callBackground(apiClientPage, 'environments/choose', { activeId: STAGING.id });
+
+        await apiClientPage.reload();
+
+        await expect(getEnvironmentSelect(apiClientPage)).toHaveValue(STAGING.id);
+
+        await openSection(apiClientPage, 'Environments');
+
+        await apiClientPage.getByRole('button', { name: 'Delete Staging', exact: true }).click();
+
+        await apiClientPage
+            .getByRole('dialog', { name: 'Delete environment?' })
+            .getByRole('button', { name: 'Delete environment', exact: true })
+            .click();
+
+        await expect(getEnvironmentSelect(apiClientPage)).toHaveValue('');
+
+        await expect(apiClientPage.getByText('An environment keeps values')).toBeVisible();
+    });
+
+    apiClientTest('refuse a choice of an environment that does not exist', async ({ apiClientPage }) => {
+        const answer = await callBackground(apiClientPage, 'environments/choose', { activeId: 'missing' });
+
+        expect(answer).toMatchObject({ ok: false, error: { code: RpcErrorCodes.BAD_REQUEST } });
+    });
+});
+
+apiClientTest.describe('history', () => {
+    apiClientTest('keeps a sent request and opens it in a new tab', async ({ apiClientPage, testServer }) => {
+        const history = getHistoryPanel(apiClientPage);
+        const url = testServer.origin + PATHS.HISTORY;
+
+        await sendRequest(apiClientPage, url);
+
+        await expect(history.getByRole('listitem')).toHaveCount(1);
+
+        await expect(history.getByRole('listitem')).toContainText(`GET${LOOPBACK_HOST}`);
+
+        await expect(history.getByRole('listitem')).toContainText('200');
+
+        await getTabBar(apiClientPage)
+            .getByRole('button', { name: `Close ${LOOPBACK_HOST}`, exact: false })
+            .click();
+
+        await history.getByRole('button', { name: new RegExp(PATHS.HISTORY) }).click();
+
+        await expect(getUrlField(apiClientPage)).toHaveValue(url);
+
+        await expect(getTabBar(apiClientPage).getByRole('listitem')).toHaveCount(2);
+    });
+
+    apiClientTest('clears the history once the user confirms', async ({ apiClientPage, testServer }) => {
+        const history = getHistoryPanel(apiClientPage);
+
+        await sendRequest(apiClientPage, testServer.origin + PATHS.HISTORY);
+
+        await expect(history.getByRole('listitem')).toHaveCount(1);
+
+        await history.getByRole('button', { name: 'Clear history', exact: true }).click();
+
+        await apiClientPage
+            .getByRole('dialog', { name: 'Clear the history?' })
+            .getByRole('button', { name: 'Clear history', exact: true })
+            .click();
+
+        await expect(history.getByRole('listitem')).toHaveCount(0);
+    });
+
+    apiClientTest('drops the oldest requests beyond the limit', async ({ apiClientPage, testServer }) => {
+        const history = getHistoryPanel(apiClientPage);
+        const oldEntries = Array.from({ length: API_CLIENT_CONFIG.HISTORY_LIMIT }, (_, index) => makeOldEntry(index));
+
+        await expect(history).toBeVisible();
+
+        await fillHistory(apiClientPage, oldEntries);
+
+        await sendRequest(apiClientPage, testServer.origin + PATHS.HISTORY);
+
+        await expect(history.getByRole('listitem').first()).toContainText(PATHS.HISTORY);
+
+        await expect(history.getByRole('listitem')).toHaveCount(API_CLIENT_CONFIG.HISTORY_LIMIT);
+
+        await expect(history.getByText('old.test/0', { exact: true })).toHaveCount(0);
+    });
+
+    apiClientTest('keeps the open tabs after a reload', async ({ apiClientPage }) => {
+        const tabs = getTabBar(apiClientPage);
+
+        await getUrlField(apiClientPage).fill('https://one.test');
+
+        await tabs.getByRole('button', { name: 'Open a new request' }).click();
+
+        await getUrlField(apiClientPage).fill('https://two.test');
+
+        await expect.poll(() => readSavedUrls(apiClientPage)).toEqual(['https://one.test', 'https://two.test']);
+
+        await apiClientPage.reload();
+
+        await expect(tabs.getByRole('listitem')).toHaveCount(2);
+
+        await expect(getUrlField(apiClientPage)).toHaveValue('https://two.test');
     });
 });

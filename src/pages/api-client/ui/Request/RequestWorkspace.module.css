@@ -1,0 +1,13 @@
+.workspace {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    min-width: 0;
+    padding: var(--space-l) var(--space-xl) var(--space-xxxl);
+}
+
+@media (width < 840px) {
+    .workspace {
+        padding-inline: var(--space-l);
+    }
+}

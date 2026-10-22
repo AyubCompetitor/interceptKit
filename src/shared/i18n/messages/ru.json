@@ -728,6 +728,129 @@
     "apiClientAllowAccess": {
         "message": "Разрешить и отправить"
     },
+    "apiClientSidebar": {
+        "message": "История и окружения"
+    },
+    "apiClientHistory": {
+        "message": "История"
+    },
+    "apiClientHistoryHint": {
+        "message": "Здесь появятся отправленные запросы, последние $1. Они хранятся как набраны: с {{переменными}}, но без их значений."
+    },
+    "apiClientHistoryNoResponse": {
+        "message": "Нет ответа"
+    },
+    "apiClientHistoryDelete": {
+        "message": "Удалить из истории"
+    },
+    "apiClientHistoryClear": {
+        "message": "Очистить историю"
+    },
+    "apiClientHistoryClearTitle": {
+        "message": "Очистить историю?"
+    },
+    "apiClientHistoryClearText": {
+        "message": "Все запросы из истории удалятся. Открытые вкладки останутся как есть."
+    },
+    "apiClientHistoryCancel": {
+        "message": "Отмена"
+    },
+    "apiClientHistoryActionFailed": {
+        "message": "Не удалось изменить историю. Попробуйте ещё раз."
+    },
+    "apiClientMissingVariables": {
+        "message": "Нет значений для $1: выберите окружение, где они заданы, или добавьте их в него."
+    },
+    "apiClientEnvironment": {
+        "message": "Окружение"
+    },
+    "apiClientNoEnvironment": {
+        "message": "Без окружения"
+    },
+    "apiClientEnvironments": {
+        "message": "Окружения"
+    },
+    "apiClientEnvironmentsEmpty": {
+        "message": "Окружение хранит значения вроде {{baseUrl}} или {{token}} для одного стенда. Выбрать окружение можно вверху страницы."
+    },
+    "apiClientEnvironmentAdd": {
+        "message": "Новое окружение"
+    },
+    "apiClientEnvironmentActive": {
+        "message": "Выбрано"
+    },
+    "apiClientEnvironmentVariableCount": {
+        "message": "Переменных: $1"
+    },
+    "apiClientEnvironmentEdit": {
+        "message": "Изменить окружение"
+    },
+    "apiClientEnvironmentEditNamed": {
+        "message": "Изменить $1"
+    },
+    "apiClientEnvironmentDelete": {
+        "message": "Удалить окружение"
+    },
+    "apiClientEnvironmentDeleteNamed": {
+        "message": "Удалить $1"
+    },
+    "apiClientEnvironmentsActionFailed": {
+        "message": "Не удалось изменить окружения. Попробуйте ещё раз."
+    },
+    "apiClientEnvironmentNewTitle": {
+        "message": "Новое окружение"
+    },
+    "apiClientEnvironmentEditTitle": {
+        "message": "Изменить окружение"
+    },
+    "apiClientEnvironmentName": {
+        "message": "Название"
+    },
+    "apiClientEnvironmentNamePlaceholder": {
+        "message": "Тестовый стенд"
+    },
+    "apiClientEnvironmentCancel": {
+        "message": "Отмена"
+    },
+    "apiClientEnvironmentSave": {
+        "message": "Сохранить"
+    },
+    "apiClientEnvironmentSaveFailed": {
+        "message": "Не удалось сохранить окружение: $1"
+    },
+    "apiClientEnvironmentDeleteTitle": {
+        "message": "Удалить окружение?"
+    },
+    "apiClientEnvironmentDeleteText": {
+        "message": "Окружение «$1» удалится вместе с переменными без возможности восстановления."
+    },
+    "apiClientVariables": {
+        "message": "Переменные"
+    },
+    "apiClientVariableKey": {
+        "message": "Переменная"
+    },
+    "apiClientVariableEnabled": {
+        "message": "Использовать переменную"
+    },
+    "apiClientVariableSecret": {
+        "message": "Секрет"
+    },
+    "apiClientVariableEncrypted": {
+        "message": "Зашифровано"
+    },
+    "apiClientVariableAdd": {
+        "message": "Добавить переменную"
+    },
+    "apiClientVariableDelete": {
+        "message": "Удалить переменную"
+    },
+    "apiClientVariablesHint": {
+        "message": "В запросе переменная пишется как {{name}} — в адресе, параметрах, заголовках и теле."
+    },
+    "apiClientSecretsWarning": {
+        "message": "Значения секретов скрыты на экране, но в профиле браузера хранятся без шифрования. Шифрование мастер-паролем появится в одной из следующих версий."
+    },
     "dialogClose": {
         "message": "Закрыть"
     },
