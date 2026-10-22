@@ -2,12 +2,13 @@ import {
     array,
     boolean,
     discriminatedUnion,
-    httpMethod,
+    HTTP_METHODS,
     HttpMethods,
     identifier,
     keyValue,
     literal,
     object,
+    oneOf,
     optional,
     refine,
     string,
@@ -77,6 +78,9 @@ export interface ApiRequest {
 
 export const MAX_BODY_LENGTH = 5_000_000;
 
+/** Methods the API client sends: fetch() refuses CONNECT */
+export const SENDABLE_METHODS = HTTP_METHODS.filter(method => method !== HttpMethods.CONNECT);
+
 /** fetch() throws when these methods carry a body */
 const BODYLESS_METHODS: readonly HttpMethod[] = [HttpMethods.GET, HttpMethods.HEAD];
 
@@ -84,17 +88,22 @@ const REQUEST_ERRORS = {
     BODY_NOT_ALLOWED: 'requests cannot have a body',
 } as const;
 
+export const isBodylessMethod = (method: HttpMethod): boolean => BODYLESS_METHODS.includes(method);
+
+export const isSendableMethod = (value: string): value is HttpMethod =>
+    SENDABLE_METHODS.some(method => method === value);
+
 const getBodyError = (request: ApiRequest): NotRequired<string> => {
     const hasBody = request.body.bodyType !== RequestBodyTypes.NONE;
 
-    const isBodylessMethod = BODYLESS_METHODS.includes(request.method);
-
-    if (hasBody && isBodylessMethod) {
+    if (hasBody && isBodylessMethod(request.method)) {
         return `${request.method} ${REQUEST_ERRORS.BODY_NOT_ALLOWED}`;
     }
 
     return;
 };
+
+const sendableMethod = oneOf(SENDABLE_METHODS);
 
 const fields = array(keyValue, { maxLength: 500 });
 
@@ -116,7 +125,7 @@ export const apiRequestValidator: Validator<ApiRequest> = refine(
     object({
         id: identifier,
         name: optional(string({ maxLength: 200 })),
-        method: httpMethod,
+        method: sendableMethod,
         url: string({ maxLength: 8192 }),
         query: fields,
         headers: fields,

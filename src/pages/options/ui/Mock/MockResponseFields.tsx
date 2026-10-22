@@ -5,12 +5,11 @@ import type { MockDraftFields } from '../../model/mockDraft.ts';
 
 import { MAX_MOCK_DELAY_MS } from '#entities/mock';
 import { useTranslation } from '#shared/i18n';
-import { CodeEditor, Field, Flex, Spaces } from '#shared/ui';
+import { CodeEditor, Field, Flex, SegmentedControl, Spaces } from '#shared/ui';
 
 import { BODY_TYPE_LABELS, BODY_TYPE_LANGUAGES } from './mockLabels.ts';
 import styles from './MockForm.module.css';
 import { MockHeaderList } from './MockHeaderList.tsx';
-import { SegmentedControl } from '../SegmentedControl/SegmentedControl.tsx';
 
 /** Status codes the browser lets a page see in a response */
 const STATUS_RANGE = {

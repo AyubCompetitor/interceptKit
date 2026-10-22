@@ -21,6 +21,12 @@ describe('apiRequestValidator', () => {
         expect(validate(apiRequestValidator, request).ok).toBe(true);
     });
 
+    it('rejects CONNECT, which fetch() refuses to send', () => {
+        const request = makeRequest({ method: HttpMethods.CONNECT, body: { bodyType: RequestBodyTypes.NONE } });
+
+        expect(validate(apiRequestValidator, request).ok).toBe(false);
+    });
+
     it('requires an explicit cookie decision', () => {
         const { sendCookies: _, ...withoutCookies } = makeRequest();
 

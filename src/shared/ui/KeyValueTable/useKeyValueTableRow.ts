@@ -1,19 +1,21 @@
 import type { ChangeEvent } from 'react';
 
-import type { MockHeaderChange, MockHeaderDraft } from '../model/mockDraft.ts';
+import type { KeyValueRow } from '#shared/lib';
 
-/** Binds the controls of one header row to its draft */
-export const useMockHeaderRow = (
-    { rowId, enabled }: MockHeaderDraft,
-    onChange: MockHeaderChange,
+import type { KeyValueRowChange } from './types.ts';
+
+/** Binds the controls of one row to its pair */
+export const useKeyValueTableRow = (
+    { rowId, enabled }: KeyValueRow,
+    onChange: KeyValueRowChange,
     onRemove: (rowId: string) => void,
 ) => {
     const onEnabledToggle = () => {
         onChange(rowId, { enabled: !enabled });
     };
 
-    const onNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-        onChange(rowId, { name: event.target.value });
+    const onKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
+        onChange(rowId, { key: event.target.value });
     };
 
     const onValueChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +28,7 @@ export const useMockHeaderRow = (
 
     return {
         onEnabledToggle,
-        onNameChange,
+        onKeyChange,
         onValueChange,
         onRowRemove,
     };

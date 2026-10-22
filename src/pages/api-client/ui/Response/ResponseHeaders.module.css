@@ -1,0 +1,22 @@
+/** Names and values line up in two columns across the rows */
+.list {
+    display: grid;
+    grid-template-columns: minmax(120px, max-content) minmax(0, 1fr);
+    gap: var(--space-s) var(--space-xl);
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-s);
+}
+
+.row {
+    display: contents;
+}
+
+.name {
+    color: var(--color-text-muted);
+}
+
+.value {
+    margin: 0;
+    overflow-wrap: anywhere;
+}

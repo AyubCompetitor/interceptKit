@@ -9,7 +9,7 @@ InterceptKit is a Manifest V3 extension for Chrome and Edge 140+. This document 
 | Service worker (background)  | `src/app/entrypoints/background.ts`  | On demand; Chrome stops it after ~30 s idle                     | `chrome.storage`, `declarativeNetRequest`, `scripting`  |
 | Popup                        | `src/app/entrypoints/popup/`         | While the toolbar popup is open                                 | Storage (read), background (RPC)                        |
 | Dashboard (options page)     | `src/app/entrypoints/options/`       | In a tab                                                        | Storage (read), background (RPC), host access requests  |
-| API client                   | `src/app/entrypoints/api-client/`    | In a tab                                                        | Later: the network, only for requests the user sends    |
+| API client                   | `src/app/entrypoints/api-client/`    | In a tab                                                        | The network, only for requests the user sends           |
 | Interceptor (content script) | `src/app/entrypoints/interceptor.ts` | Main world of pages on sites with mocks on, before page scripts | Only the page: receives mocks through `postMessage`     |
 | Bridge (content script)      | `src/app/entrypoints/bridge.ts`      | The extension's isolated world on the same pages                | Background (RPC), the interceptor through `postMessage` |
 
@@ -45,7 +45,7 @@ These rules are checked by `oxlint` (`.oxlintrc.json`): `no-restricted-imports` 
 | `chrome.storage.local`   | `settings`, `rules`, `mocks`, `sites`, `schemaVersion` | Closed to content scripts: the service worker calls `storage.local.setAccessLevel('TRUSTED_CONTEXTS')` on every start |
 | `chrome.storage.session` | Short-lived state                                      | In memory only; closed to content scripts by default                                                                  |
 | `chrome.storage.managed` | Administrator policy                                   | Read-only; validated field by field, see below                                                                        |
-| IndexedDB                | API client environments and history                    | Not yet; content scripts cannot reach the extension's IndexedDB                                                       |
+| IndexedDB                | API client history                                     | Not yet; content scripts cannot reach the extension's IndexedDB                                                       |
 
 Every value is validated on read and on write with the dependency-free validators in `shared/lib/validation.ts`. Corrupted or foreign data degrades to defaults with a warning instead of crashing; invalid data is never written. The layout of `chrome.storage.local` is versioned (`schemaVersion`); migrations run in the service worker before any write.
 
@@ -113,11 +113,25 @@ Known limitations, as with any in-page interception:
 
 ## API client
 
-The API client page is not built yet. What it will rely on:
+The API client page builds HTTP requests in tabs and sends them with `fetch` from the extension page. This is the only network access the extension has, and it is used only for requests the user sends.
+
+```
+tab ──buildApiRequest──▶ ApiRequest ──buildOutgoingRequest──▶ OutgoingRequest ──fetch──▶ ApiResponse
+```
+
+- Each tab keeps one request as typed: the method, the URL, query parameters, headers, the body and the cookie switch. Every body format (JSON, text, form) keeps its own text, so switching formats loses nothing. Open tabs live in the page's memory for now.
+- `buildOutgoingRequest` in `entities/request` is a pure function. It adds the enabled parameters after the query of the URL as typed, sets the content type of the body format unless a header sets one, and refuses what `fetch` would throw on, such as a header name with a space or a body on GET. GET and HEAD go without a body; the editor keeps it and says so.
+- `fetch` silently drops some headers: `Cookie`, `Origin`, `Referer`, `User-Agent`, `Sec-*` and others. The editor names the dropped ones under the headers instead of letting the user think they were sent.
+- A `fetch` from an extension page sends the site's cookies, even `SameSite=Strict` ones, unless it asks for `credentials: 'omit'`. The client sends `omit` unless the user turns cookies on in the request's settings.
+- Requests skip the browser cache (`cache: 'no-store'`) and carry no `Referer` (`referrerPolicy: 'no-referrer'`). The browser still adds `Origin: chrome-extension://<id>` to requests that need one.
+- Without host access the browser would hide the response. Send checks the granted host patterns first. If the host is not covered, it asks for `*://<host>/*` within the same click and sends once the user agrees. A refusal leaves a notice with a button that asks again.
+- The response shows its status, time and size, the body in a read-only editor (JSON laid out, text as it came, binary content not shown) and the headers. Pages never see `Set-Cookie`.
+
+Planned:
 
 - `parseCurl` in `entities/request` reads a command from the browser's "Copy as cURL (bash)" into a method, a URL, query parameters, headers and a body. It refuses what it cannot import faithfully, such as multipart forms, with a reason.
-- A `fetch` from an extension page sends the site's cookies, even `SameSite=Strict` ones, unless it asks for `credentials: 'omit'`. The client sends no cookies unless the user turns them on.
-- Headers that `fetch` cannot set, such as `Cookie`, `Origin` or `User-Agent`, are set by a session rule limited to requests the extension itself starts (`initiatorDomains` is the extension's id), so browsing is unaffected.
+- Headers that `fetch` cannot set will be set by a session rule limited to requests the extension itself starts (`initiatorDomains` is the extension's id), so browsing is unaffected.
+- Environments live in `chrome.storage.local` next to rules and mocks; the history goes to IndexedDB, so that large bodies never take space from rules.
 
 ## Site access
 
@@ -168,4 +182,5 @@ dist/chrome-mv3/
 - **Interception tests** (`e2e/interception.spec.ts`) check the effect of rules on real requests. A local HTTP server (`e2e/testServer.ts`, Node's `node:http` on `127.0.0.1` with a random port) serves a test page and echoes every other request back with the headers it received. The tests load a copy of the build with install-time access to `http://127.0.0.1/*`, so the shipped manifest stays unchanged. They cover a block rule on fetches and navigations, redirects to a URL, a regex substitution and a URL transform, and request and response header changes. The browser maps a second host, `foreign.test`, to the same server, but the extension has no access to it. A request from a page on that host passes even when a rule blocks its URL: a rule acts only when the extension has access to both the request URL and the page that started it.
 - **Interceptor tests** (`e2e/interceptor.spec.ts`) inject the built `content/interceptor.js` into the test page before its scripts, post a mock list the way the bridge does, and check `fetch` and XHR in the real browser. A mocked XHR is compared with a real request to the test server, so its events must match the browser's own.
 - **Mock delivery tests** (`e2e/mocks.spec.ts`) go through the real registration: they turn mocks on for the test server's granted pattern, save a mock and wait until the browser has both scripts. A page of the site then gets the mock, including a request its own script sends while the page is still parsing; a page of a site without mocks reaches the server. They also check that switching mocks off or pausing interception takes the scripts away, and that the background refuses page mocks to extension pages, mocks for sites it has not granted, and mocks that claim to come from the policy. The dashboard tests do the same through the interface: they turn mocks on in Sites, create a mock in the editor and load a page of the site.
+- **API client tests** (`e2e/apiClient.spec.ts`) send requests from the page to the test server: parameters and headers, a JSON body, cookies off and on, and a host without access, where the access prompt is replaced as in the Sites tests. The server keeps what reached it (`getLastRequest`), and the tests check it there: the response editor draws only the lines on the screen.
 - **Type checking** runs two programs. `tsconfig.json` covers the whole repository with Node typings for configs, unit tests and e2e. `tsconfig.browser.json` covers `src` without tests and without Node typings, so extension code cannot use Node APIs by accident.

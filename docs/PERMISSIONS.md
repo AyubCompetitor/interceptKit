@@ -14,6 +14,8 @@ Every permission InterceptKit requests is listed here with the reason it needs i
 
 None at install. `optional_host_permissions: *://*/*` only declares which sites the extension _may ask for_. You add each site in the dashboard's Sites section, where the browser asks for your approval in its own prompt, and you can remove it there at any time. Until then the extension cannot see or change that site.
 
+The API client asks the same way when you send a request to a host it has no access to: the browser prompts for `*://<host>/*` at your click on Send. Without that access the browser would hide the response from the extension.
+
 The browser checks host access both for the request and for the page that started it: a rule for `api.example.com` on requests from `app.example.com` works only after both sites are granted.
 
 ## Planned

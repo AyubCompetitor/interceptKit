@@ -1,15 +1,10 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { buildMock, createMockDraft, updateMockHeader, type MockHeaderDraft } from '../mockDraft.ts';
+import { buildMock, createMockDraft } from '../mockDraft.ts';
 
 import { MockBodyTypes } from '#entities/mock';
 
 import { DETAILED_MOCK, JSON_MOCK } from './mocks.ts';
-
-const HEADER_ROWS: MockHeaderDraft[] = [
-    { rowId: 'a', name: 'X-A', value: '1', enabled: true },
-    { rowId: 'b', name: 'X-B', value: '2', enabled: true },
-];
 
 describe('mock drafts', () => {
     it.each([
@@ -40,7 +35,7 @@ describe('mock drafts', () => {
             ...createMockDraft(JSON_MOCK),
             name: '  Users  ',
             pattern: ' ||api.example.com/ ',
-            headers: [{ rowId: 'a', name: ' X-A ', value: ' 1 ', enabled: true }],
+            headers: [{ rowId: 'a', key: ' X-A ', value: ' 1 ', enabled: true }],
         };
 
         expect(buildMock(draft)).toMatchObject({
@@ -52,14 +47,5 @@ describe('mock drafts', () => {
 
     it('leave out an empty choice of methods', () => {
         expect(buildMock(createMockDraft(JSON_MOCK)).match).not.toHaveProperty('methods');
-    });
-});
-
-describe('updateMockHeader', () => {
-    it('changes only the row with the id', () => {
-        expect(updateMockHeader(HEADER_ROWS, 'b', { enabled: false })).toEqual([
-            HEADER_ROWS[0],
-            { ...HEADER_ROWS[1], enabled: false },
-        ]);
     });
 });

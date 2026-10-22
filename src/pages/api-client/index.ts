@@ -1,1 +1,1 @@
-export * from './ui/ApiClientPage.tsx';
+export * from './ui/ApiClientPage/ApiClientPage.tsx';

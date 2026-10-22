@@ -1,10 +1,10 @@
 import type { ChangeEvent } from 'react';
 
-import type { MockDraft, MockDraftChange, MockHeaderDraft } from '../model/mockDraft.ts';
+import type { MockDraft, MockDraftChange } from '../model/mockDraft.ts';
 import type { SyntaxType } from '../model/ruleDraft.ts';
 
 import type { MockBodyType } from '#entities/mock';
-import type { HttpMethod } from '#shared/lib';
+import type { HttpMethod, KeyValueRow } from '#shared/lib';
 
 import { toggleValue } from './toggleValue.ts';
 
@@ -41,7 +41,7 @@ export const useMockDraftFields = (draft: MockDraft, onDraftChange: MockDraftCha
         onDraftChange({ body });
     };
 
-    const onHeadersChange = (headers: MockHeaderDraft[]) => {
+    const onHeadersChange = (headers: KeyValueRow[]) => {
         onDraftChange({ headers });
     };
 

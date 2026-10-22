@@ -578,11 +578,197 @@
     "apiClientTitle": {
         "message": "API client"
     },
-    "apiClientSoonTitle": {
-        "message": "Coming in a later version"
+    "apiClientTabs": {
+        "message": "Open requests"
     },
-    "apiClientPlaceholder": {
-        "message": "Here you'll build and send HTTP requests, switch environments and look through the history."
+    "apiClientNewTab": {
+        "message": "New request",
+        "description": "Title of a request tab while its URL is empty."
+    },
+    "apiClientTabOpen": {
+        "message": "Open a new request"
+    },
+    "apiClientTabClose": {
+        "message": "Close $1",
+        "description": "$1 is the title of the tab: a URL or “New request”."
+    },
+    "apiClientMethod": {
+        "message": "Method"
+    },
+    "apiClientUrl": {
+        "message": "URL"
+    },
+    "apiClientSend": {
+        "message": "Send"
+    },
+    "apiClientCancel": {
+        "message": "Cancel"
+    },
+    "apiClientSections": {
+        "message": "Parts of the request"
+    },
+    "apiClientSectionParams": {
+        "message": "Params"
+    },
+    "apiClientSectionHeaders": {
+        "message": "Headers"
+    },
+    "apiClientSectionBody": {
+        "message": "Body"
+    },
+    "apiClientSectionSettings": {
+        "message": "Settings"
+    },
+    "apiClientValue": {
+        "message": "Value"
+    },
+    "apiClientParamKey": {
+        "message": "Parameter"
+    },
+    "apiClientParamEnabled": {
+        "message": "Send the parameter"
+    },
+    "apiClientParamAdd": {
+        "message": "Add parameter"
+    },
+    "apiClientParamDelete": {
+        "message": "Delete parameter"
+    },
+    "apiClientParamsEmpty": {
+        "message": "Parameters go into the query after the URL, next to the ones it already has."
+    },
+    "apiClientHeaderKey": {
+        "message": "Header"
+    },
+    "apiClientHeaderEnabled": {
+        "message": "Send the header"
+    },
+    "apiClientHeaderAdd": {
+        "message": "Add header"
+    },
+    "apiClientHeaderDelete": {
+        "message": "Delete header"
+    },
+    "apiClientHeadersEmpty": {
+        "message": "The browser adds headers of its own, such as Accept and User-Agent."
+    },
+    "apiClientForbiddenHeaders": {
+        "message": "The browser doesn't let the API client set these headers yet, so they aren't sent: $1.",
+        "description": "$1 is a comma-separated list of header names."
+    },
+    "apiClientFieldKey": {
+        "message": "Field"
+    },
+    "apiClientFieldEnabled": {
+        "message": "Send the field"
+    },
+    "apiClientFieldAdd": {
+        "message": "Add field"
+    },
+    "apiClientFieldDelete": {
+        "message": "Delete field"
+    },
+    "apiClientFieldsEmpty": {
+        "message": "The form goes as application/x-www-form-urlencoded."
+    },
+    "apiClientBodyType": {
+        "message": "Body format"
+    },
+    "apiClientBodyNone": {
+        "message": "None"
+    },
+    "apiClientBodyJson": {
+        "message": "JSON"
+    },
+    "apiClientBodyRaw": {
+        "message": "Text"
+    },
+    "apiClientBodyForm": {
+        "message": "Form"
+    },
+    "apiClientBodyNoneHint": {
+        "message": "The request goes without a body."
+    },
+    "apiClientBodyEditor": {
+        "message": "Request body"
+    },
+    "apiClientContentType": {
+        "message": "Content type"
+    },
+    "apiClientContentTypeHint": {
+        "message": "Goes as the Content-Type header unless the headers set one."
+    },
+    "apiClientBodyless": {
+        "message": "$1 requests go without a body. It's kept here for another method.",
+        "description": "$1 is GET or HEAD."
+    },
+    "apiClientSendCookies": {
+        "message": "Send the site's cookies"
+    },
+    "apiClientSendCookiesHint": {
+        "message": "Off: the request goes without your cookies for the site. On: the browser adds all of them, including the cookies of the session you're signed in with."
+    },
+    "apiClientResponse": {
+        "message": "Response"
+    },
+    "apiClientResponseIdle": {
+        "message": "Send the request, and its response shows up here."
+    },
+    "apiClientResponseWaiting": {
+        "message": "Waiting for the response…"
+    },
+    "apiClientResponseSections": {
+        "message": "Parts of the response"
+    },
+    "apiClientResponseBody": {
+        "message": "Body"
+    },
+    "apiClientResponseHeaders": {
+        "message": "Headers"
+    },
+    "apiClientResponseBodyEditor": {
+        "message": "Response body"
+    },
+    "apiClientResponseNoBody": {
+        "message": "The response has no body."
+    },
+    "apiClientResponseBinary": {
+        "message": "The body isn't text ($1), so it isn't shown.",
+        "description": "$1 is the content type, such as image/png."
+    },
+    "apiClientResponseCookiesNote": {
+        "message": "Set-Cookie isn't listed: the browser hides it from pages."
+    },
+    "apiClientDuration": {
+        "message": "$1 ms",
+        "description": "$1 is a number of milliseconds."
+    },
+    "apiClientSizeBytes": {
+        "message": "$1 B"
+    },
+    "apiClientSizeKilobytes": {
+        "message": "$1 KB"
+    },
+    "apiClientSizeMegabytes": {
+        "message": "$1 MB"
+    },
+    "apiClientInvalidRequest": {
+        "message": "The request wasn't sent: $1",
+        "description": "$1 is the technical reason, in English."
+    },
+    "apiClientSendFailed": {
+        "message": "No response came back: $1",
+        "description": "$1 is what the browser reported, in English."
+    },
+    "apiClientSendFailedHint": {
+        "message": "The server may be down or out of reach, or the browser may not trust its certificate."
+    },
+    "apiClientNoAccess": {
+        "message": "InterceptKit has no access to $1, and without it the browser would hide the response.",
+        "description": "$1 is a host name."
+    },
+    "apiClientAllowAccess": {
+        "message": "Allow and send"
     },
     "dialogClose": {
         "message": "Close",

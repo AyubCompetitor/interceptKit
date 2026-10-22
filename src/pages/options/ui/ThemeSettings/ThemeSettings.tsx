@@ -3,9 +3,7 @@ import type { FC } from 'react';
 import { useThemeSettings } from '../../model/useThemeSettings.ts';
 
 import { useTranslation } from '#shared/i18n';
-import { Flex, Spaces, Typography, TypographyColors } from '#shared/ui';
-
-import { SegmentedControl } from '../SegmentedControl/SegmentedControl.tsx';
+import { Flex, SegmentedControl, Spaces, Typography, TypographyColors } from '#shared/ui';
 
 import { THEME_LABELS } from './themeLabels.ts';
 

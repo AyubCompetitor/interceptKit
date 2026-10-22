@@ -23,14 +23,17 @@ interface CodeEditorProps {
     minRows?: number;
     /** Lines shown before the editor scrolls */
     maxRows?: number;
-    /** Called with the whole text after every change */
-    onChange: (value: string) => void;
+    /** Called with the whole text after every change; a read-only editor needs none */
+    onChange?: (value: string) => void;
 }
 
 const DEFAULT_ROWS = {
     MIN: 6,
     MAX: 20,
 } as const;
+
+/** What a read-only editor does with changes it never makes */
+const onTextIgnore = () => {};
 
 const CodeEditorView = lazy(async () => {
     const module = await import('./CodeEditorView.tsx');
@@ -47,7 +50,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     isReadOnly = false,
     minRows = DEFAULT_ROWS.MIN,
     maxRows = DEFAULT_ROWS.MAX,
-    onChange,
+    onChange = onTextIgnore,
 }) => {
     const { t } = useTranslation();
     const { isJson, isFormattable, onFormat } = useCodeEditor(value, language, onChange);

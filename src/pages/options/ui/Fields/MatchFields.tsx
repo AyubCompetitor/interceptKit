@@ -6,11 +6,10 @@ import { countDraftConditions, type DraftFields } from '../../model/ruleDraft.ts
 import { RESOURCE_TYPES } from '#entities/rule';
 import { useTranslation } from '#shared/i18n';
 import { HTTP_METHODS } from '#shared/lib';
-import { Badge, Field, Flex, Icon, IconNames, Spaces } from '#shared/ui';
+import { Badge, Field, Flex, Icon, IconNames, SegmentedControl, Spaces } from '#shared/ui';
 
 import { Checklist } from '../Checklist/Checklist.tsx';
 import { PATTERN_HINTS, PATTERN_PLACEHOLDERS, RESOURCE_TYPE_LABELS, SYNTAX_TYPE_LABELS } from '../Rule/ruleLabels.ts';
-import { SegmentedControl } from '../SegmentedControl/SegmentedControl.tsx';
 
 import styles from './MatchFields.module.css';
 

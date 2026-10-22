@@ -1,7 +1,8 @@
 import { useId, type ChangeEvent } from 'react';
 
+import { joinClassNames } from '../joinClassNames.ts';
+
 import { useTranslation, type MessageKey } from '#shared/i18n';
-import { joinClassNames } from '#shared/ui';
 
 import styles from './SegmentedControl.module.css';
 

@@ -5,7 +5,7 @@ import { useRuleForm } from '../../model/useRuleForm.ts';
 
 import { RuleTypes, type Rule } from '#entities/rule';
 import { useTranslation } from '#shared/i18n';
-import { Field, Flex, Spaces, Typography, TypographyColors, TypographySizes } from '#shared/ui';
+import { Field, Flex, SegmentedControl, Spaces, Typography, TypographyColors, TypographySizes } from '#shared/ui';
 
 import { FormStep } from '../FormStep/FormStep.tsx';
 import { HeaderFields } from '../Fields/HeaderFields.tsx';
@@ -13,7 +13,6 @@ import { MatchFields } from '../Fields/MatchFields.tsx';
 import { RedirectFields } from '../Fields/RedirectFields.tsx';
 import styles from './RuleForm.module.css';
 import { RULE_TYPE_HINTS, RULE_TYPE_LABELS } from './ruleLabels.ts';
-import { SegmentedControl } from '../SegmentedControl/SegmentedControl.tsx';
 
 interface RuleFormProps {
     /** Id the submit button in the dialog footer points at */

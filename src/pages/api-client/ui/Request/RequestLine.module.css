@@ -1,0 +1,15 @@
+.line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-s);
+}
+
+.method {
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+.url {
+    width: 100%;
+    font-family: var(--font-mono);
+}

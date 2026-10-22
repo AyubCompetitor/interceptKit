@@ -5,12 +5,11 @@ import type { MockDraftFields } from '../../model/mockDraft.ts';
 
 import { useTranslation } from '#shared/i18n';
 import { HTTP_METHODS } from '#shared/lib';
-import { Field, Flex, Spaces } from '#shared/ui';
+import { Field, Flex, SegmentedControl, Spaces } from '#shared/ui';
 
 import { Checklist } from '../Checklist/Checklist.tsx';
 import styles from './MockForm.module.css';
 import { PATTERN_HINTS, PATTERN_PLACEHOLDERS, SYNTAX_TYPE_LABELS } from '../Rule/ruleLabels.ts';
-import { SegmentedControl } from '../SegmentedControl/SegmentedControl.tsx';
 
 /** Which requests the mock answers: the same URL syntax as rules, plus methods */
 export const MockMatchFields: FC<MockDraftFields> = ({ draft, onDraftChange }) => {

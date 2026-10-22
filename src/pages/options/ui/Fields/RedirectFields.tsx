@@ -6,11 +6,20 @@ import type { DraftFields, RuleDraft } from '../../model/ruleDraft.ts';
 import { RuleTargetTypes } from '#entities/rule';
 import { useTranslation } from '#shared/i18n';
 import { SyntaxTypes } from '#shared/lib';
-import { Field, Flex, Notice, NoticeTones, Spaces, Typography, TypographyColors, TypographySizes } from '#shared/ui';
+import {
+    Field,
+    Flex,
+    Notice,
+    NoticeTones,
+    SegmentedControl,
+    Spaces,
+    Typography,
+    TypographyColors,
+    TypographySizes,
+} from '#shared/ui';
 
 import { ChoiceSelect } from '../ChoiceSelect/ChoiceSelect.tsx';
 import { SCHEME_LABELS, TARGET_TYPE_LABELS } from '../Rule/ruleLabels.ts';
-import { SegmentedControl } from '../SegmentedControl/SegmentedControl.tsx';
 
 import styles from './RedirectFields.module.css';
 

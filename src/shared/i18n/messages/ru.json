@@ -545,11 +545,188 @@
     "apiClientTitle": {
         "message": "API-клиент"
     },
-    "apiClientSoonTitle": {
-        "message": "Появится в одной из следующих версий"
+    "apiClientTabs": {
+        "message": "Открытые запросы"
     },
-    "apiClientPlaceholder": {
-        "message": "Здесь можно будет собирать и отправлять HTTP-запросы, переключать окружения и просматривать историю."
+    "apiClientNewTab": {
+        "message": "Новый запрос"
+    },
+    "apiClientTabOpen": {
+        "message": "Открыть новый запрос"
+    },
+    "apiClientTabClose": {
+        "message": "Закрыть $1"
+    },
+    "apiClientMethod": {
+        "message": "Метод"
+    },
+    "apiClientUrl": {
+        "message": "Адрес"
+    },
+    "apiClientSend": {
+        "message": "Отправить"
+    },
+    "apiClientCancel": {
+        "message": "Отменить"
+    },
+    "apiClientSections": {
+        "message": "Части запроса"
+    },
+    "apiClientSectionParams": {
+        "message": "Параметры"
+    },
+    "apiClientSectionHeaders": {
+        "message": "Заголовки"
+    },
+    "apiClientSectionBody": {
+        "message": "Тело"
+    },
+    "apiClientSectionSettings": {
+        "message": "Настройки"
+    },
+    "apiClientValue": {
+        "message": "Значение"
+    },
+    "apiClientParamKey": {
+        "message": "Параметр"
+    },
+    "apiClientParamEnabled": {
+        "message": "Отправлять параметр"
+    },
+    "apiClientParamAdd": {
+        "message": "Добавить параметр"
+    },
+    "apiClientParamDelete": {
+        "message": "Удалить параметр"
+    },
+    "apiClientParamsEmpty": {
+        "message": "Параметры попадут в строку запроса после адреса, рядом с теми, что в нём уже есть."
+    },
+    "apiClientHeaderKey": {
+        "message": "Заголовок"
+    },
+    "apiClientHeaderEnabled": {
+        "message": "Отправлять заголовок"
+    },
+    "apiClientHeaderAdd": {
+        "message": "Добавить заголовок"
+    },
+    "apiClientHeaderDelete": {
+        "message": "Удалить заголовок"
+    },
+    "apiClientHeadersEmpty": {
+        "message": "Часть заголовков, например Accept и User-Agent, браузер добавит сам."
+    },
+    "apiClientForbiddenHeaders": {
+        "message": "Браузер пока не даёт API-клиенту задать эти заголовки, поэтому они не отправятся: $1."
+    },
+    "apiClientFieldKey": {
+        "message": "Поле"
+    },
+    "apiClientFieldEnabled": {
+        "message": "Отправлять поле"
+    },
+    "apiClientFieldAdd": {
+        "message": "Добавить поле"
+    },
+    "apiClientFieldDelete": {
+        "message": "Удалить поле"
+    },
+    "apiClientFieldsEmpty": {
+        "message": "Форма уйдёт как application/x-www-form-urlencoded."
+    },
+    "apiClientBodyType": {
+        "message": "Формат тела"
+    },
+    "apiClientBodyNone": {
+        "message": "Без тела"
+    },
+    "apiClientBodyJson": {
+        "message": "JSON"
+    },
+    "apiClientBodyRaw": {
+        "message": "Текст"
+    },
+    "apiClientBodyForm": {
+        "message": "Форма"
+    },
+    "apiClientBodyNoneHint": {
+        "message": "Запрос уйдёт без тела."
+    },
+    "apiClientBodyEditor": {
+        "message": "Тело запроса"
+    },
+    "apiClientContentType": {
+        "message": "Тип содержимого"
+    },
+    "apiClientContentTypeHint": {
+        "message": "Уходит в заголовке Content-Type, если его нет среди заголовков."
+    },
+    "apiClientBodyless": {
+        "message": "Запросы $1 уходят без тела. Оно сохранится здесь на случай, если вы смените метод."
+    },
+    "apiClientSendCookies": {
+        "message": "Отправлять куки сайта"
+    },
+    "apiClientSendCookiesHint": {
+        "message": "Когда выключено, запрос уходит без ваших кук этого сайта. Когда включено, браузер добавит их все, в том числе куки сессии, под которой вы вошли."
+    },
+    "apiClientResponse": {
+        "message": "Ответ"
+    },
+    "apiClientResponseIdle": {
+        "message": "Отправьте запрос, и здесь появится ответ."
+    },
+    "apiClientResponseWaiting": {
+        "message": "Ждём ответ…"
+    },
+    "apiClientResponseSections": {
+        "message": "Части ответа"
+    },
+    "apiClientResponseBody": {
+        "message": "Тело"
+    },
+    "apiClientResponseHeaders": {
+        "message": "Заголовки"
+    },
+    "apiClientResponseBodyEditor": {
+        "message": "Тело ответа"
+    },
+    "apiClientResponseNoBody": {
+        "message": "У ответа нет тела."
+    },
+    "apiClientResponseBinary": {
+        "message": "Тело не текстовое ($1), поэтому здесь не показывается."
+    },
+    "apiClientResponseCookiesNote": {
+        "message": "Set-Cookie в списке нет: браузер не показывает его страницам."
+    },
+    "apiClientDuration": {
+        "message": "$1 мс"
+    },
+    "apiClientSizeBytes": {
+        "message": "$1 Б"
+    },
+    "apiClientSizeKilobytes": {
+        "message": "$1 КБ"
+    },
+    "apiClientSizeMegabytes": {
+        "message": "$1 МБ"
+    },
+    "apiClientInvalidRequest": {
+        "message": "Запрос не отправлен: $1"
+    },
+    "apiClientSendFailed": {
+        "message": "Ответ не пришёл: $1"
+    },
+    "apiClientSendFailedHint": {
+        "message": "Возможно, сервер не работает или недоступен либо браузер не доверяет его сертификату."
+    },
+    "apiClientNoAccess": {
+        "message": "У InterceptKit нет доступа к $1, а без него браузер скроет ответ."
+    },
+    "apiClientAllowAccess": {
+        "message": "Разрешить и отправить"
     },
     "dialogClose": {
         "message": "Закрыть"

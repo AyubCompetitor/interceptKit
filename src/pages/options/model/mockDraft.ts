@@ -1,19 +1,16 @@
 import { MockBodyTypes, type Mock, type MockBodyType, type MockMatch } from '#entities/mock';
-import { getRandomUUID, Sources, SyntaxTypes, type HttpMethod, type KeyValue } from '#shared/lib';
+import {
+    getRandomUUID,
+    mapKeyValueToRow,
+    mapRowToKeyValue,
+    Sources,
+    SyntaxTypes,
+    type HttpMethod,
+    type KeyValue,
+    type KeyValueRow,
+} from '#shared/lib';
 
 import type { SyntaxType } from './ruleDraft.ts';
-
-/** A response header as the form edits it */
-export interface MockHeaderDraft {
-    /** React key of the row, never saved */
-    readonly rowId: string;
-    /** Header name */
-    readonly name: string;
-    /** Header value */
-    readonly value: string;
-    /** Disabled headers are kept but not sent */
-    readonly enabled: boolean;
-}
 
 /** Every field of the mock form */
 export interface MockDraft {
@@ -40,7 +37,7 @@ export interface MockDraft {
     /** Response body */
     readonly body: string;
     /** Response headers */
-    readonly headers: readonly MockHeaderDraft[];
+    readonly headers: readonly KeyValueRow[];
 }
 
 /** Props of a group of fields in the mock form */
@@ -55,9 +52,6 @@ export type MockDraftPatch = Partial<MockDraft>;
 
 /** Merges changed fields into the form state */
 export type MockDraftChange = (patch: MockDraftPatch) => void;
-
-/** Changes the header row with the id */
-export type MockHeaderChange = (rowId: string, patch: Partial<MockHeaderDraft>) => void;
 
 const DEFAULT_STATUS = '200';
 
@@ -74,24 +68,10 @@ const NEW_MOCK_DRAFT: Omit<MockDraft, 'id'> = {
     headers: [],
 };
 
-export const createMockHeaderDraft = (): MockHeaderDraft => ({
-    rowId: getRandomUUID(),
-    name: '',
-    value: '',
-    enabled: true,
-});
-
-const mapHeaderToDraft = (header: KeyValue): MockHeaderDraft => ({
-    rowId: getRandomUUID(),
-    name: header.key,
-    value: header.value,
-    enabled: header.enabled,
-});
-
-const mapDraftToHeader = (draft: MockHeaderDraft): KeyValue => ({
-    key: draft.name.trim(),
-    value: draft.value,
-    enabled: draft.enabled,
+/** Header names are tokens, so spaces around them are a typing slip */
+const mapRowToHeader = (row: KeyValueRow): KeyValue => ({
+    ...mapRowToKeyValue(row),
+    key: row.key.trim(),
 });
 
 const formatDelay = (delayMs: number): string => {
@@ -121,7 +101,7 @@ export const createMockDraft = (mock: NotRequired<Mock>): MockDraft => {
         delayMs: formatDelay(response.delayMs),
         bodyType: response.bodyType,
         body: response.body,
-        headers: response.headers.map(mapHeaderToDraft),
+        headers: response.headers.map(mapKeyValueToRow),
     };
 };
 
@@ -155,23 +135,9 @@ export const buildMock = (draft: MockDraft): Mock => ({
     match: buildMockMatch(draft),
     response: {
         status: Number(draft.status.trim()),
-        headers: draft.headers.map(mapDraftToHeader),
+        headers: draft.headers.map(mapRowToHeader),
         bodyType: draft.bodyType,
         body: draft.body,
         delayMs: parseDelay(draft.delayMs),
     },
 });
-
-export const updateMockHeader = (
-    headers: readonly MockHeaderDraft[],
-    rowId: string,
-    patch: Partial<MockHeaderDraft>,
-): MockHeaderDraft[] => {
-    return headers.map(header => {
-        if (header.rowId !== rowId) {
-            return header;
-        }
-
-        return { ...header, ...patch };
-    });
-};

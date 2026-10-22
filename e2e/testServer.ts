@@ -13,16 +13,22 @@ export interface TestServer {
     origin: string;
     /** The same server under a host that resolves to the loopback address only in the test browser */
     foreignOrigin: string;
+    /** The last echoed request to the path with its query; none before one arrives */
+    getLastRequest: (path: string) => NotRequired<TestServerEcho>;
     /** Stops the server */
     close: () => Promise<void>;
 }
 
 /** What the server answers to any path but its pages: what reached it */
 export interface TestServerEcho {
+    /** Method of the request */
+    method: string;
     /** Path of the request, with its query */
     path: string;
     /** Request headers as they reached the server */
     headers: IncomingHttpHeaders;
+    /** Request body as text */
+    body: string;
 }
 
 export const LOOPBACK_HOST = '127.0.0.1';
@@ -71,27 +77,30 @@ const sendPage = (response: ServerResponse, html: string) => {
     response.end(html);
 };
 
-const sendEcho = (request: IncomingMessage, response: ServerResponse) => {
+const readBody = async (request: IncomingMessage): Promise<string> => {
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of request) {
+        chunks.push(Buffer.from(chunk));
+    }
+
+    return Buffer.concat(chunks).toString('utf8');
+};
+
+/** Answers with what reached the server and keeps it for the test to read */
+const sendEcho = async (request: IncomingMessage, response: ServerResponse, received: TestServerEcho[]) => {
     const echo: TestServerEcho = {
+        method: request.method ?? '',
         path: request.url ?? '',
         headers: request.headers,
+        body: await readBody(request),
     };
+
+    received.push(echo);
 
     response.writeHead(200, ECHO_HEADERS);
 
     response.end(JSON.stringify(echo));
-};
-
-const onRequest = (request: IncomingMessage, response: ServerResponse) => {
-    const html = PAGES[request.url ?? ''];
-
-    if (html !== undefined) {
-        sendPage(response, html);
-
-        return;
-    }
-
-    sendEcho(request, response);
 };
 
 const closeServer = async (server: Server) => {
@@ -102,6 +111,22 @@ const closeServer = async (server: Server) => {
 
 /** Starts an HTTP server on a free port of the loopback address */
 export const startTestServer = async (): Promise<TestServer> => {
+    const received: TestServerEcho[] = [];
+
+    const onRequest = (request: IncomingMessage, response: ServerResponse) => {
+        const html = PAGES[request.url ?? ''];
+
+        if (html !== undefined) {
+            sendPage(response, html);
+
+            return;
+        }
+
+        sendEcho(request, response, received).catch(() => response.destroy());
+    };
+
+    const getLastRequest = (path: string) => received.findLast(echo => echo.path === path);
+
     const server = createServer(onRequest);
 
     server.listen(0, LOOPBACK_HOST);
@@ -117,6 +142,7 @@ export const startTestServer = async (): Promise<TestServer> => {
     return {
         origin: `http://${LOOPBACK_HOST}:${address.port}`,
         foreignOrigin: `http://${FOREIGN_HOST}:${address.port}`,
+        getLastRequest,
         close: () => closeServer(server),
     };
 };
