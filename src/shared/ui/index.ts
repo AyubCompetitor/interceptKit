@@ -6,6 +6,7 @@ export * from './Badge/index.ts';
 export * from './Brand/index.ts';
 export * from './Button/index.ts';
 export * from './Checkbox/index.ts';
+export * from './CodeEditor/index.ts';
 export * from './EmptyState/index.ts';
 export * from './Field/index.ts';
 export * from './Flex/index.ts';

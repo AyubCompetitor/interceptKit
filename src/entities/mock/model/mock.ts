@@ -73,6 +73,8 @@ export const MAX_MOCKS = 1000;
 /** Mock bodies live in chrome.storage.local (10 MB in total) and are visible to the page */
 export const MAX_MOCK_BODY_LENGTH = 1_048_576;
 
+export const MAX_MOCK_DELAY_MS = 60_000;
+
 /** Statuses whose responses must not have a body (fetch throws otherwise) */
 const NULL_BODY_STATUSES = new Set([204, 205, 304]);
 
@@ -128,7 +130,7 @@ export const mockResponse: Validator<MockResponse> = refine(
         headers: array(mockHeader, { maxLength: 100 }),
         bodyType: oneOf(MOCK_BODY_TYPES),
         body: string({ maxLength: MAX_MOCK_BODY_LENGTH }),
-        delayMs: number({ integer: true, min: 0, max: 60_000 }),
+        delayMs: number({ integer: true, min: 0, max: MAX_MOCK_DELAY_MS }),
     }),
     getMockResponseError,
 );

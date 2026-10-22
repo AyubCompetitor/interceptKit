@@ -12,13 +12,14 @@ export const buildManifest = (): chrome.runtime.ManifestV3 => ({
     version: pkg.version,
     default_locale: 'en',
     minimum_chrome_version: '140',
-    permissions: ['storage', 'declarativeNetRequestWithHostAccess'],
+    permissions: ['storage', 'declarativeNetRequestWithHostAccess', 'scripting'],
     optional_host_permissions: ['*://*/*'],
     storage: { managed_schema: 'managed-schema.json' },
     background: { service_worker: 'background/background.js' },
     action: { default_title: '__MSG_extName__', default_popup: 'pages/popup.html' },
     options_ui: { page: 'pages/options.html', open_in_tab: true },
     content_security_policy: {
-        extension_pages: "script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'",
+        extension_pages:
+            "script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'",
     },
 });

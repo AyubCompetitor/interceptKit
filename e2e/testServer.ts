@@ -17,7 +17,7 @@ export interface TestServer {
     close: () => Promise<void>;
 }
 
-/** What the server answers to any path but the page: what reached it */
+/** What the server answers to any path but its pages: what reached it */
 export interface TestServerEcho {
     /** Path of the request, with its query */
     path: string;
@@ -32,7 +32,22 @@ export const FOREIGN_HOST = 'foreign.test';
 
 export const PAGE_PATH = '/page';
 
-const PAGE_HTML = '<!doctype html><title>Test page</title>';
+/** A page whose own script sends a request while the page is still parsing */
+export const EARLY_PAGE_PATH = '/early';
+
+export const EARLY_REQUEST_PATH = '/api/early';
+
+/** Where the early page leaves the status its request got */
+export const EARLY_STATUS_ATTRIBUTE = 'data-early-status';
+
+const EARLY_SCRIPT = `fetch('${EARLY_REQUEST_PATH}').then(response => {
+    document.documentElement.dataset.earlyStatus = String(response.status);
+});`;
+
+const PAGES: Readonly<Record<string, string>> = {
+    [PAGE_PATH]: '<!doctype html><title>Test page</title>',
+    [EARLY_PAGE_PATH]: `<!doctype html><title>Early page</title><script>${EARLY_SCRIPT}</script>`,
+};
 
 /** CORS is open, so a page on the foreign host may read the echo */
 const ECHO_HEADERS = {
@@ -50,10 +65,10 @@ const isAddressInfo = (address: Nullable<string | AddressInfo>): address is Addr
     return typeof address === 'object' && address !== null;
 };
 
-const sendPage = (response: ServerResponse) => {
+const sendPage = (response: ServerResponse, html: string) => {
     response.setHeader('content-type', 'text/html');
 
-    response.end(PAGE_HTML);
+    response.end(html);
 };
 
 const sendEcho = (request: IncomingMessage, response: ServerResponse) => {
@@ -68,8 +83,10 @@ const sendEcho = (request: IncomingMessage, response: ServerResponse) => {
 };
 
 const onRequest = (request: IncomingMessage, response: ServerResponse) => {
-    if (request.url === PAGE_PATH) {
-        sendPage(response);
+    const html = PAGES[request.url ?? ''];
+
+    if (html !== undefined) {
+        sendPage(response, html);
 
         return;
     }

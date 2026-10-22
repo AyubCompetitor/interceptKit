@@ -2,7 +2,7 @@ import { describe, expect, it } from '@rstest/core';
 
 import { HttpMethods, validate } from '#shared/lib';
 
-import { apiRequestValidator } from '../request.ts';
+import { apiRequestValidator, RequestBodyTypes } from '../request.ts';
 
 import { makeRequest } from './mocks.ts';
 
@@ -16,7 +16,7 @@ describe('apiRequestValidator', () => {
     });
 
     it('accepts GET without a body', () => {
-        const request = makeRequest({ method: HttpMethods.GET, body: { bodyType: 'none' } });
+        const request = makeRequest({ method: HttpMethods.GET, body: { bodyType: RequestBodyTypes.NONE } });
 
         expect(validate(apiRequestValidator, request).ok).toBe(true);
     });

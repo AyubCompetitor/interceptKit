@@ -6,6 +6,7 @@ import { useDashboardSection } from '../../lib/useDashboardSection.ts';
 import { useTranslation } from '#shared/i18n';
 import { createDocumentTitle, useDocumentTitle } from '#shared/ui';
 
+import { MocksSection } from '../Mock/MocksSection.tsx';
 import styles from './OptionsPage.module.css';
 import { RulesSection } from '../Rule/RulesSection.tsx';
 import { SettingsSection } from '../SettingsSection/SettingsSection.tsx';
@@ -21,6 +22,7 @@ export const OptionsPage: FC = () => {
     useDocumentTitle(title);
 
     const isRules = section === DashboardSections.RULES;
+    const isMocks = section === DashboardSections.MOCKS;
     const isSites = section === DashboardSections.SITES;
     const isSettings = section === DashboardSections.SETTINGS;
 
@@ -30,6 +32,7 @@ export const OptionsPage: FC = () => {
 
             <main className={styles.content}>
                 {isRules && <RulesSection />}
+                {isMocks && <MocksSection />}
                 {isSites && <SitesSection />}
                 {isSettings && <SettingsSection />}
             </main>

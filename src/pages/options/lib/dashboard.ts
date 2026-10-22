@@ -2,6 +2,7 @@ import { oneOf, validate } from '#shared/lib';
 
 export enum DashboardSections {
     RULES = 'rules',
+    MOCKS = 'mocks',
     SITES = 'sites',
     SETTINGS = 'settings',
 }

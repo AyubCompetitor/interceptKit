@@ -72,7 +72,7 @@ export default defineConfig(({ env }) => ({
         },
         /** Scripts the browser injects into web pages: self-contained files, no HTML, no dev client */
         content: {
-            source: { entry: { interceptor: entry('interceptor.ts') } },
+            source: { entry: { interceptor: entry('interceptor.ts'), bridge: entry('bridge.ts') } },
             output: { target: 'web', distPath: { root: `${OUT}/content`, js: '' } },
             performance: { chunkSplit: { strategy: 'all-in-one' } },
             tools: { htmlPlugin: false },

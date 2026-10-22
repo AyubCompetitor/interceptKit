@@ -16,13 +16,42 @@ import {
     type Validator,
 } from '#shared/lib';
 
-export type NoneBody = { readonly bodyType: 'none' };
+export enum RequestBodyTypes {
+    NONE = 'none',
+    JSON = 'json',
+    RAW = 'raw',
+    FORM = 'form',
+}
 
-export type JsonBody = { readonly bodyType: 'json'; readonly text: string };
+export type RequestBodyType = `${RequestBodyTypes}`;
 
-export type RawBody = { readonly bodyType: 'raw'; readonly text: string; readonly contentType: string };
+export interface NoneBody {
+    /** No body */
+    readonly bodyType: RequestBodyTypes.NONE;
+}
 
-export type FormBody = { readonly bodyType: 'form'; readonly fields: readonly KeyValue[] };
+export interface JsonBody {
+    /** A JSON body */
+    readonly bodyType: RequestBodyTypes.JSON;
+    /** The JSON as typed; may contain {{variables}} */
+    readonly text: string;
+}
+
+export interface RawBody {
+    /** A body of any other type */
+    readonly bodyType: RequestBodyTypes.RAW;
+    /** The body as typed */
+    readonly text: string;
+    /** Value of the Content-Type header */
+    readonly contentType: string;
+}
+
+export interface FormBody {
+    /** A URL-encoded form */
+    readonly bodyType: RequestBodyTypes.FORM;
+    /** Fields of the form */
+    readonly fields: readonly KeyValue[];
+}
 
 export type RequestBody = NoneBody | JsonBody | RawBody | FormBody;
 
@@ -56,7 +85,7 @@ const REQUEST_ERRORS = {
 } as const;
 
 const getBodyError = (request: ApiRequest): NotRequired<string> => {
-    const hasBody = request.body.bodyType !== 'none';
+    const hasBody = request.body.bodyType !== RequestBodyTypes.NONE;
 
     const isBodylessMethod = BODYLESS_METHODS.includes(request.method);
 
@@ -70,14 +99,17 @@ const getBodyError = (request: ApiRequest): NotRequired<string> => {
 const fields = array(keyValue, { maxLength: 500 });
 
 const requestBody: Validator<RequestBody> = discriminatedUnion('bodyType', {
-    none: object({ bodyType: literal('none') }),
-    json: object({ bodyType: literal('json'), text: string({ maxLength: MAX_BODY_LENGTH }) }),
-    raw: object({
-        bodyType: literal('raw'),
+    [RequestBodyTypes.NONE]: object({ bodyType: literal(RequestBodyTypes.NONE) }),
+    [RequestBodyTypes.JSON]: object({
+        bodyType: literal(RequestBodyTypes.JSON),
+        text: string({ maxLength: MAX_BODY_LENGTH }),
+    }),
+    [RequestBodyTypes.RAW]: object({
+        bodyType: literal(RequestBodyTypes.RAW),
         text: string({ maxLength: MAX_BODY_LENGTH }),
         contentType: string({ maxLength: 256 }),
     }),
-    form: object({ bodyType: literal('form'), fields }),
+    [RequestBodyTypes.FORM]: object({ bodyType: literal(RequestBodyTypes.FORM), fields }),
 });
 
 export const apiRequestValidator: Validator<ApiRequest> = refine(

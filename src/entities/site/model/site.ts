@@ -1,17 +1,20 @@
 import { array, boolean, isDuplicateValues, object, PROTOCOLS, refine, string, type Validator } from '#shared/lib';
 
+/** Settings of a site the browser granted access to */
 export interface Site {
-    /** Normalized origin, e.g. https://app.example.com */
-    readonly origin: string;
-    /** Whether mock scripts are injected into pages of this site */
+    /** Host pattern as the browser granted it, e.g. *://*.example.com/* */
+    readonly pattern: string;
+    /** Whether mock scripts are injected into pages the pattern covers */
     readonly mocks: boolean;
 }
 
 export const MAX_SITES = 1000;
 
+/** A scheme, a host and every path: the shape of every host pattern the browser grants */
+const HOST_PATTERN_RGX = /^(\*|https?):\/\/[^/]+\/\*$/;
+
 const SITE_ERRORS = {
-    NOT_NORMALIZED: 'expected a normalized http(s) origin',
-    DUPLICATE_ORIGIN: 'duplicate site',
+    DUPLICATE_PATTERN: 'duplicate site',
 } as const;
 
 export const parseOrigin = (input: string): NotRequired<string> => {
@@ -30,31 +33,24 @@ export const parseOrigin = (input: string): NotRequired<string> => {
     return url.origin;
 };
 
-const getOriginError = (value: string): NotRequired<string> => {
-    const isNormalized = parseOrigin(value) === value;
+const getDuplicatePatternError = (sites: readonly Site[]): NotRequired<string> => {
+    const patterns = sites.map(site => site.pattern);
 
-    if (isNormalized) {
+    if (!isDuplicateValues(patterns)) {
         return;
     }
 
-    return SITE_ERRORS.NOT_NORMALIZED;
+    return SITE_ERRORS.DUPLICATE_PATTERN;
 };
 
-const getDuplicateOriginError = (sites: readonly Site[]): NotRequired<string> => {
-    const origins = sites.map(site => site.origin);
+const hostPattern = string({ minLength: 1, maxLength: 2048, pattern: HOST_PATTERN_RGX });
 
-    if (!isDuplicateValues(origins)) {
-        return;
-    }
-
-    return SITE_ERRORS.DUPLICATE_ORIGIN;
-};
-
-const origin = refine(string({ minLength: 1, maxLength: 2048 }), getOriginError);
-
-export const siteValidator: Validator<Site> = object({ origin, mocks: boolean() });
+export const siteValidator: Validator<Site> = object({
+    pattern: hostPattern,
+    mocks: boolean(),
+});
 
 export const sitesValidator: Validator<Site[]> = refine(
     array(siteValidator, { maxLength: MAX_SITES }),
-    getDuplicateOriginError,
+    getDuplicatePatternError,
 );

@@ -2,9 +2,12 @@ import { createQueue } from '#shared/lib';
 import { createRouter } from '#shared/messaging';
 import { restrictLocalStore } from '#shared/platform';
 
+import { registerMockHandlers } from './mockHandlers.ts';
+import { startMockSync } from './mockSync.ts';
 import { registerRuleHandlers } from './ruleHandlers.ts';
 import { startRuleSync } from './ruleSync.ts';
 import { registerSettingsHandlers } from './settingsHandlers.ts';
+import { registerSiteHandlers } from './siteHandlers.ts';
 import { migrateStorage } from './storageSchema.ts';
 
 const FAIL_MESSAGES = {
@@ -27,8 +30,11 @@ export const startListenBackground: VoidFunction = () => {
 
     registerSettingsHandlers(router, storageReady, enqueue);
     registerRuleHandlers(router, storageReady, enqueue);
+    registerMockHandlers(router, storageReady, enqueue);
+    registerSiteHandlers(router, storageReady, enqueue);
 
     startRuleSync(storageReady, enqueue);
+    startMockSync(storageReady, enqueue);
 
     router.listen();
 };

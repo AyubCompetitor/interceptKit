@@ -109,3 +109,14 @@ const isHostInPattern = (host: string, pattern: string): boolean => {
 /** Whether a granted pattern reaches the host; the scheme is ignored, since rules name hosts, not schemes */
 export const isHostCovered = (host: string, patterns: readonly string[]): boolean =>
     patterns.some(pattern => isHostInPattern(host, pattern));
+
+/** Whether a pattern reaches the host of a page's origin */
+export const isOriginCovered = (origin: string, patterns: readonly string[]): boolean => {
+    if (!URL.canParse(origin)) {
+        return false;
+    }
+
+    const { hostname } = new URL(origin);
+
+    return isHostCovered(hostname, patterns);
+};

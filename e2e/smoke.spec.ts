@@ -3,6 +3,10 @@ import { expect, openSection, test, trackErrors } from './fixtures.ts';
 const CSP_META = 'meta[http-equiv="Content-Security-Policy"]';
 const EXTENSION_NAME = 'InterceptKit';
 
+/** No inline scripts or styles and no images from elsewhere; CodeMirror keeps it through its shadow root */
+const PAGES_CSP =
+    "script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
+
 const getExtensionPath = (extensionId: string) => `chrome-extension://${extensionId}/pages/`;
 
 test('manifest requests only the reviewed permissions', async ({ serviceWorker }) => {
@@ -10,7 +14,7 @@ test('manifest requests only the reviewed permissions', async ({ serviceWorker }
 
     expect(manifest.manifest_version).toBe(3);
 
-    expect(manifest.permissions).toEqual(['storage', 'declarativeNetRequestWithHostAccess']);
+    expect(manifest.permissions).toEqual(['storage', 'declarativeNetRequestWithHostAccess', 'scripting']);
 
     expect(manifest.host_permissions ?? []).toEqual([]);
 
@@ -19,6 +23,8 @@ test('manifest requests only the reviewed permissions', async ({ serviceWorker }
     expect(manifest.content_scripts ?? []).toEqual([]);
 
     expect(manifest.web_accessible_resources ?? []).toEqual([]);
+
+    expect(manifest.content_security_policy).toEqual({ extension_pages: PAGES_CSP });
 });
 
 test('storage.local can be closed to content scripts', async ({ serviceWorker }) => {

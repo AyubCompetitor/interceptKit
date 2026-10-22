@@ -341,6 +341,45 @@
             }
         },
         {
+            "files": ["src/app/bridge/**", "src/app/entrypoints/bridge.ts"],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "patterns": [
+                            {
+                                "group": ["#*/*", "!#entities/mock", "!#shared/lib", "!#shared/messaging"],
+                                "message": "The bridge runs on web pages: it may use only the mock entity, shared/lib and RPC."
+                            },
+                            {
+                                "group": ["react", "react/*", "react-dom", "react-dom/*"],
+                                "message": "The bridge runs on web pages: no UI code."
+                            }
+                        ]
+                    }
+                ],
+                "no-restricted-globals": [
+                    "error",
+                    {
+                        "name": "chrome",
+                        "message": "The bridge talks to the background only through #shared/messaging."
+                    },
+                    {
+                        "name": "browser",
+                        "message": "The bridge talks to the background only through #shared/messaging."
+                    },
+                    { "name": "fetch", "message": "The bridge sends no requests of its own." },
+                    { "name": "XMLHttpRequest", "message": "The bridge sends no requests of its own." },
+                    { "name": "WebSocket", "message": "The bridge sends no requests of its own." },
+                    { "name": "EventSource", "message": "The bridge sends no requests of its own." },
+                    { "name": "WebTransport", "message": "The bridge sends no requests of its own." },
+                    { "name": "localStorage", "message": "The page's storage belongs to the page." },
+                    { "name": "sessionStorage", "message": "The page's storage belongs to the page." },
+                    { "name": "indexedDB", "message": "The page's storage belongs to the page." }
+                ]
+            }
+        },
+        {
             "files": ["src/pages/api-client/api/**"],
             "rules": { "no-restricted-globals": "off" }
         },

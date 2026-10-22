@@ -8,3 +8,6 @@ export * from './rpcMethod.ts';
 export * from './createQueue.ts';
 export * from './isDuplicateValues.ts';
 export * from './migrations.ts';
+export * from './contentScript.ts';
+export * from './shellWords.ts';
+export * from './jsonText.ts';

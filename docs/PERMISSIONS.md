@@ -4,10 +4,11 @@ Every permission InterceptKit requests is listed here with the reason it needs i
 
 ## Requested at install
 
-| Permission                            | Warning shown to the user | Why it is needed                                                                                                                                                               |
-| ------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `storage`                             | None                      | Keeps rules, mocks, sites and settings in `chrome.storage.local`, short-lived state in `chrome.storage.session`, and reads administrator policy from `chrome.storage.managed`. |
-| `declarativeNetRequestWithHostAccess` | None                      | Redirects, modifies headers of and blocks requests through declarative rules the browser applies itself. Rules take effect only on sites you granted access to.                |
+| Permission                            | Warning shown to the user | Why it is needed                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `storage`                             | None                      | Keeps rules, mocks, sites and settings in `chrome.storage.local`, short-lived state in `chrome.storage.session`, and reads administrator policy from `chrome.storage.managed`.                                                                                                                                    |
+| `declarativeNetRequestWithHostAccess` | None                      | Redirects, modifies headers of and blocks requests through declarative rules the browser applies itself. Rules take effect only on sites you granted access to.                                                                                                                                                   |
+| `scripting`                           | None                      | Registers the two mock scripts on the sites where you turned mocks on: `content/interceptor.js` in the page's own world answers `fetch` and XHR with your mocks, `content/bridge.js` in the extension's isolated world hands it the mocks of that site. Nothing is registered while no granted site has mocks on. |
 
 ## Host access
 
@@ -17,11 +18,7 @@ The browser checks host access both for the request and for the page that starte
 
 ## Planned
 
-Each permission is added only in the version that starts using it.
-
-| Permission  | Warning | Why it will be needed                                              |
-| ----------- | ------- | ------------------------------------------------------------------ |
-| `scripting` | None    | Registers the mock scripts on the sites where you turned mocks on. |
+Each permission is added only in the version that starts using it. None is planned at the moment.
 
 ## Deliberately not requested
 

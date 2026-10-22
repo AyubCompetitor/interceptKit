@@ -2,6 +2,7 @@ import type { FC } from 'react';
 
 import { useSiteList } from '../../model/useSiteList.ts';
 
+import { formatHostPattern } from '#entities/site';
 import { useTranslation } from '#shared/i18n';
 import {
     Button,
@@ -11,6 +12,7 @@ import {
     Icon,
     IconNames,
     Spaces,
+    Switch,
     Typography,
     TypographyColors,
 } from '#shared/ui';
@@ -20,9 +22,10 @@ import { SiteName } from './SiteName.tsx';
 
 export const SiteList: FC = () => {
     const { t } = useTranslation();
-    const { patterns, isRemoveFailed, onSiteRemove } = useSiteList();
+    const { patterns, mockPatterns, isLoading, isRemoveFailed, isMocksFailed, onSiteRemove, onSiteMocksToggle } =
+        useSiteList();
 
-    if (!patterns) {
+    if (!patterns || isLoading) {
         return null;
     }
 
@@ -37,6 +40,12 @@ export const SiteList: FC = () => {
                     <li key={pattern} className={styles.site}>
                         <Icon className={styles.icon} name={IconNames.SITES} />
                         <SiteName pattern={pattern} />
+                        <Switch
+                            aria-label={t('sitesMocksFor', formatHostPattern(pattern))}
+                            checked={mockPatterns.includes(pattern)}
+                            label={t('sitesMocks')}
+                            onChange={() => onSiteMocksToggle(pattern)}
+                        />
                         <Button size={ButtonSizes.SMALL} onClick={() => onSiteRemove(pattern)}>
                             {t('sitesRemove')}
                         </Button>
@@ -47,6 +56,12 @@ export const SiteList: FC = () => {
             {isRemoveFailed && (
                 <Typography color={TypographyColors.DANGER} role='alert'>
                     {t('sitesRemoveFailed')}
+                </Typography>
+            )}
+
+            {isMocksFailed && (
+                <Typography color={TypographyColors.DANGER} role='alert'>
+                    {t('sitesMocksFailed')}
                 </Typography>
             )}
         </Flex>

@@ -46,10 +46,10 @@
         "message": "Intercept requests"
     },
     "interceptionOn": {
-        "message": "Enabled rules work on allowed sites."
+        "message": "Enabled rules and mocks work on allowed sites."
     },
     "interceptionOff": {
-        "message": "Paused: no rule applies."
+        "message": "Paused: no rule or mock applies."
     },
     "interceptionPaused": {
         "message": "Interception is paused, so none of these rules apply right now."
@@ -366,7 +366,7 @@
         "description": "Accessible name of the × button in a header row."
     },
     "sitesDescription": {
-        "message": "InterceptKit works only on sites you allow. The browser checks access to both the site a request goes to and the page that sends it."
+        "message": "InterceptKit works only on sites you allow. The browser checks access to both the site a request goes to and the page that sends it. Mocks answer only on sites where you turn them on."
     },
     "sitesDomain": {
         "message": "Domain"
@@ -408,6 +408,137 @@
     },
     "sitesRemoveFailed": {
         "message": "Couldn't remove access. Try again."
+    },
+    "sitesMocks": {
+        "message": "Mocks"
+    },
+    "sitesMocksFor": {
+        "message": "Mocks on $1",
+        "description": "$1 is the site."
+    },
+    "sitesMocksFailed": {
+        "message": "Couldn't switch mocks for the site. Try again."
+    },
+    "mocksDescription": {
+        "message": "Answer the page's fetch and XHR requests with your own responses. If several mocks match a request, the one higher in the list answers. Open pages get changes after a reload."
+    },
+    "mocksAdd": {
+        "message": "New mock"
+    },
+    "mocksPaused": {
+        "message": "Interception is paused, so mocks don't answer right now."
+    },
+    "mocksNoSites": {
+        "message": "Mocks work only on sites where you turn them on, and no site has them on yet."
+    },
+    "mocksOpenSites": {
+        "message": "Turn on for a site"
+    },
+    "mocksSecretsWarning": {
+        "message": "Scripts of the page can read its mocks, so don't put tokens, passwords or other secrets into them."
+    },
+    "mocksEmptyTitle": {
+        "message": "No mocks yet"
+    },
+    "mocksEmptyText": {
+        "message": "A mock finds requests by URL and answers them with the status, headers and body you set."
+    },
+    "mocksEdit": {
+        "message": "Edit"
+    },
+    "mocksDelete": {
+        "message": "Delete"
+    },
+    "mocksActionFailed": {
+        "message": "Couldn't update the mock. Try again."
+    },
+    "mocksNewTitle": {
+        "message": "New mock"
+    },
+    "mocksEditTitle": {
+        "message": "Edit mock"
+    },
+    "mocksCancel": {
+        "message": "Cancel"
+    },
+    "mocksSave": {
+        "message": "Save"
+    },
+    "mocksSaveFailed": {
+        "message": "Couldn't save the mock: $1",
+        "description": "$1 is the technical reason, in English."
+    },
+    "mocksDeleteTitle": {
+        "message": "Delete mock?"
+    },
+    "mocksDeleteText": {
+        "message": "The mock “$1” will be deleted. This can't be undone.",
+        "description": "$1 is the mock name."
+    },
+    "mockSummaryMethods": {
+        "message": "Only $1",
+        "description": "$1 is a list of HTTP methods."
+    },
+    "mockSummaryDelay": {
+        "message": "Answers after $1 ms",
+        "description": "$1 is a number of milliseconds."
+    },
+    "mockName": {
+        "message": "Name"
+    },
+    "mockNamePlaceholder": {
+        "message": "For example, empty user list"
+    },
+    "mockStepMatch": {
+        "message": "Which requests"
+    },
+    "mockStepResponse": {
+        "message": "What to answer"
+    },
+    "mockStatus": {
+        "message": "Status"
+    },
+    "mockDelay": {
+        "message": "Delay, ms"
+    },
+    "mockDelayHint": {
+        "message": "Up to 60,000 ms. Leave empty to answer at once."
+    },
+    "mockBodyType": {
+        "message": "Body format"
+    },
+    "mockBodyJson": {
+        "message": "JSON"
+    },
+    "mockBodyText": {
+        "message": "Text"
+    },
+    "mockBody": {
+        "message": "Body"
+    },
+    "mockBodyHint": {
+        "message": "A JSON body must be valid JSON. Statuses such as 204 take no body."
+    },
+    "mockHeaders": {
+        "message": "Response headers"
+    },
+    "mockHeaderEnabled": {
+        "message": "Send the header"
+    },
+    "mockHeaderName": {
+        "message": "Header"
+    },
+    "mockHeaderValue": {
+        "message": "Value"
+    },
+    "mockHeaderAdd": {
+        "message": "Add header"
+    },
+    "mockHeaderDelete": {
+        "message": "Delete header"
+    },
+    "mockHeadersEmpty": {
+        "message": "Without headers the response gets only a content type for its body format."
     },
     "settingsDescription": {
         "message": "How InterceptKit looks in this browser."
@@ -456,5 +587,9 @@
     "dialogClose": {
         "message": "Close",
         "description": "Accessible name of the button that closes a dialog."
+    },
+    "codeEditorFormat": {
+        "message": "Format",
+        "description": "Button under a JSON editor that lays the JSON out with indents."
     }
 }

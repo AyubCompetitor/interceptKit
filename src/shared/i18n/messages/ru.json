@@ -42,10 +42,10 @@
         "message": "Перехват запросов"
     },
     "interceptionOn": {
-        "message": "Включённые правила работают на разрешённых сайтах."
+        "message": "Включённые правила и моки работают на разрешённых сайтах."
     },
     "interceptionOff": {
-        "message": "Пауза: правила не применяются."
+        "message": "Пауза: ни правила, ни моки не действуют."
     },
     "interceptionPaused": {
         "message": "Перехват на паузе, поэтому правила сейчас не действуют."
@@ -342,7 +342,7 @@
         "message": "Удалить строку"
     },
     "sitesDescription": {
-        "message": "InterceptKit работает только на сайтах, которые вы разрешили. Браузер проверяет доступ и к сайту, куда уходит запрос, и к странице, которая его отправляет."
+        "message": "InterceptKit работает только на сайтах, которые вы разрешили. Браузер проверяет доступ и к сайту, куда уходит запрос, и к странице, которая его отправляет. Моки отвечают только на тех сайтах, где вы их включили."
     },
     "sitesDomain": {
         "message": "Домен"
@@ -382,6 +382,132 @@
     },
     "sitesRemoveFailed": {
         "message": "Не удалось отозвать доступ. Попробуйте ещё раз."
+    },
+    "sitesMocks": {
+        "message": "Моки"
+    },
+    "sitesMocksFor": {
+        "message": "Моки на $1"
+    },
+    "sitesMocksFailed": {
+        "message": "Не удалось переключить моки для сайта. Попробуйте ещё раз."
+    },
+    "mocksDescription": {
+        "message": "Подменяйте ответы на fetch- и XHR-запросы страницы своими. Если запросу подходят несколько моков, ответит тот, что выше в списке. Открытые страницы получат изменения после перезагрузки."
+    },
+    "mocksAdd": {
+        "message": "Новый мок"
+    },
+    "mocksPaused": {
+        "message": "Перехват на паузе, поэтому моки сейчас не отвечают."
+    },
+    "mocksNoSites": {
+        "message": "Моки работают только на сайтах, где вы их включили, а таких пока нет."
+    },
+    "mocksOpenSites": {
+        "message": "Включить для сайта"
+    },
+    "mocksSecretsWarning": {
+        "message": "Скрипты страницы могут прочитать её моки, поэтому не кладите в них токены, пароли и другие секреты."
+    },
+    "mocksEmptyTitle": {
+        "message": "Моков пока нет"
+    },
+    "mocksEmptyText": {
+        "message": "Мок находит запросы по URL и отвечает на них заданными статусом, заголовками и телом."
+    },
+    "mocksEdit": {
+        "message": "Изменить"
+    },
+    "mocksDelete": {
+        "message": "Удалить"
+    },
+    "mocksActionFailed": {
+        "message": "Не удалось обновить мок. Попробуйте ещё раз."
+    },
+    "mocksNewTitle": {
+        "message": "Новый мок"
+    },
+    "mocksEditTitle": {
+        "message": "Редактирование мока"
+    },
+    "mocksCancel": {
+        "message": "Отмена"
+    },
+    "mocksSave": {
+        "message": "Сохранить"
+    },
+    "mocksSaveFailed": {
+        "message": "Не удалось сохранить мок: $1"
+    },
+    "mocksDeleteTitle": {
+        "message": "Удалить мок?"
+    },
+    "mocksDeleteText": {
+        "message": "Мок «$1» будет удалён без возможности восстановления."
+    },
+    "mockSummaryMethods": {
+        "message": "Только $1"
+    },
+    "mockSummaryDelay": {
+        "message": "Отвечает через $1 мс"
+    },
+    "mockName": {
+        "message": "Название"
+    },
+    "mockNamePlaceholder": {
+        "message": "Например, пустой список пользователей"
+    },
+    "mockStepMatch": {
+        "message": "Какие запросы"
+    },
+    "mockStepResponse": {
+        "message": "Что ответить"
+    },
+    "mockStatus": {
+        "message": "Статус"
+    },
+    "mockDelay": {
+        "message": "Задержка, мс"
+    },
+    "mockDelayHint": {
+        "message": "До 60 000 мс. Если оставить пустым, ответ придёт сразу."
+    },
+    "mockBodyType": {
+        "message": "Формат тела"
+    },
+    "mockBodyJson": {
+        "message": "JSON"
+    },
+    "mockBodyText": {
+        "message": "Текст"
+    },
+    "mockBody": {
+        "message": "Тело ответа"
+    },
+    "mockBodyHint": {
+        "message": "JSON-тело должно быть корректным JSON. У статусов вроде 204 тела нет."
+    },
+    "mockHeaders": {
+        "message": "Заголовки ответа"
+    },
+    "mockHeaderEnabled": {
+        "message": "Отправлять заголовок"
+    },
+    "mockHeaderName": {
+        "message": "Заголовок"
+    },
+    "mockHeaderValue": {
+        "message": "Значение"
+    },
+    "mockHeaderAdd": {
+        "message": "Добавить заголовок"
+    },
+    "mockHeaderDelete": {
+        "message": "Удалить заголовок"
+    },
+    "mockHeadersEmpty": {
+        "message": "Без заголовков ответ получит только тип содержимого по формату тела."
     },
     "settingsDescription": {
         "message": "Как InterceptKit выглядит в этом браузере."
@@ -427,5 +553,8 @@
     },
     "dialogClose": {
         "message": "Закрыть"
+    },
+    "codeEditorFormat": {
+        "message": "Форматировать"
     }
 }

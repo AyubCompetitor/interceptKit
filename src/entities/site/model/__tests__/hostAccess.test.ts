@@ -1,6 +1,13 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { buildHostPattern, formatHostPattern, isHostCovered, parseHost, parseHostPattern } from '../hostAccess.ts';
+import {
+    buildHostPattern,
+    formatHostPattern,
+    isHostCovered,
+    isOriginCovered,
+    parseHost,
+    parseHostPattern,
+} from '../hostAccess.ts';
 
 describe('parseHost', () => {
     it.each([
@@ -78,5 +85,20 @@ describe('isHostCovered', () => {
         { name: 'any host without grants', host: 'example.com', patterns: [] },
     ])('does not cover $name', ({ host, patterns }) => {
         expect(isHostCovered(host, patterns)).toBe(false);
+    });
+});
+
+describe('isOriginCovered', () => {
+    const PATTERNS = ['*://*.example.com/*'];
+
+    it('covers a page origin by its host', () => {
+        expect(isOriginCovered('https://app.example.com:8443', PATTERNS)).toBe(true);
+    });
+
+    it.each([
+        { name: 'another host', origin: 'https://example.org' },
+        { name: 'the opaque origin of a sandboxed frame', origin: 'null' },
+    ])('does not cover $name', ({ origin }) => {
+        expect(isOriginCovered(origin, PATTERNS)).toBe(false);
     });
 });

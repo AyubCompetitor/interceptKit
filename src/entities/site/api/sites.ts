@@ -1,6 +1,6 @@
-import { sitesValidator, type Site } from '../model/site.ts';
+import { siteValidator, sitesValidator, type Site } from '../model/site.ts';
 
-import { defineStoreItem, Stores } from '#shared/lib';
+import { defineMethod, defineStoreItem, Stores } from '#shared/lib';
 
 export const sitesItem = defineStoreItem<readonly Site[]>({
     key: 'sites',
@@ -8,3 +8,8 @@ export const sitesItem = defineStoreItem<readonly Site[]>({
     fallback: [],
     validator: sitesValidator,
 });
+
+/** Sites are written only by the background, which checks that the browser granted the pattern */
+export const sitesRpc = {
+    setMocks: defineMethod<Site, Site>('sites/setMocks', siteValidator),
+} as const;

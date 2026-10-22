@@ -1,0 +1,51 @@
+.row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-l);
+    padding: var(--space-l) var(--space-l) var(--space-l) var(--space-xl);
+
+    & + & {
+        border-top: 1px solid var(--color-border);
+    }
+}
+
+.details {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+}
+
+/** As tall as the switch and the buttons, so the first lines line up */
+.title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+    min-height: var(--control-height-s);
+}
+
+.name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.pattern {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-s);
+    overflow-wrap: anywhere;
+}
+
+.actions {
+    display: flex;
+    flex: none;
+    gap: var(--space-xs);
+}
+
+.isDisabled {
+    .name,
+    .pattern {
+        color: var(--color-text-subtle);
+    }
+}

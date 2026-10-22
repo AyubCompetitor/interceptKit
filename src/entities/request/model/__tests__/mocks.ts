@@ -1,5 +1,7 @@
 import { HttpMethods } from '#shared/lib';
 
+import { RequestBodyTypes } from '../request.ts';
+
 /** Raw API client request as it comes from storage or an import; a POST with a JSON body unless overridden */
 export const makeRequest = (overrides: Record<string, unknown> = {}) => ({
     id: 'q1',
@@ -7,7 +9,7 @@ export const makeRequest = (overrides: Record<string, unknown> = {}) => ({
     url: '{{baseUrl}}/users',
     query: [],
     headers: [{ key: 'Authorization', value: 'Bearer {{token}}', enabled: true }],
-    body: { bodyType: 'json', text: '{"name":"{{name}}"}' },
+    body: { bodyType: RequestBodyTypes.JSON, text: '{"name":"{{name}}"}' },
     sendCookies: false,
     ...overrides,
 });

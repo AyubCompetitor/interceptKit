@@ -4,6 +4,8 @@ import { validate } from '#shared/lib';
 
 import { parseOrigin, sitesValidator } from '../site.ts';
 
+import { makeSite } from './mocks.ts';
+
 describe('parseOrigin', () => {
     it.each([
         { input: 'https://App.Example.com/path?q=1', expected: 'https://app.example.com' },
@@ -18,17 +20,24 @@ describe('parseOrigin', () => {
 });
 
 describe('sitesValidator', () => {
-    const site = { origin: 'https://a.example', mocks: false };
-
-    it('accepts normalized origins', () => {
-        expect(validate(sitesValidator, [site]).ok).toBe(true);
+    it.each([
+        { pattern: '*://*.example.com/*' },
+        { pattern: '*://example.com/*' },
+        { pattern: 'http://127.0.0.1/*' },
+        { pattern: '*://*/*' },
+    ])('accepts the granted pattern $pattern', ({ pattern }) => {
+        expect(validate(sitesValidator, [makeSite({ pattern })]).ok).toBe(true);
     });
 
-    it('rejects an origin that is not normalized', () => {
-        expect(validate(sitesValidator, [{ ...site, origin: 'https://a.example/' }]).ok).toBe(false);
+    it.each([
+        { name: 'an origin instead of a pattern', pattern: 'https://example.com' },
+        { name: 'a pattern for one path', pattern: '*://example.com/api/*' },
+        { name: 'a pattern of another scheme', pattern: 'file:///*' },
+    ])('rejects $name', ({ pattern }) => {
+        expect(validate(sitesValidator, [makeSite({ pattern })]).ok).toBe(false);
     });
 
-    it('rejects duplicate origins', () => {
-        expect(validate(sitesValidator, [site, site]).ok).toBe(false);
+    it('rejects duplicate patterns', () => {
+        expect(validate(sitesValidator, [makeSite(), makeSite({ mocks: false })]).ok).toBe(false);
     });
 });
