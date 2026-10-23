@@ -1,6 +1,5 @@
 const ABORT_EVENT = 'abort';
 
-/** Waits as long as the mock says; an abort ends the wait with the signal's reason, as it ends a real fetch */
 export const waitForMockDelay = (delayMs: number, signal: NotRequired<AbortSignal>): Promise<void> => {
     signal?.throwIfAborted();
 

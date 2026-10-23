@@ -10,7 +10,6 @@ export const useSectionChoice = <T extends string>(initialSection: T) => {
 
     return {
         section,
-
         onSectionChange,
     };
 };

@@ -11,7 +11,6 @@ import { Checklist } from '../Checklist/Checklist.tsx';
 import styles from './MockForm.module.css';
 import { PATTERN_HINTS, PATTERN_PLACEHOLDERS, SYNTAX_TYPE_LABELS } from '../Rule/ruleLabels.ts';
 
-/** Which requests the mock answers: the same URL syntax as rules, plus methods */
 export const MockMatchFields: FC<MockDraftFields> = ({ draft, onDraftChange }) => {
     const { t } = useTranslation();
     const { onSyntaxChange, onPatternChange, onMethodToggle } = useMockDraftFields(draft, onDraftChange);

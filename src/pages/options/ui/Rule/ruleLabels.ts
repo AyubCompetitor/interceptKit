@@ -13,21 +13,18 @@ import {
 import type { MessageKey } from '#shared/i18n';
 import { SyntaxTypes } from '#shared/lib';
 
-/** Labels of the form's choices; the key order is the order of the options */
 export const RULE_TYPE_LABELS: Record<RuleType, MessageKey> = {
     [RuleTypes.REDIRECT]: 'ruleTypeRedirect',
     [RuleTypes.HEADERS]: 'ruleTypeHeaders',
     [RuleTypes.BLOCK]: 'ruleTypeBlock',
 };
 
-/** What each action does, under the action choice */
 export const RULE_TYPE_HINTS: Record<RuleType, MessageKey> = {
     [RuleTypes.REDIRECT]: 'ruleTypeRedirectHint',
     [RuleTypes.HEADERS]: 'ruleTypeHeadersHint',
     [RuleTypes.BLOCK]: 'ruleTypeBlockHint',
 };
 
-/** Short names of the actions for the rule list */
 export const RULE_BADGE_LABELS: Record<RuleType, MessageKey> = {
     [RuleTypes.REDIRECT]: 'ruleBadgeRedirect',
     [RuleTypes.HEADERS]: 'ruleBadgeHeaders',

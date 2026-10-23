@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import type { Environment } from '#entities/environment';
 
-/** Whether the editor is open and which environment it shows; none means a new environment */
 export const useEnvironmentEditor = () => {
     const [editedEnvironment, setEditedEnvironment] = useState<NotRequired<Environment>>();
     const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -23,7 +22,6 @@ export const useEnvironmentEditor = () => {
 
     return {
         editedEnvironment,
-
         isEditorOpen,
 
         onEnvironmentCreate,

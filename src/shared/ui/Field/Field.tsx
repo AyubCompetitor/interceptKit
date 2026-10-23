@@ -18,6 +18,7 @@ export const Field: FCC<FieldProps> = ({ label, hint, className, children }) => 
             <span className={styles.label}>{label}</span>
             {children}
         </label>
+
         {hint && <span className={styles.hint}>{hint}</span>}
     </div>
 );

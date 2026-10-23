@@ -1,17 +1,28 @@
-import type { FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
-import { NO_ENVIRONMENT, useEnvironmentSelect } from '../../lib/useEnvironmentSelect.ts';
 import { useEnvironments } from '../../model/useEnvironments.ts';
 
 import { useTranslation } from '#shared/i18n';
 
 import styles from './EnvironmentSelect.module.css';
 
-/** Which environment fills the {{variables}} of the requests */
+const NO_ENVIRONMENT = '';
+
 export const EnvironmentSelect: FC = () => {
     const { t } = useTranslation();
     const { environments, activeEnvironment, isLoading, onEnvironmentChoose } = useEnvironments();
-    const { onChoiceChange } = useEnvironmentSelect(onEnvironmentChoose);
+
+    const onChoiceChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        const activeId = event.target.value;
+
+        if (activeId === NO_ENVIRONMENT) {
+            onEnvironmentChoose({});
+
+            return;
+        }
+
+        onEnvironmentChoose({ activeId });
+    };
 
     if (isLoading) {
         return null;
@@ -25,6 +36,7 @@ export const EnvironmentSelect: FC = () => {
             onChange={onChoiceChange}
         >
             <option value={NO_ENVIRONMENT}>{t('apiClientNoEnvironment')}</option>
+
             {environments.map(environment => (
                 <option key={environment.id} value={environment.id}>
                     {environment.name}

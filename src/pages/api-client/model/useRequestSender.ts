@@ -26,21 +26,25 @@ const mapErrorToSendState = (error: unknown): SendState => {
     }
 
     if (error instanceof Error) {
-        return { stateType: SendStateTypes.FAILED, reason: error.message };
+        return {
+            stateType: SendStateTypes.FAILED,
+            reason: error.message,
+        };
     }
 
-    return { stateType: SendStateTypes.FAILED, reason: UNKNOWN_ERROR };
+    return {
+        stateType: SendStateTypes.FAILED,
+        reason: UNKNOWN_ERROR,
+    };
 };
 
 const logHistoryFailure = (error: unknown) =>
     console.warn('[api-client] the request was not added to the history', error);
 
-/** The history keeps the request as typed: templates, never the values of variables */
 const saveToHistory = (typedRequest: ApiRequest, sentAt: number, response: NotRequired<ApiResponse>) => {
     addHistoryEntry(buildHistoryEntry(typedRequest, sentAt, response)).catch(logHistoryFailure);
 };
 
-/** Sends the requests of the tabs; access to a host is asked for inside the user's click, before anything else */
 export const useRequestSender = (onSendStateChange: (tabId: string, sendState: SendState) => void) => {
     const patterns = useHostPatterns();
     const controllers = useRef(new Map<string, AbortController>());
@@ -58,13 +62,14 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
             saveToHistory(typedRequest, sentAt, response);
         };
 
-        /** A cancelled request does not go to the history */
         const onFailure = (error: unknown) => {
             onSendStateChange(tabId, mapErrorToSendState(error));
 
-            if (!isAbortError(error)) {
-                saveToHistory(typedRequest, sentAt, undefined);
+            if (isAbortError(error)) {
+                return;
             }
+
+            saveToHistory(typedRequest, sentAt, undefined);
         };
 
         sendRequest(outgoing, controller.signal).then(onResponse).catch(onFailure);
@@ -73,6 +78,7 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
     const onRequestSend = (draft: RequestDraft, environment: NotRequired<Environment>) => {
         const tabId = draft.id;
         const typedRequest = buildApiRequest(draft);
+
         const { request, missingNames } = resolveRequestVariables(typedRequest, environment);
 
         if (missingNames.length > 0) {
@@ -91,6 +97,7 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
 
         const outgoing = result.value;
         const { hostname } = new URL(outgoing.url);
+
         const isCovered = patterns !== undefined && isHostCovered(hostname, patterns);
 
         if (isCovered) {

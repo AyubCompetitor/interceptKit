@@ -11,13 +11,11 @@ import { BODY_TYPE_LABELS, BODY_TYPE_LANGUAGES } from './mockLabels.ts';
 import styles from './MockForm.module.css';
 import { MockHeaderList } from './MockHeaderList.tsx';
 
-/** Status codes the browser lets a page see in a response */
 const STATUS_RANGE = {
     MIN: 200,
     MAX: 599,
 } as const;
 
-/** What the page receives instead of the real response */
 export const MockResponseFields: FC<MockDraftFields> = ({ draft, onDraftChange }) => {
     const { t } = useTranslation();
     const { onStatusChange, onDelayChange, onBodyTypeChange, onBodyChange, onHeadersChange } = useMockDraftFields(

@@ -21,18 +21,18 @@ import type { SendState } from './sendState.ts';
 
 const logSaveFailure = (error: unknown) => console.warn('[api-client] open tabs were not saved', error);
 
-/** The open requests of the page: restored from the last visit and saved a moment after every change */
 export const useRequestTabs = () => {
     const [state, setState] = useState<NotRequired<RequestTabs>>();
 
     useEffect(() => {
-        /** Lives in the effect: tabs that arrive after cleanup are dropped */
         let isActive = true;
 
         const onTabsRestore = (nextState: RequestTabs) => {
-            if (isActive) {
-                setState(nextState);
+            if (!isActive) {
+                return;
             }
+
+            setState(nextState);
         };
 
         readRecord(apiClientDatabase, openRequestsStore, OPEN_REQUESTS_KEY)
@@ -45,7 +45,7 @@ export const useRequestTabs = () => {
     }, []);
 
     useEffect(() => {
-        if (state === undefined) {
+        if (!state) {
             return;
         }
 
@@ -59,7 +59,6 @@ export const useRequestTabs = () => {
     const activeTab = state && getActiveTab(state);
     const isLoading = state === undefined;
 
-    /** Changes are ignored until the saved tabs are back */
     const updateState = (update: (current: RequestTabs) => RequestTabs) => {
         setState(current => current && update(current));
     };
@@ -80,7 +79,6 @@ export const useRequestTabs = () => {
         updateState(current => closeRequestTab(current, tabId));
     };
 
-    /** An edit belongs to the tab on the screen */
     const onDraftChange = (patch: RequestDraftPatch) => {
         updateState(current => updateTabDraft(current, current.activeId, patch));
     };

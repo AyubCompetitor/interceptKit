@@ -16,8 +16,10 @@ import { EnvironmentRow } from './EnvironmentRow.tsx';
 export const EnvironmentPanel: FC = () => {
     const { t } = useTranslation();
     const { environments, activeEnvironment, isLoading, isActionFailed, onEnvironmentDelete } = useEnvironments();
+
     const { editedEnvironment, isEditorOpen, onEnvironmentCreate, onEnvironmentEdit, onEditorClose } =
         useEnvironmentEditor();
+
     const { environmentToDelete, onDeleteRequest, onDeleteCancel, onDeleteConfirm } =
         useEnvironmentDeletion(onEnvironmentDelete);
 
@@ -25,11 +27,9 @@ export const EnvironmentPanel: FC = () => {
         return null;
     }
 
-    const hasEnvironments = environments.length > 0;
-
     return (
         <section aria-label={t('apiClientEnvironments')} className={styles.panel}>
-            {hasEnvironments && (
+            {!!environments.length && (
                 <ul className={styles.list}>
                     {environments.map(environment => (
                         <EnvironmentRow
@@ -43,7 +43,7 @@ export const EnvironmentPanel: FC = () => {
                 </ul>
             )}
 
-            {!hasEnvironments && (
+            {!environments.length && (
                 <Typography color={TypographyColors.HINT} size={TypographySizes.SMALL}>
                     {t('apiClientEnvironmentsEmpty')}
                 </Typography>

@@ -21,9 +21,11 @@ export const ChoiceSelect = <T extends string>({ label, value, labels, onChange 
     const choices = Object.keys(labels).filter(isChoice);
 
     const onSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        if (isChoice(event.target.value)) {
-            onChange(event.target.value);
+        if (!isChoice(event.target.value)) {
+            return;
         }
+
+        onChange(event.target.value);
     };
 
     return (

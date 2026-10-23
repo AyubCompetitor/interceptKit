@@ -15,7 +15,6 @@ interface SidebarProps {
     section: DashboardSection;
 }
 
-/** The API client opens in its own tab, like from the popup */
 const API_CLIENT_URL = `/${EXTENSION_PAGES.API_CLIENT}`;
 
 export const Sidebar: FC<SidebarProps> = ({ section }) => {

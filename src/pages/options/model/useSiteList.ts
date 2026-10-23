@@ -5,13 +5,14 @@ import { executeRpc } from '#shared/messaging';
 import { revokeHostAccess, useHostPatterns, useStorageItem } from '#shared/platform';
 
 export const useSiteList = () => {
-    const patterns = useHostPatterns();
-    const sites = useStorageItem(sitesItem);
     const [isRemoveFailed, setIsRemoveFailed] = useState(false);
     const [isMocksFailed, setIsMocksFailed] = useState(false);
 
-    const isLoading = sites === undefined;
+    const patterns = useHostPatterns();
+    const sites = useStorageItem(sitesItem);
+
     const mockPatterns = getMockPatterns(sites ?? [], patterns ?? []);
+    const isLoading = sites === undefined;
 
     const onSiteRemove = (pattern: string) => {
         revokeHostAccess(pattern)

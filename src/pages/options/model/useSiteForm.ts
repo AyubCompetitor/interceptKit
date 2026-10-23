@@ -18,7 +18,6 @@ export const useSiteForm = () => {
     const onApplyAccess = (isGranted: boolean) => {
         if (!isGranted) {
             setErrorKey(SITE_FORM_ERRORS.NOT_GRANTED);
-
             return;
         }
 
@@ -55,7 +54,6 @@ export const useSiteForm = () => {
         domain,
         errorKey,
         isWithSubdomains,
-
         onDomainChange,
         onSubdomainsChange,
         onSiteAdd,

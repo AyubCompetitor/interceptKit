@@ -17,7 +17,6 @@ interface EnvironmentEditorProps {
 
 export const EnvironmentEditor: FC<EnvironmentEditorProps> = ({ isOpen, environment, onClose }) => {
     const formId = useId();
-
     const { t } = useTranslation();
 
     const isNewEnvironment = environment === undefined;

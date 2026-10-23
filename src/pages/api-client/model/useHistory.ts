@@ -5,8 +5,8 @@ import { clearRecords, deleteRecord, useDatabaseRecords } from '#shared/platform
 
 /** Sent requests, newest first; the list follows changes made on any page of the extension */
 export const useHistory = () => {
-    const records = useDatabaseRecords(apiClientDatabase, historyStore);
     const [isActionFailed, setIsActionFailed] = useState(false);
+    const records = useDatabaseRecords(apiClientDatabase, historyStore);
 
     const entries = sortHistoryEntries(records ?? []);
     const isLoading = !records;
@@ -25,10 +25,8 @@ export const useHistory = () => {
 
     return {
         entries,
-
         isLoading,
         isActionFailed,
-
         onEntryDelete,
         onHistoryClear,
     };

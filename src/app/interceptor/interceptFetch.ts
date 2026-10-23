@@ -53,7 +53,6 @@ const getMockRequest = (input: RequestInfo | URL, init: NotRequired<RequestInit>
     };
 };
 
-/** Statuses such as 204 refuse even an empty body, so no text means no body at all */
 const getMockBody = (mock: PageMock): Nullable<string> => {
     const hasBody = mock.response.body !== '';
 
@@ -70,7 +69,6 @@ const buildMockResponse = (mock: PageMock, url: string): Response => {
         headers: buildMockHeaders(mock.response),
     });
 
-    /** A built response has an empty URL, while pages may read it */
     Object.defineProperty(response, 'url', { value: url });
 
     return response;

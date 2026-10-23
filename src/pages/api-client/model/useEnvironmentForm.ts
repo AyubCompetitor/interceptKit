@@ -34,7 +34,6 @@ export const useEnvironmentForm = (environment: NotRequired<Environment>, onSave
     return {
         draft,
         saveError,
-
         onDraftChange,
         onEnvironmentSubmit,
     };

@@ -24,3 +24,31 @@ export const watchHostAccess = (listener: VoidFunction): VoidFunction => {
         chrome.permissions.onRemoved.removeListener(listener);
     };
 };
+
+/** Calls listener with the sorted host patterns the extension holds now and after each change, until stopped */
+export const subscribeHostPatterns = (listener: (patterns: string[]) => void): VoidFunction => {
+    let isSubscribed = true;
+
+    const updatePermissions = (patterns: string[]) => {
+        if (!isSubscribed) {
+            return;
+        }
+
+        listener(patterns.toSorted());
+    };
+
+    const reloadPermissions = () => {
+        getHostPermissions()
+            .then(updatePermissions)
+            .catch(() => updatePermissions([]));
+    };
+
+    const stopWatching = watchHostAccess(reloadPermissions);
+
+    reloadPermissions();
+
+    return () => {
+        isSubscribed = false;
+        stopWatching();
+    };
+};

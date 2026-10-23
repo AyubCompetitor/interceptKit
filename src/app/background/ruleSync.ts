@@ -25,7 +25,6 @@ const RULE_FEATURES: Record<Rule['type'], Feature> = {
 };
 
 const isRuleActive = (rule: Rule, policy: ManagedPolicy): boolean => {
-    /** Only an explicit false forbids user rules: without a policy the field is absent */
     const isForbiddenUserRule = rule.source === Sources.USER && policy.allowUserRules === false;
 
     if (!rule.enabled || isForbiddenUserRule) {

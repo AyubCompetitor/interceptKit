@@ -12,9 +12,7 @@ interface IconProps {
     className?: NotRequired<string>;
 }
 
-/** Outline icons on a 20 × 20 grid, drawn with the current text color */
 const ICON_SHAPES: Record<IconName, ReactNode> = {
-    /** A request line that forks off to a new destination */
     [IconNames.BRAND]: <path d='M3 13.5h4.5c3 0 3.5-7 7-7H17M14.5 4l2.5 2.5L14.5 9M7.5 13.5H17' />,
     [IconNames.PLUS]: <path d='M10 4.5v11M4.5 10h11' />,
     [IconNames.EDIT]: <path d='M12.5 4.5l3 3L8 15H5v-3zM11 6l3 3' />,

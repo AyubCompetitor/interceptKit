@@ -25,7 +25,6 @@ export const useEnvironmentDeletion = (onEnvironmentDelete: (environment: Enviro
 
     return {
         environmentToDelete,
-
         onDeleteRequest,
         onDeleteCancel,
         onDeleteConfirm,

@@ -25,7 +25,6 @@ export const useMockDeletion = (onMockDelete: (mock: Mock) => void) => {
 
     return {
         mockToDelete,
-
         onDeleteRequest,
         onDeleteCancel,
         onDeleteConfirm,

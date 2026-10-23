@@ -3,10 +3,10 @@ import { lazy, Suspense, type FC } from 'react';
 import { Button, ButtonSizes } from '../Button/index.ts';
 
 import { useTranslation } from '#shared/i18n';
+import { formatJsonText, noop } from '#shared/lib';
 
 import styles from './CodeEditor.module.css';
-import type { CodeLanguage } from './types.ts';
-import { useCodeEditor } from './useCodeEditor.ts';
+import { CodeLanguages, type CodeLanguage } from './types.ts';
 
 interface CodeEditorProps {
     /** Visible name of the editor, also the accessible name of its text */
@@ -23,7 +23,7 @@ interface CodeEditorProps {
     minRows?: number;
     /** Lines shown before the editor scrolls */
     maxRows?: number;
-    /** Called with the whole text after every change; a read-only editor needs none */
+    /** Called with the whole text after every change */
     onChange?: (value: string) => void;
 }
 
@@ -32,16 +32,12 @@ const DEFAULT_ROWS = {
     MAX: 20,
 } as const;
 
-/** What a read-only editor does with changes it never makes */
-const onTextIgnore = () => {};
-
 const CodeEditorView = lazy(async () => {
     const module = await import('./CodeEditorView.tsx');
 
     return { default: module.CodeEditorView };
 });
 
-/** A code editor for JSON and text that keeps a strict CSP; CodeMirror loads with the first editor shown */
 export const CodeEditor: FC<CodeEditorProps> = ({
     label,
     hint,
@@ -50,26 +46,46 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     isReadOnly = false,
     minRows = DEFAULT_ROWS.MIN,
     maxRows = DEFAULT_ROWS.MAX,
-    onChange = onTextIgnore,
+    onChange = noop,
 }) => {
     const { t } = useTranslation();
-    const { isJson, isFormattable, onFormat } = useCodeEditor(value, language, onChange);
 
-    const settings = { language, label, isReadOnly, minRows, maxRows };
-    const placeholderHeight = `calc(${minRows}lh + 2 * var(--space-s) + 2px)`;
-    const hasFormatButton = isJson && !isReadOnly;
+    const isJson = language === CodeLanguages.JSON;
+    const formattedJson = isJson ? formatJsonText(value) : undefined;
+
+    const isFormatButtonAvailable = isJson && !isReadOnly;
+    const isFormattable = formattedJson !== undefined && formattedJson !== value;
+
+    const onFormat = () => {
+        if (formattedJson === undefined) {
+            return;
+        }
+
+        onChange(formattedJson);
+    };
 
     return (
         <div className={styles.editor}>
             <span className={styles.label}>{label}</span>
 
-            <Suspense fallback={<div className={styles.placeholder} style={{ minHeight: placeholderHeight }} />}>
-                <CodeEditorView settings={settings} value={value} onChange={onChange} />
+            <Suspense
+                fallback={
+                    <div
+                        className={styles.placeholder}
+                        style={{ minHeight: `calc(${minRows}lh + 2 * var(--space-s) + 2px)` }}
+                    />
+                }
+            >
+                <CodeEditorView
+                    settings={{ language, label, isReadOnly, minRows, maxRows }}
+                    value={value}
+                    onChange={onChange}
+                />
             </Suspense>
 
             {hint && <span className={styles.hint}>{hint}</span>}
 
-            {hasFormatButton && (
+            {isFormatButtonAvailable && (
                 <Button className={styles.format} disabled={!isFormattable} size={ButtonSizes.SMALL} onClick={onFormat}>
                     {t('codeEditorFormat')}
                 </Button>

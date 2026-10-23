@@ -34,7 +34,6 @@ export const useRuleForm = (rule: NotRequired<Rule>, onSaved: VoidFunction) => {
     return {
         draft,
         saveError,
-
         onDraftChange,
         onRuleSubmit,
     };

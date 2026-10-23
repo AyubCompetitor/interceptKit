@@ -17,14 +17,24 @@ const mapBodyTexts = (body: RequestBody, mapText: TextMapper): RequestBody => {
     }
 
     if (body.bodyType === RequestBodyTypes.FORM) {
-        return { ...body, fields: body.fields.map(field => mapPairTexts(field, mapText)) };
+        return {
+            ...body,
+            fields: body.fields.map(field => mapPairTexts(field, mapText)),
+        };
     }
 
     if (body.bodyType === RequestBodyTypes.RAW) {
-        return { ...body, text: mapText(body.text), contentType: mapText(body.contentType) };
+        return {
+            ...body,
+            text: mapText(body.text),
+            contentType: mapText(body.contentType),
+        };
     }
 
-    return { ...body, text: mapText(body.text) };
+    return {
+        ...body,
+        text: mapText(body.text),
+    };
 };
 
 /** The request with every text the user typed changed, for example with {{variables}} filled in */

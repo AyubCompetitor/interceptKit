@@ -18,7 +18,6 @@ interface RequestLineProps extends RequestDraftFields {
 
 const URL_PLACEHOLDER = 'https://api.example.com/users';
 
-/** The method, the URL and the button that sends them; the URL is text, since it will hold {{variables}} */
 export const RequestLine: FC<RequestLineProps> = ({ draft, isSending, onDraftChange, onCancel }) => {
     const { t } = useTranslation();
     const { onMethodChange, onUrlChange } = useRequestDraftFields(draft, onDraftChange);

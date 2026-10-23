@@ -42,13 +42,6 @@ export const RulesSection: FC = () => {
     const { ruleToDelete, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useRuleDeletion(onRuleDelete);
     const { editedRule, isEditorOpen, onRuleCreate, onRuleEdit, onEditorClose } = useRuleEditor();
 
-    if (!rules || !patterns) {
-        return null;
-    }
-
-    const hasRules = rules.length > 0;
-    const hasSites = patterns.length > 0;
-
     const newRuleButton = (
         <Button variant={ButtonVariants.PRIMARY} onClick={onRuleCreate}>
             <Icon name={IconNames.PLUS} />
@@ -56,10 +49,14 @@ export const RulesSection: FC = () => {
         </Button>
     );
 
+    if (!rules || !patterns) {
+        return null;
+    }
+
     return (
         <Flex aria-labelledby={titleId} as='section' direction='column' gap={Spaces.XL}>
             <SectionHeader
-                action={hasRules && newRuleButton}
+                action={!!rules.length && newRuleButton}
                 description={t('rulesDescription')}
                 title={t('rulesTitle')}
                 titleId={titleId}
@@ -78,7 +75,7 @@ export const RulesSection: FC = () => {
                 </Notice>
             )}
 
-            {!hasSites && (
+            {!patterns.length && (
                 <Notice
                     action={
                         <a className={styles.noticeLink} href={SITES_HASH}>
@@ -90,7 +87,7 @@ export const RulesSection: FC = () => {
                 </Notice>
             )}
 
-            {hasRules && (
+            {!!rules.length && (
                 <ul className={styles.list}>
                     {rules.map(rule => (
                         <RuleRow
@@ -106,7 +103,7 @@ export const RulesSection: FC = () => {
                 </ul>
             )}
 
-            {!hasRules && (
+            {!rules.length && (
                 <EmptyState
                     action={newRuleButton}
                     description={t('rulesEmptyText')}

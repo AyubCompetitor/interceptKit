@@ -18,7 +18,6 @@ const CHOICE_ERRORS = {
     UNKNOWN_ENVIRONMENT: 'there is no environment with this id',
 } as const;
 
-/** No environment chosen: requests go without variables */
 const NO_CHOICE: EnvironmentChoice = {};
 
 const saveEnvironmentHandler = async (environment: Environment, storageReady: Promise<void>): Promise<Environment> => {

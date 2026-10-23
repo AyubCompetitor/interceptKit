@@ -63,12 +63,18 @@ export const getResponseBodyView = (response: ApiResponse): ResponseBodyView => 
     const contentType = getResponseContentType(response);
 
     if (BODY_TYPE_RGXS.BINARY.test(contentType)) {
-        return { viewType: ResponseBodyViewTypes.BINARY, contentType };
+        return {
+            viewType: ResponseBodyViewTypes.BINARY,
+            contentType,
+        };
     }
 
     if (BODY_TYPE_RGXS.JSON.test(contentType)) {
         return getJsonView(response.body);
     }
 
-    return { viewType: ResponseBodyViewTypes.TEXT, text: response.body };
+    return {
+        viewType: ResponseBodyViewTypes.TEXT,
+        text: response.body,
+    };
 };

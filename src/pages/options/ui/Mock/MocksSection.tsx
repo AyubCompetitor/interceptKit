@@ -43,9 +43,6 @@ export const MocksSection: FC = () => {
         return null;
     }
 
-    const hasMocks = mocks.length > 0;
-    const hasMockSites = mockPatterns.length > 0;
-
     const newMockButton = (
         <Button variant={ButtonVariants.PRIMARY} onClick={onMockCreate}>
             <Icon name={IconNames.PLUS} />
@@ -56,7 +53,7 @@ export const MocksSection: FC = () => {
     return (
         <Flex aria-labelledby={titleId} as='section' direction='column' gap={Spaces.XL}>
             <SectionHeader
-                action={hasMocks && newMockButton}
+                action={!!mocks.length && newMockButton}
                 description={t('mocksDescription')}
                 title={t('mocksTitle')}
                 titleId={titleId}
@@ -75,7 +72,7 @@ export const MocksSection: FC = () => {
                 </Notice>
             )}
 
-            {!hasMockSites && (
+            {!mockPatterns.length && (
                 <Notice
                     action={
                         <a className={styles.noticeLink} href={SITES_HASH}>
@@ -89,7 +86,7 @@ export const MocksSection: FC = () => {
 
             <Notice tone={NoticeTones.WARNING}>{t('mocksSecretsWarning')}</Notice>
 
-            {hasMocks && (
+            {!!mocks.length && (
                 <ul className={styles.list}>
                     {mocks.map(mock => (
                         <MockRow
@@ -103,7 +100,7 @@ export const MocksSection: FC = () => {
                 </ul>
             )}
 
-            {!hasMocks && (
+            {!mocks.length && (
                 <EmptyState
                     action={newMockButton}
                     description={t('mocksEmptyText')}

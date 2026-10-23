@@ -2,7 +2,6 @@ import { formatIssues, validate, type Store, type StoreItem, type StoredData } f
 
 const getStore = (name: Store): chrome.storage.StorageArea => chrome.storage[name];
 
-/** Validates a stored value */
 const parseStored = <T>(item: StoreItem<T>, raw: unknown): T => {
     if (raw === undefined) {
         return item.fallback;
@@ -10,13 +9,11 @@ const parseStored = <T>(item: StoreItem<T>, raw: unknown): T => {
 
     const result = validate(item.validator, raw);
 
-    if (result.ok) {
-        return result.value;
+    if (!result.ok) {
+        return item.fallback;
     }
 
-    console.warn(`[storage] ${item.area}.${item.key} is invalid, using defaults:`, formatIssues(result.issues));
-
-    return item.fallback;
+    return result.value;
 };
 
 export const readItem = async <T>(item: StoreItem<T>): Promise<T> => {
@@ -57,15 +54,41 @@ export const watchItem = <T>(item: StoreItem<T>, listener: (value: T) => void): 
     return () => chrome.storage.onChanged.removeListener(onChanged);
 };
 
+/** Calls listener with the value of the item now and after each change, until stopped */
+export const subscribeItem = <T>(item: StoreItem<T>, listener: (value: T) => void): VoidFunction => {
+    let isSubscribed = true;
+
+    const updateValue = (value: T) => {
+        if (!isSubscribed) {
+            return;
+        }
+
+        listener(value);
+    };
+
+    const stopWatching = watchItem(item, updateValue);
+
+    readItem(item)
+        .then(updateValue)
+        .catch(() => updateValue(item.fallback));
+
+    return () => {
+        isSubscribed = false;
+        stopWatching();
+    };
+};
+
 /** Whole-area access for schema migrations and the administrator's policy */
 export const readStoreData = async (name: Store): Promise<StoredData> => getStore(name).get(null);
 
 /** Calls listener whenever anything in the area changes */
 export const watchStoreChanges = (name: Store, listener: VoidFunction): VoidFunction => {
     const onChanged = (_changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
-        if (areaName === name) {
-            listener();
+        if (areaName !== name) {
+            return;
         }
+
+        listener();
     };
 
     chrome.storage.onChanged.addListener(onChanged);
@@ -89,7 +112,6 @@ export const writeStoreData = async (name: Store, storedData: StoredData): Promi
     await store.set({ ...storedData });
 };
 
-/** Closes storage.local to content scripts */
 export const restrictLocalStore = async (): Promise<void> => {
     await chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
 };

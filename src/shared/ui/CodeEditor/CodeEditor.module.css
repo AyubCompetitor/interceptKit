@@ -16,12 +16,10 @@
     font-size: var(--font-size-s);
 }
 
-/** CodeMirror lives in the shadow root of this element */
 .host {
     min-width: 0;
 }
 
-/** Keeps the place of the editor while CodeMirror loads, with the same line height */
 .placeholder {
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-m);

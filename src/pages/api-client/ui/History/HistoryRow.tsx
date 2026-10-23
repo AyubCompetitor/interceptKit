@@ -1,12 +1,16 @@
 import type { FC } from 'react';
 
 import { isErrorStatus, type ApiRequest, type HistoryEntry } from '#entities/request';
+import type { Locale } from '#shared/config';
 import { useTranslation } from '#shared/i18n';
 import { Button, ButtonSizes, ButtonVariants, Icon, IconNames, joinClassNames } from '#shared/ui';
 
-import { formatSentAt } from './historyFormat.ts';
 import styles from './HistoryRow.module.css';
 import { formatRequestUrl } from '../Tabs/requestTabTitle.ts';
+
+/** Date and time of sending in the language of the interface */
+const formatSentAt = (sentAt: number, locale: Locale): string =>
+    new Intl.DateTimeFormat(locale, { dateStyle: 'short', timeStyle: 'short' }).format(sentAt);
 
 interface HistoryRowProps {
     /** A request that went out */
@@ -19,9 +23,10 @@ interface HistoryRowProps {
 
 /** The whole row opens the request; the status is red for errors and for a request that got no response */
 export const HistoryRow: FC<HistoryRowProps> = ({ entry, onOpen, onDelete }) => {
+    const { request, response } = entry;
+
     const { locale, t } = useTranslation();
 
-    const { request, response } = entry;
     const url = formatRequestUrl(request.url) ?? '';
     const status = response === undefined ? t('apiClientHistoryNoResponse') : String(response.status);
     const isFailed = response === undefined || isErrorStatus(response.status);

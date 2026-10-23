@@ -19,7 +19,6 @@ interface SegmentedControlProps<T extends string> {
     onChange: (value: T) => void;
 }
 
-/** A few choices side by side: native radio buttons, so arrows move the selection */
 export const SegmentedControl = <T extends string>({
     legend,
     isLegendHidden = false,
@@ -28,22 +27,23 @@ export const SegmentedControl = <T extends string>({
     onChange,
 }: SegmentedControlProps<T>) => {
     const name = useId();
-
     const { t } = useTranslation();
 
     const isChoice = (candidate: string): candidate is T => Object.hasOwn(labels, candidate);
-
     const choices = Object.keys(labels).filter(isChoice);
 
     const onRadioChange = (event: ChangeEvent<HTMLInputElement>) => {
-        if (isChoice(event.target.value)) {
-            onChange(event.target.value);
+        if (!isChoice(event.target.value)) {
+            return;
         }
+
+        onChange(event.target.value);
     };
 
     return (
         <fieldset className={styles.group}>
             <legend className={joinClassNames(styles.legend, isLegendHidden && styles.hiddenLegend)}>{legend}</legend>
+
             <div className={styles.track}>
                 {choices.map(choice => (
                     <label key={choice} className={styles.segment}>
@@ -55,6 +55,7 @@ export const SegmentedControl = <T extends string>({
                             value={choice}
                             onChange={onRadioChange}
                         />
+
                         {t(labels[choice])}
                     </label>
                 ))}

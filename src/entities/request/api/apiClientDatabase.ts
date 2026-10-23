@@ -3,7 +3,6 @@ import { openRequestsValidator, type OpenRequests } from '../model/openRequests.
 
 import { defineDatabase, defineDatabaseStore } from '#shared/lib';
 
-/** Sent requests, oldest dropped first */
 export const historyStore = defineDatabaseStore<HistoryEntry>({
     name: 'history',
     keyPath: 'id',
@@ -11,14 +10,12 @@ export const historyStore = defineDatabaseStore<HistoryEntry>({
     validator: historyEntryValidator,
 });
 
-/** The open tabs: one record under OPEN_REQUESTS_KEY */
 export const openRequestsStore = defineDatabaseStore<OpenRequests>({
     name: 'openRequests',
     keyPath: 'id',
     validator: openRequestsValidator,
 });
 
-/** IndexedDB of the API client: bodies can be large, so they stay out of chrome.storage.local */
 export const apiClientDatabase = defineDatabase({
     name: 'interceptkit-api-client',
     version: 1,

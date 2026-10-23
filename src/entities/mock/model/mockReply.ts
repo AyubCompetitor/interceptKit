@@ -23,17 +23,16 @@ export const buildMockHeaders = (response: MockResponse): MockHeader[] => {
     const headers = enabledHeaders.map((header): MockHeader => [header.key.toLowerCase(), header.value]);
     const shownHeaders = headers.filter(isShownHeader);
 
-    const hasBody = response.body !== '';
-    const hasContentType = shownHeaders.some(isContentTypeHeader);
+    const isResponseBodyEmpty = response.body === '';
+    const isHasContentType = shownHeaders.some(isContentTypeHeader);
 
-    if (!hasBody || hasContentType) {
+    if (isResponseBodyEmpty || isHasContentType) {
         return shownHeaders;
     }
 
     return [...shownHeaders, [CONTENT_TYPE_HEADER, DEFAULT_CONTENT_TYPES[response.bodyType]]];
 };
 
-/** Value of a response header; repeated headers are joined like the browser joins them */
 export const getMockHeader = (headers: readonly MockHeader[], name: string): Nullable<string> => {
     const lowerName = name.toLowerCase();
     const values = headers.filter(header => header[0] === lowerName).map(header => header[1]);

@@ -1,6 +1,6 @@
-import type { FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
-import { useEnvironmentDraftFields } from '../../lib/useEnvironmentDraftFields.ts';
+import type { VariableDraft } from '../../model/environmentDraft.ts';
 import { useEnvironmentForm } from '../../model/useEnvironmentForm.ts';
 
 import type { Environment } from '#entities/environment';
@@ -23,9 +23,12 @@ interface EnvironmentFormProps {
 export const EnvironmentForm: FC<EnvironmentFormProps> = ({ formId, environment, onSaved }) => {
     const { t } = useTranslation();
     const { draft, saveError, onDraftChange, onEnvironmentSubmit } = useEnvironmentForm(environment, onSaved);
-    const { onNameChange, onVariablesChange } = useEnvironmentDraftFields(onDraftChange);
 
     const isSaveFailed = saveError !== undefined;
+
+    const onNameChange = (event: ChangeEvent<HTMLInputElement>) => onDraftChange({ name: event.target.value });
+
+    const onVariablesChange = (variables: VariableDraft[]) => onDraftChange({ variables });
 
     return (
         <form className={styles.form} id={formId} onSubmit={onEnvironmentSubmit}>

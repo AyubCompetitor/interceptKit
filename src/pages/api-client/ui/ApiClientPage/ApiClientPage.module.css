@@ -19,7 +19,6 @@
     font-weight: 600;
 }
 
-/** Tools of the whole page sit at the far end of the header */
 .tools {
     display: flex;
     align-items: center;

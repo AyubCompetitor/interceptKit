@@ -3,10 +3,6 @@ import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 
-/**
- * Syntax colors follow the monochrome design: weight and shade, color only for errors.
- * Custom properties reach into the shadow root, so the tokens of the page apply.
- */
 const highlightStyle = HighlightStyle.define([
     { tag: tags.propertyName, color: 'var(--color-text)', fontWeight: '600' },
     { tag: tags.string, color: 'var(--color-text-muted)' },
@@ -15,7 +11,6 @@ const highlightStyle = HighlightStyle.define([
     { tag: tags.invalid, color: 'var(--color-danger-text)' },
 ]);
 
-/** The lint theme draws markers and underlines as data: images, which a strict img-src blocks */
 const LINT_STYLES = {
     '.cm-lintRange-error, .cm-lintRange-warning, .cm-lintRange-info, .cm-lintRange-hint': {
         backgroundImage: 'none',
@@ -47,7 +42,6 @@ const LINT_STYLES = {
     },
 };
 
-/** The editor looks like the fields of the form: the same border, background and focus ring */
 export const buildCodeEditorTheme = (minRows: number, maxRows: number): Extension => [
     EditorView.theme({
         '&': {
@@ -94,5 +88,6 @@ export const buildCodeEditorTheme = (minRows: number, maxRows: number): Extensio
         },
         ...LINT_STYLES,
     }),
+
     syntaxHighlighting(highlightStyle),
 ];

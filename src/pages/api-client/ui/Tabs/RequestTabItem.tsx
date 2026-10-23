@@ -1,6 +1,5 @@
 import type { FC } from 'react';
 
-import { useRequestTabItem } from '../../lib/useRequestTabItem.ts';
 import type { RequestTab } from '../../model/requestTabs.ts';
 
 import { useTranslation } from '#shared/i18n';
@@ -22,9 +21,10 @@ interface RequestTabItemProps {
 
 export const RequestTabItem: FC<RequestTabItemProps> = ({ tab, isActive, onSelect, onClose }) => {
     const { t } = useTranslation();
-    const { onTabSelect, onTabClose } = useRequestTabItem(tab.draft.id, onSelect, onClose);
-
     const title = getRequestTabTitle(tab.draft) ?? t('apiClientNewTab');
+
+    const onTabSelect = () => onSelect(tab.draft.id);
+    const onTabClose = () => onClose(tab.draft.id);
 
     return (
         <li className={joinClassNames(styles.item, isActive && styles.isActive)}>

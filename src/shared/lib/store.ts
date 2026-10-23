@@ -3,7 +3,6 @@ import type { Validator } from './validation.ts';
 export enum Stores {
     LOCAL = 'local',
     SESSION = 'session',
-    /** Read-only area filled by the administrator's policy */
     MANAGED = 'managed',
 }
 

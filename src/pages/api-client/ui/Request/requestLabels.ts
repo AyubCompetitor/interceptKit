@@ -4,7 +4,6 @@ import { RequestBodyTypes, type RequestBodyType } from '#entities/request';
 import type { MessageKey } from '#shared/i18n';
 import type { KeyValueTableLabels } from '#shared/ui';
 
-/** Parts of the request editor; the key order is the order of the options */
 export const REQUEST_SECTION_LABELS: Record<RequestSection, MessageKey> = {
     [RequestSections.PARAMS]: 'apiClientSectionParams',
     [RequestSections.HEADERS]: 'apiClientSectionHeaders',
@@ -12,7 +11,6 @@ export const REQUEST_SECTION_LABELS: Record<RequestSection, MessageKey> = {
     [RequestSections.SETTINGS]: 'apiClientSectionSettings',
 };
 
-/** Body formats; the key order is the order of the options */
 export const BODY_TYPE_LABELS: Record<RequestBodyType, MessageKey> = {
     [RequestBodyTypes.NONE]: 'apiClientBodyNone',
     [RequestBodyTypes.JSON]: 'apiClientBodyJson',

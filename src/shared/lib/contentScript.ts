@@ -1,14 +1,14 @@
 /** Where a content script runs */
 export enum ScriptWorlds {
-    /** Shared with the page's own scripts, without extension APIs */
+    /** Shared with the page own scripts, without extension APIs */
     MAIN = 'MAIN',
-    /** The extension's own world on the page, with runtime messaging */
+    /** The extension own world on the page, with runtime messaging */
     ISOLATED = 'ISOLATED',
 }
 
 export type ScriptWorld = `${ScriptWorlds}`;
 
-/** A content script the extension registers at run time; shared/platform executes it */
+/** A content script the extension registers at run time */
 export interface ContentScriptSpec {
     /** Unique id of the registration */
     readonly id: string;

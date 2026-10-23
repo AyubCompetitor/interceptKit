@@ -5,12 +5,11 @@ import { Icon, IconNames } from '../Icon/index.ts';
 import { Typography, TypographyColors, TypographySizes } from '../Typography/index.ts';
 
 import { useTranslation } from '#shared/i18n';
-import type { KeyValueRow } from '#shared/lib';
+import { createKeyValueRow, updateKeyValueRow, type KeyValue, type KeyValueRow } from '#shared/lib';
 
 import styles from './KeyValueTable.module.css';
 import { KeyValueTableRow } from './KeyValueTableRow.tsx';
 import type { KeyValueTableLabels } from './types.ts';
-import { useKeyValueTable } from './useKeyValueTable.ts';
 
 interface KeyValueTableProps {
     /** Texts of the columns, the controls and the empty table */
@@ -26,13 +25,17 @@ interface KeyValueTableProps {
 /** Pairs that can be switched off; every field of a row is named for assistive technology, so the column titles are visual */
 export const KeyValueTable: FC<KeyValueTableProps> = ({ labels, rows, isKeyRequired = false, onRowsChange }) => {
     const { t } = useTranslation();
-    const { onRowAdd, onRowChange, onRowRemove } = useKeyValueTable(rows, onRowsChange);
 
-    const hasRows = rows.length > 0;
+    const onRowAdd = () => onRowsChange([...rows, createKeyValueRow()]);
+
+    const onRowChange = (rowId: string, patch: Partial<KeyValue>) =>
+        onRowsChange(updateKeyValueRow(rows, rowId, patch));
+
+    const onRowRemove = (rowId: string) => onRowsChange(rows.filter(row => row.rowId !== rowId));
 
     return (
         <div className={styles.content}>
-            {hasRows && (
+            {!!rows.length && (
                 <div className={styles.table}>
                     <div aria-hidden='true' className={styles.columns}>
                         <span />
@@ -40,6 +43,7 @@ export const KeyValueTable: FC<KeyValueTableProps> = ({ labels, rows, isKeyRequi
                         <span>{t(labels.value)}</span>
                         <span />
                     </div>
+
                     {rows.map(row => (
                         <KeyValueTableRow
                             key={row.rowId}
@@ -53,7 +57,7 @@ export const KeyValueTable: FC<KeyValueTableProps> = ({ labels, rows, isKeyRequi
                 </div>
             )}
 
-            {!hasRows && (
+            {!rows.length && (
                 <Typography color={TypographyColors.HINT} size={TypographySizes.SMALL}>
                     {t(labels.empty)}
                 </Typography>

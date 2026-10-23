@@ -57,6 +57,7 @@ export const Modal: FCC<ModalProps> = ({ isOpen, onClose, title, size = ModalSiz
                 </Button>
             </header>
             <div className={styles.body}>{isOpen && children}</div>
+
             {footer && <footer className={styles.footer}>{footer}</footer>}
         </dialog>
     );

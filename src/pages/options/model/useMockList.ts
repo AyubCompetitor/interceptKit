@@ -6,10 +6,11 @@ import { executeRpc } from '#shared/messaging';
 import { useHostPatterns, useStorageItem } from '#shared/platform';
 
 export const useMockList = () => {
+    const [isActionFailed, setIsActionFailed] = useState(false);
+
     const mocks = useStorageItem(mocksItem);
     const sites = useStorageItem(sitesItem);
     const patterns = useHostPatterns();
-    const [isActionFailed, setIsActionFailed] = useState(false);
 
     const isLoading = !mocks || !sites || !patterns;
     const mockPatterns = getMockPatterns(sites ?? [], patterns ?? []);

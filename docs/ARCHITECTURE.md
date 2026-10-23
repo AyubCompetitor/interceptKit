@@ -47,7 +47,7 @@ These rules are checked by `oxlint` (`.oxlintrc.json`): `no-restricted-imports` 
 | `chrome.storage.managed` | Administrator policy                                                                        | Read-only; validated field by field, see below                                                                        |
 | IndexedDB                | API client history and open tabs (`interceptkit-api-client`)                                | Written by the API client page itself; content scripts cannot reach the extension's IndexedDB                         |
 
-Every value is validated on read and on write with the dependency-free validators in `shared/lib/validation.ts`. Corrupted or foreign data degrades to defaults with a warning instead of crashing; invalid data is never written. The layout of `chrome.storage.local` is versioned (`schemaVersion`); migrations run in the service worker before any write.
+Every value is validated on read and on write with the dependency-free validators in `shared/lib/validation.ts`. Corrupted or foreign data degrades to defaults instead of crashing; invalid data is never written. The layout of `chrome.storage.local` is versioned (`schemaVersion`); migrations run in the service worker before any write.
 
 **Administrator policy fails closed.** If a restricting policy field is present but invalid, it is read in its most restrictive form (for example, a broken `allowedHosts` allows no hosts) and the problem is reported, so an administrator's typo never silently lifts a restriction.
 
@@ -139,7 +139,7 @@ History:
 
 - Every request that went out, with a response or without one, goes to the history; a cancelled one does not. An entry keeps the request as typed, with `{{variables}}` and without their values, plus the status, time and size of the response. Response bodies are not kept.
 - The history keeps the last 100 requests (`API_CLIENT_CONFIG.HISTORY_LIMIT` in `shared/config`); a new entry drops the oldest ones in the same step. A request from the history opens as a copy in a new tab.
-- The history and the open tabs live in IndexedDB, not in `chrome.storage.local`: bodies can be large and must never take space from rules, and a write there wakes no service worker. The page writes them itself through `shared/platform/database.ts`, a small adapter without a library. Like `chrome.storage`, it validates every record on read and on write and skips a broken record with a warning.
+- The history and the open tabs live in IndexedDB, not in `chrome.storage.local`: bodies can be large and must never take space from rules, and a write there wakes no service worker. The page writes them itself through `shared/platform/database/database.ts`, a small adapter without a library. Like `chrome.storage`, it validates every record on read and on write and skips a broken record.
 - A page that changes the records tells the other pages of the extension through a `BroadcastChannel`, so two open API client pages show the same history. The open tabs are one record: two pages open at once overwrite each other's tabs.
 
 Planned:

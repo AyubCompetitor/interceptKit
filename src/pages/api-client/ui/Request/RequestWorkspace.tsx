@@ -29,7 +29,6 @@ interface RequestWorkspaceProps {
     onCancel: VoidFunction;
 }
 
-/** The open requests: their tabs, the editor of the one on the screen and its response */
 export const RequestWorkspace: FC<RequestWorkspaceProps> = ({
     tabs,
     activeTab,

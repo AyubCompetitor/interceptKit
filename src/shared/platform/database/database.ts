@@ -1,13 +1,29 @@
 import { formatIssues, validate, type Database, type DatabaseStore } from '#shared/lib';
 
-/** One open connection per database for the life of the page */
-const connections = new Map<string, Promise<IDBDatabase>>();
+const CONNECTIONS = new Map<string, Promise<IDBDatabase>>();
 
 const READ_WRITE = 'readwrite';
 
 const NEWEST_FIRST = 'prev';
 
 const getChannelName = (database: Database): string => `${database.name}:changes`;
+
+const getObjectStore = (
+    store: DatabaseStore<unknown>,
+    connection: IDBDatabase,
+    transaction: Nullable<IDBTransaction>,
+) => {
+    const isStoreContains = connection.objectStoreNames.contains(store.name);
+
+    if (isStoreContains && transaction) {
+        return transaction.objectStore(store.name);
+    }
+
+    return connection.createObjectStore(store.name, { keyPath: store.keyPath });
+};
+
+const getConnectionTransactionStore = <T = unknown>(store: DatabaseStore<T>, connection: IDBDatabase) =>
+    connection.transaction(store.name).objectStore(store.name);
 
 const waitForRequest = <T>(request: IDBRequest<T>): Promise<T> =>
     new Promise((resolve, reject) => {
@@ -29,13 +45,10 @@ const upgradeDatabase = (database: Database, request: IDBOpenDBRequest): void =>
     const transaction = request.transaction;
 
     for (const store of database.stores) {
-        const hasStore = connection.objectStoreNames.contains(store.name);
-        const objectStore =
-            hasStore && transaction
-                ? transaction.objectStore(store.name)
-                : connection.createObjectStore(store.name, { keyPath: store.keyPath });
+        const objectStore = getObjectStore(store, connection, transaction);
+        const isNewIndex = store.orderBy !== undefined && !objectStore.indexNames.contains(store.orderBy);
 
-        if (store.orderBy !== undefined && !objectStore.indexNames.contains(store.orderBy)) {
+        if (isNewIndex) {
             objectStore.createIndex(store.orderBy, store.orderBy);
         }
     }
@@ -50,10 +63,9 @@ const openConnection = (database: Database): Promise<IDBDatabase> =>
         request.addEventListener('success', () => {
             const connection = request.result;
 
-            /** Another page opens a newer version: this one lets it go and reconnects on its next call */
             connection.addEventListener('versionchange', () => {
                 connection.close();
-                connections.delete(database.name);
+                CONNECTIONS.delete(database.name);
             });
 
             resolve(connection);
@@ -61,7 +73,7 @@ const openConnection = (database: Database): Promise<IDBDatabase> =>
     });
 
 const getConnection = (database: Database): Promise<IDBDatabase> => {
-    const cached = connections.get(database.name);
+    const cached = CONNECTIONS.get(database.name);
 
     if (cached !== undefined) {
         return cached;
@@ -69,14 +81,14 @@ const getConnection = (database: Database): Promise<IDBDatabase> => {
 
     const connection = openConnection(database);
 
-    connections.set(database.name, connection);
-    connection.catch(() => connections.delete(database.name));
+    CONNECTIONS.set(database.name, connection);
+
+    connection.catch(() => CONNECTIONS.delete(database.name));
 
     return connection;
 };
 
-/** Tells every page of the extension, this one included, that the records of the store changed */
-const notifyChange = (database: Database, store: DatabaseStore<unknown>): void => {
+const sendChangesNotify = (database: Database, store: DatabaseStore<unknown>): void => {
     const channel = new BroadcastChannel(getChannelName(database));
 
     // oxlint-disable-next-line unicorn/require-post-message-target-origin -- a BroadcastChannel takes no target origin and reaches only pages of the extension
@@ -87,21 +99,28 @@ const notifyChange = (database: Database, store: DatabaseStore<unknown>): void =
 const parseRecord = <T>(store: DatabaseStore<T>, raw: unknown): NotRequired<T> => {
     const result = validate(store.validator, raw);
 
-    if (result.ok) {
-        return result.value;
+    if (!result.ok) {
+        return;
     }
 
-    console.warn(`[database] a record of ${store.name} is invalid and skipped:`, formatIssues(result.issues));
-
-    return;
+    return result.value;
 };
 
-/** Every valid record of the store, in key order; broken ones are skipped with a warning */
 export const readRecords = async <T>(database: Database, store: DatabaseStore<T>): Promise<T[]> => {
     const connection = await getConnection(database);
-    const records = await waitForRequest(connection.transaction(store.name).objectStore(store.name).getAll());
+    const records: unknown[] = await waitForRequest(getConnectionTransactionStore(store, connection).getAll());
 
-    return records.map(record => parseRecord(store, record)).filter(record => record !== undefined);
+    const parsedRecords: T[] = [];
+
+    for (const record of records) {
+        const parsed = parseRecord(store, record);
+
+        if (parsed !== undefined) {
+            parsedRecords.push(parsed);
+        }
+    }
+
+    return parsedRecords;
 };
 
 export const readRecord = async <T>(
@@ -110,7 +129,7 @@ export const readRecord = async <T>(
     key: string,
 ): Promise<NotRequired<T>> => {
     const connection = await getConnection(database);
-    const record: unknown = await waitForRequest(connection.transaction(store.name).objectStore(store.name).get(key));
+    const record: unknown = await waitForRequest(getConnectionTransactionStore(store, connection).get(key));
 
     if (record === undefined) {
         return;
@@ -124,7 +143,7 @@ export const writeRecord = async <T>(database: Database, store: DatabaseStore<T>
     const result = validate(store.validator, record);
 
     if (!result.ok) {
-        throw new Error(`Refusing to store an invalid record of ${store.name}: ${formatIssues(result.issues)}`);
+        throw new Error(`Invalid record of ${store.name}: ${formatIssues(result.issues)}`);
     }
 
     const connection = await getConnection(database);
@@ -134,7 +153,7 @@ export const writeRecord = async <T>(database: Database, store: DatabaseStore<T>
 
     await waitForTransaction(transaction);
 
-    notifyChange(database, store);
+    sendChangesNotify(database, store);
 };
 
 export const deleteRecord = async (database: Database, store: DatabaseStore<unknown>, key: string): Promise<void> => {
@@ -145,7 +164,7 @@ export const deleteRecord = async (database: Database, store: DatabaseStore<unkn
 
     await waitForTransaction(transaction);
 
-    notifyChange(database, store);
+    sendChangesNotify(database, store);
 };
 
 export const clearRecords = async (database: Database, store: DatabaseStore<unknown>): Promise<void> => {
@@ -156,7 +175,7 @@ export const clearRecords = async (database: Database, store: DatabaseStore<unkn
 
     await waitForTransaction(transaction);
 
-    notifyChange(database, store);
+    sendChangesNotify(database, store);
 };
 
 /** Skips the newest records by the order of the store and deletes the rest, in one transaction */
@@ -191,7 +210,7 @@ export const trimRecords = async (database: Database, store: DatabaseStore<unkno
 
     await waitForTransaction(transaction);
 
-    notifyChange(database, store);
+    sendChangesNotify(database, store);
 };
 
 /** Calls listener whenever a page of the extension changes the records of the store */
@@ -209,4 +228,36 @@ export const watchRecords = (
     });
 
     return () => channel.close();
+};
+
+/** Calls listener with every valid record of the store now and after each change, until stopped */
+export const subscribeRecords = <T>(
+    database: Database,
+    store: DatabaseStore<T>,
+    listener: (records: T[]) => void,
+): VoidFunction => {
+    let isSubscribed = true;
+
+    const updateRecords = (records: T[]) => {
+        if (!isSubscribed) {
+            return;
+        }
+
+        listener(records);
+    };
+
+    const reloadRecords = () => {
+        readRecords(database, store)
+            .then(updateRecords)
+            .catch(() => updateRecords([]));
+    };
+
+    const stopWatching = watchRecords(database, store, reloadRecords);
+
+    reloadRecords();
+
+    return () => {
+        isSubscribed = false;
+        stopWatching();
+    };
 };

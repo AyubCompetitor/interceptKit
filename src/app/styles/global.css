@@ -37,7 +37,6 @@
         scrollbar-color: var(--color-border-strong) transparent;
     }
 
-    /** Chrome injects an unlayered body { font-size: 75% } with a system font into extension pages, so the type lives one level down */
     #root {
         font-family: var(--font-sans);
         font-size: var(--font-size-m);

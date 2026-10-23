@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
 import { Button, ButtonSizes, ButtonVariants } from '../Button/index.ts';
 import { Icon, IconNames } from '../Icon/index.ts';
@@ -9,7 +9,6 @@ import type { KeyValueRow } from '#shared/lib';
 
 import styles from './KeyValueTableRow.module.css';
 import type { KeyValueRowChange, KeyValueTableLabels } from './types.ts';
-import { useKeyValueTableRow } from './useKeyValueTableRow.ts';
 
 interface KeyValueTableRowProps {
     /** The edited pair */
@@ -25,12 +24,22 @@ interface KeyValueTableRowProps {
 }
 
 export const KeyValueTableRow: FC<KeyValueTableRowProps> = ({ row, labels, isKeyRequired, onChange, onRemove }) => {
+    const { rowId, enabled } = row;
+
     const { t } = useTranslation();
-    const { onEnabledToggle, onKeyChange, onValueChange, onRowRemove } = useKeyValueTableRow(row, onChange, onRemove);
+
+    const onKeyChange = (event: ChangeEvent<HTMLInputElement>) => onChange(rowId, { key: event.target.value });
+
+    const onValueChange = (event: ChangeEvent<HTMLInputElement>) => onChange(rowId, { value: event.target.value });
+
+    const onEnabledToggle = () => onChange(rowId, { enabled: !enabled });
+
+    const onRowRemove = () => onRemove(rowId);
 
     return (
         <div className={styles.row}>
             <Switch checked={row.enabled} label={t(labels.enabled)} isLabelHidden onChange={onEnabledToggle} />
+
             <input
                 aria-label={t(labels.key)}
                 className={styles.code}
@@ -39,6 +48,7 @@ export const KeyValueTableRow: FC<KeyValueTableRowProps> = ({ row, labels, isKey
                 value={row.key}
                 onChange={onKeyChange}
             />
+
             <input
                 aria-label={t(labels.value)}
                 className={styles.code}
@@ -46,6 +56,7 @@ export const KeyValueTableRow: FC<KeyValueTableRowProps> = ({ row, labels, isKey
                 value={row.value}
                 onChange={onValueChange}
             />
+
             <Button
                 aria-label={t(labels.remove)}
                 size={ButtonSizes.SMALL}

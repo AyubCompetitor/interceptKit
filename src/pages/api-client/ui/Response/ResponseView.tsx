@@ -4,13 +4,17 @@ import { ResponseSections, type ResponseSection } from '../../lib/requestSection
 import { useSectionChoice } from '../../lib/useSectionChoice.ts';
 
 import type { ApiResponse } from '#entities/request';
-import { useTranslation } from '#shared/i18n';
+import { useTranslation, type MessageKey } from '#shared/i18n';
 import { Flex, SegmentedControl, Spaces } from '#shared/ui';
 
 import { ResponseBody } from './ResponseBody.tsx';
 import { ResponseHeaders } from './ResponseHeaders.tsx';
-import { RESPONSE_SECTION_LABELS } from './responseLabels.ts';
 import { ResponseSummary } from './ResponseSummary.tsx';
+
+const RESPONSE_SECTION_LABELS: Record<ResponseSection, MessageKey> = {
+    [ResponseSections.BODY]: 'apiClientResponseBody',
+    [ResponseSections.HEADERS]: 'apiClientResponseHeaders',
+};
 
 interface ResponseViewProps {
     /** What came back */
@@ -36,6 +40,7 @@ export const ResponseView: FC<ResponseViewProps> = ({ response }) => {
             />
 
             {isBody && <ResponseBody response={response} />}
+
             {!isBody && <ResponseHeaders headers={response.headers} />}
         </Flex>
     );

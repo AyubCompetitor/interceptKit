@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 
 import { ScriptWorlds, type ContentScriptSpec } from '#shared/lib';
 
-import { syncContentScripts } from '../scripting.ts';
+import { syncContentScripts } from '../scripting/scripting.ts';
 
 import { installFakeScripting, type FakeScripting } from './mocks.ts';
 

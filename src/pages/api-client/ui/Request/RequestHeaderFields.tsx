@@ -16,13 +16,12 @@ export const RequestHeaderFields: FC<RequestDraftFields> = ({ draft, onDraftChan
     const { onHeadersChange } = useRequestDraftFields(draft, onDraftChange);
 
     const droppedNames = getDroppedHeaderNames(draft);
-    const hasDroppedHeaders = droppedNames.length > 0;
 
     return (
         <Flex direction='column' gap={Spaces.L}>
             <KeyValueTable labels={HEADER_LABELS} rows={draft.headers} onRowsChange={onHeadersChange} />
 
-            {hasDroppedHeaders && (
+            {!!droppedNames.length && (
                 <Notice tone={NoticeTones.WARNING}>
                     {t('apiClientForbiddenHeaders', droppedNames.join(NAME_SEPARATOR))}
                 </Notice>

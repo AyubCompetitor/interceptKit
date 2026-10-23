@@ -23,9 +23,7 @@ export const useRuleEditor = () => {
 
     return {
         editedRule,
-
         isEditorOpen,
-
         onRuleCreate,
         onRuleEdit,
         onEditorClose,

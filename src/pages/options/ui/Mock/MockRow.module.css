@@ -17,7 +17,6 @@
     min-width: 0;
 }
 
-/** As tall as the switch and the buttons, so the first lines line up */
 .title {
     display: flex;
     flex-wrap: wrap;

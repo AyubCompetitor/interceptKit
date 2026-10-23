@@ -6,7 +6,6 @@
     min-width: 0;
 }
 
-/** Rows lay their fields straight into this grid, so the columns line up */
 .table {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.4fr) auto;

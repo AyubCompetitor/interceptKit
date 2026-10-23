@@ -96,7 +96,6 @@ class InterceptedXhr extends NativeXhr {
         return this.#local.reply?.url ?? '';
     }
 
-    /** The native getter throws for responseType json, blob and the like, and so it should */
     override get responseText(): string {
         if (!this.#local || !isTextResponseType(this.responseType)) {
             return super.responseText;
@@ -166,7 +165,6 @@ class InterceptedXhr extends NativeXhr {
             throw new DOMException(XHR_ERRORS.ALREADY_SENT, XHR_ERRORS.INVALID_STATE);
         }
 
-        /** A synchronous request cannot wait, and the native send reports misuse such as a send without open */
         const isNativeOnly = !this.#isAsync || super.readyState !== NativeXhr.OPENED;
 
         if (isNativeOnly) {
@@ -238,7 +236,6 @@ class InterceptedXhr extends NativeXhr {
             .catch(reportError);
     }
 
-    /** Nothing to send if the page aborted or reopened the request while it waited */
     #sendAfterWait(local: LocalXhr, body: NotRequired<Nullable<Document | XMLHttpRequestBodyInit>>) {
         const isStillWaiting = this.#local === local && local.isWaiting;
 
@@ -304,7 +301,6 @@ class InterceptedXhr extends NativeXhr {
         this.#dispatchProgress(local, XHR_EVENTS.LOAD_END);
     }
 
-    /** Events stop once a handler aborts or reopens the request */
     #changeReadyState(local: LocalXhr, readyState: number) {
         if (this.#local !== local) {
             return;

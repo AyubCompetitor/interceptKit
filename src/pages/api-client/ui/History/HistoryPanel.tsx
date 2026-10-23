@@ -19,7 +19,6 @@ interface HistoryPanelProps {
 
 const HISTORY_LIMIT = String(API_CLIENT_CONFIG.HISTORY_LIMIT);
 
-/** Sent requests, newest first; the switch of the sidebar names the panel */
 export const HistoryPanel: FC<HistoryPanelProps> = ({ onRequestOpen }) => {
     const { t } = useTranslation();
     const { entries, isLoading, isActionFailed, onEntryDelete, onHistoryClear } = useHistory();
@@ -29,11 +28,9 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ onRequestOpen }) => {
         return null;
     }
 
-    const hasEntries = entries.length > 0;
-
     return (
         <section aria-label={t('apiClientHistory')} className={styles.panel}>
-            {hasEntries && (
+            {!!entries.length && (
                 <ul className={styles.list}>
                     {entries.map(entry => (
                         <HistoryRow key={entry.id} entry={entry} onDelete={onEntryDelete} onOpen={onRequestOpen} />
@@ -45,7 +42,7 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ onRequestOpen }) => {
                 {t('apiClientHistoryHint', HISTORY_LIMIT)}
             </Typography>
 
-            {hasEntries && (
+            {!!entries.length && (
                 <Button size={ButtonSizes.SMALL} onClick={onClearRequest}>
                     <Icon name={IconNames.DELETE} />
                     {t('apiClientHistoryClear')}

@@ -11,5 +11,4 @@ export const getRandomUUID = (): string => crypto.randomUUID();
 
 export const domainName = string({ minLength: 1, maxLength: 253, pattern: IDENTIFIER_RGXS.DOMAIN });
 
-/** Name of an item shown in the UI */
 export const displayName = string({ minLength: 1, maxLength: 200 });

@@ -25,7 +25,6 @@ export const useRuleDeletion = (onRuleDelete: (rule: Rule) => void) => {
 
     return {
         ruleToDelete,
-
         onDeleteRequest,
         onDeleteCancel,
         onDeleteConfirm,

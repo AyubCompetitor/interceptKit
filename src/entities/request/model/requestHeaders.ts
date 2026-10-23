@@ -1,4 +1,3 @@
-/** Headers fetch() drops without an error: the list of the Fetch standard, plus User-Agent, which Chromium drops too */
 const FORBIDDEN_HEADERS: readonly string[] = [
     'accept-charset',
     'accept-encoding',
@@ -26,7 +25,6 @@ const FORBIDDEN_HEADERS: readonly string[] = [
 
 const FORBIDDEN_PREFIXES: readonly string[] = ['proxy-', 'sec-'];
 
-/** Dropped only when they name a method that fetch() refuses */
 const METHOD_OVERRIDE_HEADERS: readonly string[] = ['x-http-method', 'x-http-method-override', 'x-method-override'];
 
 const FORBIDDEN_METHODS: readonly string[] = ['CONNECT', 'TRACE', 'TRACK'];

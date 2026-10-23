@@ -11,7 +11,6 @@ interface ResponseBodyProps {
     response: ApiResponse;
 }
 
-/** A long body scrolls inside the editor */
 const BODY_MAX_ROWS = 30;
 
 export const ResponseBody: FC<ResponseBodyProps> = ({ response }) => {
@@ -27,12 +26,10 @@ export const ResponseBody: FC<ResponseBodyProps> = ({ response }) => {
         return <Typography color={TypographyColors.HINT}>{t('apiClientResponseBinary', view.contentType)}</Typography>;
     }
 
-    const language = view.viewType === ResponseBodyViewTypes.JSON ? CodeLanguages.JSON : CodeLanguages.TEXT;
-
     return (
         <CodeEditor
             label={t('apiClientResponseBodyEditor')}
-            language={language}
+            language={view.viewType === ResponseBodyViewTypes.JSON ? CodeLanguages.JSON : CodeLanguages.TEXT}
             maxRows={BODY_MAX_ROWS}
             value={view.text}
             isReadOnly

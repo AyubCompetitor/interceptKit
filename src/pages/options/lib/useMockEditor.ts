@@ -23,9 +23,7 @@ export const useMockEditor = () => {
 
     return {
         editedMock,
-
         isEditorOpen,
-
         onMockCreate,
         onMockEdit,
         onEditorClose,

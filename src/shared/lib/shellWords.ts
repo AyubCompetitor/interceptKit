@@ -1,9 +1,7 @@
-/** A backslash before a line break joins the lines, as in a copied multi-line command */
 const LINE_CONTINUATION_RGX = /\\\r?\n/g;
 
 const WHITESPACE_RGX = /\s/;
 
-/** Escapes inside $'…' quotes, as Chrome's "Copy as cURL (bash)" writes them */
 const ANSI_C_ESCAPES: Readonly<Record<string, string>> = {
     n: '\n',
     t: '\t',
@@ -16,7 +14,6 @@ const ANSI_C_ESCAPES: Readonly<Record<string, string>> = {
 
 const ANSI_C_HEX_RGX = /^(x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})/;
 
-/** Characters a backslash escapes inside double quotes; before any other it stays a backslash */
 const DOUBLE_QUOTE_ESCAPES = new Set(['"', '\\', '$', '`']);
 
 interface Reader {
@@ -101,7 +98,6 @@ const readAnsiCQuoted = (reader: Reader): NotRequired<string> => {
     return;
 };
 
-/** One word: plain characters and quoted parts up to the next unquoted whitespace */
 const readWord = (reader: Reader): NotRequired<string> => {
     let word = '';
 
@@ -127,7 +123,6 @@ const readWord = (reader: Reader): NotRequired<string> => {
     return word;
 };
 
-/** The quoted part that starts at the character; undefined for a plain character, null for an unclosed quote */
 const getQuotedPart = (reader: Reader, char: string, nextChar: string): Nullable<NotRequired<string>> => {
     if (char === "'") {
         return readSingleQuoted(reader) ?? null;
@@ -152,7 +147,6 @@ const getQuotedPart = (reader: Reader, char: string, nextChar: string): Nullable
     return;
 };
 
-/** Splits a command into words the way bash does; nothing when a quote is left open */
 export const splitShellWords = (command: string): NotRequired<string[]> => {
     const reader: Reader = { text: command.replace(LINE_CONTINUATION_RGX, ' '), index: 0 };
     const words: string[] = [];

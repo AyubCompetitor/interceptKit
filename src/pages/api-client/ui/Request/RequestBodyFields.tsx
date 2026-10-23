@@ -21,17 +21,16 @@ import {
 
 import { BODY_TYPE_LABELS, FORM_FIELD_LABELS } from './requestLabels.ts';
 
-/** The body in the chosen format; every format keeps its own text */
 export const RequestBodyFields: FC<RequestDraftFields> = ({ draft, onDraftChange }) => {
     const { t } = useTranslation();
     const { onBodyTypeChange, onJsonBodyChange, onRawBodyChange, onRawContentTypeChange, onFormFieldsChange } =
         useRequestDraftFields(draft, onDraftChange);
 
-    const isBodyless = isBodylessMethod(draft.method);
     const isNone = draft.bodyType === RequestBodyTypes.NONE;
     const isJson = draft.bodyType === RequestBodyTypes.JSON;
     const isRaw = draft.bodyType === RequestBodyTypes.RAW;
     const isForm = draft.bodyType === RequestBodyTypes.FORM;
+    const isBodyless = isBodylessMethod(draft.method);
 
     return (
         <Flex direction='column' gap={Spaces.L}>

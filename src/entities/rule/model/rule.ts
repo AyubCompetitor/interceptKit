@@ -252,11 +252,11 @@ const getSubstitutionError = (rule: Rule): NotRequired<string> => {
 const getDuplicateIdError = (rules: readonly Rule[]): NotRequired<string> => {
     const ids = rules.map(rule => rule.id);
 
-    if (isDuplicateValues(ids)) {
-        return RULE_ERRORS.DUPLICATE_ID;
+    if (!isDuplicateValues(ids)) {
+        return;
     }
 
-    return;
+    return RULE_ERRORS.DUPLICATE_ID;
 };
 
 const requestMatch: Validator<RequestMatch> = object({

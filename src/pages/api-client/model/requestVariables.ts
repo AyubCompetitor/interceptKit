@@ -9,7 +9,6 @@ export interface ResolvedRequest {
     readonly missingNames: readonly string[];
 }
 
-/** The request as typed stays untouched: history keeps templates, never the values of secrets */
 export const resolveRequestVariables = (
     request: ApiRequest,
     environment: NotRequired<Environment>,

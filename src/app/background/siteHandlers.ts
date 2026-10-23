@@ -7,7 +7,6 @@ const SITE_ERRORS = {
     NOT_GRANTED: 'the browser has not granted access to this site',
 } as const;
 
-/** Settings belong to sites the user granted: a pattern the browser does not grant is refused */
 const setSiteMocksHandler = async (site: Site, storageReady: Promise<void>): Promise<Site> => {
     await storageReady;
 

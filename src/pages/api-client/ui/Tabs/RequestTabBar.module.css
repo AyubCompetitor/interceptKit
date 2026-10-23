@@ -6,7 +6,6 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-/** Many tabs scroll sideways instead of wrapping */
 .list {
     display: flex;
     gap: var(--space-xs);

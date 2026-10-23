@@ -1,7 +1,11 @@
 import type { FC } from 'react';
 
-import { useVariableTable } from '../../lib/useVariableTable.ts';
-import type { VariableDraft } from '../../model/environmentDraft.ts';
+import {
+    createVariableDraft,
+    updateVariableDraft,
+    type VariableDraft,
+    type VariableDraftPatch,
+} from '../../model/environmentDraft.ts';
 
 import { useTranslation } from '#shared/i18n';
 import { Button, ButtonSizes, Icon, IconNames, Typography, TypographyColors, TypographySizes } from '#shared/ui';
@@ -19,15 +23,20 @@ interface VariableTableProps {
 /** Every field of a row is named for assistive technology, so the column titles are visual */
 export const VariableTable: FC<VariableTableProps> = ({ variables, onVariablesChange }) => {
     const { t } = useTranslation();
-    const { onVariableAdd, onVariableChange, onVariableRemove } = useVariableTable(variables, onVariablesChange);
 
-    const hasVariables = variables.length > 0;
+    const onVariableAdd = () => onVariablesChange([...variables, createVariableDraft()]);
+
+    const onVariableChange = (rowId: string, patch: VariableDraftPatch) =>
+        onVariablesChange(updateVariableDraft(variables, rowId, patch));
+
+    const onVariableRemove = (rowId: string) =>
+        onVariablesChange(variables.filter(variable => variable.rowId !== rowId));
 
     return (
         <fieldset className={styles.group}>
             <legend className={styles.legend}>{t('apiClientVariables')}</legend>
 
-            {hasVariables && (
+            {!!variables.length && (
                 <div className={styles.table}>
                     <div aria-hidden='true' className={styles.columns}>
                         <span />

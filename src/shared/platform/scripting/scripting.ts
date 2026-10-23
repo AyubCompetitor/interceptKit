@@ -28,18 +28,13 @@ const isRegistrationCurrent = (
     registered: readonly RegisteredScript[],
     specs: readonly ContentScriptSpec[],
     matches: readonly string[],
-): boolean => {
-    return specs.every(spec => {
+): boolean =>
+    specs.every(spec => {
         const script = registered.find(current => current.id === spec.id);
 
         return script !== undefined && isScriptCurrent(script, spec, matches);
     });
-};
 
-/**
- * Registers the scripts on the given patterns, or unregisters them for none. A registration
- * that is already current is left alone, so pages loading meanwhile never miss a script.
- */
 export const syncContentScripts = async (
     specs: readonly ContentScriptSpec[],
     matches: readonly string[],

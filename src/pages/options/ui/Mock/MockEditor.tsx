@@ -17,7 +17,6 @@ interface MockEditorProps {
 
 export const MockEditor: FC<MockEditorProps> = ({ isOpen, mock, onClose }) => {
     const formId = useId();
-
     const { t } = useTranslation();
 
     const isNewMock = mock === undefined;

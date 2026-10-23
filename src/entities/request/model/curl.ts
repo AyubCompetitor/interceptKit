@@ -217,7 +217,6 @@ const FLAG_OPTIONS: Readonly<Record<string, FlagOption>> = {
     '--head': setHead,
 };
 
-/** Options whose value the request has no use for: output, timeouts, proxies, certificates */
 const SKIPPED_VALUE_OPTIONS = new Set([
     '-o',
     '--output',
@@ -239,7 +238,13 @@ const SKIPPED_VALUE_OPTIONS = new Set([
 
 const UNSUPPORTED_OPTIONS = new Set(['-F', '--form', '--form-string', '-T', '--upload-file']);
 
-/** curl reads -XPOST as -X POST; long options always take their value from the next word */
+const DEFAULT_CURL_OPTIONS: CurlOptions = {
+    headers: [],
+    data: [],
+    isGet: false,
+    isHead: false,
+};
+
 const splitGluedOption = (word: string): [name: string, gluedValue: NotRequired<string>] => {
     const isGlued = CURL_RGXS.GLUED_SHORT_OPTION.test(word);
 
@@ -253,13 +258,14 @@ const splitGluedOption = (word: string): [name: string, gluedValue: NotRequired<
 const isOptionWord = (word: string): boolean => word.startsWith('-') && word.length > 1;
 
 const readOptions = (words: readonly string[]): Result<CurlOptions> => {
-    const options: CurlOptions = { headers: [], data: [], isGet: false, isHead: false };
-    let index = 0;
+    const options = structuredClone(DEFAULT_CURL_OPTIONS);
 
-    while (index < words.length) {
-        const word = words[index] ?? '';
+    let idx = 0;
 
-        index += 1;
+    while (idx < words.length) {
+        const word = words[idx] ?? '';
+
+        idx += 1;
 
         if (!isOptionWord(word)) {
             setUrl(options, word);
@@ -276,17 +282,15 @@ const readOptions = (words: readonly string[]): Result<CurlOptions> => {
         const valueOption = VALUE_OPTIONS[name];
         const isValueOption = valueOption !== undefined || SKIPPED_VALUE_OPTIONS.has(name);
 
-        /** Other flags, such as --compressed or -sSL, change nothing in the request */
         if (!isValueOption) {
             FLAG_OPTIONS[name]?.(options);
-
             continue;
         }
 
-        const value = gluedValue ?? words[index];
+        const value = gluedValue ?? words[idx];
 
         if (gluedValue === undefined) {
-            index += 1;
+            idx += 1;
         }
 
         if (value === undefined) {
@@ -310,13 +314,13 @@ const getMethod = (options: CurlOptions): string => {
         return HttpMethods.HEAD;
     }
 
-    const hasBody = options.data.length > 0 && !options.isGet;
+    const isDataEmpty = options.data.length === 0 || options.isGet;
 
-    if (hasBody) {
-        return HttpMethods.POST;
+    if (isDataEmpty) {
+        return HttpMethods.GET;
     }
 
-    return HttpMethods.GET;
+    return HttpMethods.POST;
 };
 
 const getHeaderValue = (headers: readonly KeyValue[], name: string): NotRequired<string> => {
@@ -365,13 +369,19 @@ const buildBody = (options: CurlOptions): RequestBody => {
     const fields = isFormType ? parseFormFields(text) : undefined;
 
     if (fields) {
-        return { bodyType: RequestBodyTypes.FORM, fields };
+        return {
+            fields,
+            bodyType: RequestBodyTypes.FORM,
+        };
     }
 
-    return { bodyType: RequestBodyTypes.RAW, text, contentType };
+    return {
+        text,
+        contentType,
+        bodyType: RequestBodyTypes.RAW,
+    };
 };
 
-/** The URL without its query, and the query as pairs; -G adds the data to the query */
 const splitUrl = (options: CurlOptions, rawUrl: string): Pick<CurlImport, 'url' | 'query'> => {
     const hasScheme = rawUrl.includes(SCHEME_SEPARATOR);
     const fullUrl = hasScheme ? rawUrl : DEFAULT_SCHEME + rawUrl;
@@ -395,7 +405,6 @@ const splitUrl = (options: CurlOptions, rawUrl: string): Pick<CurlImport, 'url' 
     };
 };
 
-/** Reads a curl command, for example from the browser's "Copy as cURL (bash)" */
 export const parseCurl = (command: string): Result<CurlImport> => {
     const words = splitShellWords(command.trim());
 

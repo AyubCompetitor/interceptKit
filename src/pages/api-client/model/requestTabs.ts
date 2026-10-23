@@ -89,29 +89,33 @@ export const selectRequestTab = (state: RequestTabs, tabId: string): RequestTabs
         return state;
     }
 
-    return { ...state, activeId: tabId };
+    return {
+        ...state,
+        activeId: tabId,
+    };
 };
 
 /** Closing the active tab shows the one that takes its place; closing the last one opens a new empty tab */
 export const closeRequestTab = (state: RequestTabs, tabId: string): RequestTabs => {
-    const index = state.tabs.findIndex(tab => tab.draft.id === tabId);
+    const idx = state.tabs.findIndex(tab => tab.draft.id === tabId);
 
-    if (index === -1) {
+    if (idx === -1) {
         return state;
     }
 
-    const tabs = state.tabs.toSpliced(index, 1);
-    const nextTab = tabs[Math.min(index, tabs.length - 1)];
+    const tabs = state.tabs.toSpliced(idx, 1);
+    const nextTab = tabs[Math.min(idx, tabs.length - 1)];
 
     if (nextTab === undefined) {
         return createRequestTabs();
     }
 
     const isActiveClosed = tabId === state.activeId;
+    const activeId = isActiveClosed ? nextTab.draft.id : state.activeId;
 
     return {
         tabs,
-        activeId: isActiveClosed ? nextTab.draft.id : state.activeId,
+        activeId,
     };
 };
 
@@ -121,10 +125,16 @@ const patchRequestTab = (state: RequestTabs, tabId: string, patch: Partial<Reque
             return tab;
         }
 
-        return { ...tab, ...patch };
+        return {
+            ...tab,
+            ...patch,
+        };
     });
 
-    return { ...state, tabs };
+    return {
+        ...state,
+        tabs,
+    };
 };
 
 export const updateTabDraft = (state: RequestTabs, tabId: string, patch: RequestDraftPatch): RequestTabs => {
@@ -137,7 +147,5 @@ export const updateTabDraft = (state: RequestTabs, tabId: string, patch: Request
     return patchRequestTab(state, tabId, { draft: { ...tab.draft, ...patch } });
 };
 
-/** The answer for a tab closed while its request was on the way changes nothing */
-export const updateTabSendState = (state: RequestTabs, tabId: string, sendState: SendState): RequestTabs => {
-    return patchRequestTab(state, tabId, { sendState });
-};
+export const updateTabSendState = (state: RequestTabs, tabId: string, sendState: SendState): RequestTabs =>
+    patchRequestTab(state, tabId, { sendState });

@@ -13,7 +13,6 @@ import { RequestHeaderFields } from './RequestHeaderFields.tsx';
 import { QUERY_LABELS, REQUEST_SECTION_LABELS } from './requestLabels.ts';
 import { RequestSettingsFields } from './RequestSettingsFields.tsx';
 
-/** One part of the request at a time: parameters, headers, body or settings */
 export const RequestEditor: FC<RequestDraftFields> = ({ draft, onDraftChange }) => {
     const { t } = useTranslation();
     const { section, onSectionChange } = useSectionChoice<RequestSection>(RequestSections.PARAMS);
@@ -35,8 +34,11 @@ export const RequestEditor: FC<RequestDraftFields> = ({ draft, onDraftChange }) 
             />
 
             {isParams && <KeyValueTable labels={QUERY_LABELS} rows={draft.query} onRowsChange={onQueryChange} />}
+
             {isHeaders && <RequestHeaderFields draft={draft} onDraftChange={onDraftChange} />}
+
             {isBody && <RequestBodyFields draft={draft} onDraftChange={onDraftChange} />}
+
             {isSettings && <RequestSettingsFields draft={draft} onDraftChange={onDraftChange} />}
         </Flex>
     );

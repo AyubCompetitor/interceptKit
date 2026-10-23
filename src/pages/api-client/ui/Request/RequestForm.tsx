@@ -1,6 +1,5 @@
-import type { FC } from 'react';
+import type { FC, SubmitEvent } from 'react';
 
-import { useRequestFormSubmit } from '../../lib/useRequestFormSubmit.ts';
 import type { RequestDraftFields } from '../../model/requestDraft.ts';
 
 import { RequestEditor } from './RequestEditor.tsx';
@@ -17,7 +16,10 @@ interface RequestFormProps extends RequestDraftFields {
 }
 
 export const RequestForm: FC<RequestFormProps> = ({ draft, isSending, onDraftChange, onSend, onCancel }) => {
-    const { onFormSubmit } = useRequestFormSubmit(onSend);
+    const onFormSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        onSend();
+    };
 
     return (
         <form className={styles.form} onSubmit={onFormSubmit}>

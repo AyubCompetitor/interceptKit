@@ -76,10 +76,6 @@ const POLICY_FIELDS: PolicyFields = {
 
 const isPolicyKey = (key: string): key is keyof ManagedPolicy => Object.hasOwn(POLICY_FIELDS, key);
 
-/**
- * Reads administrator policy field by field: a broken field never disables the whole policy.
- * Restrictive fields fall back to their most restrictive value; every problem is reported.
- */
 export const readPolicy = (raw: unknown): PolicyReadResult => {
     const isMissing = raw === undefined || raw === null;
 

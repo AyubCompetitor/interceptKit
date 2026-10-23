@@ -78,10 +78,8 @@ export interface ApiRequest {
 
 export const MAX_BODY_LENGTH = 5_000_000;
 
-/** Methods the API client sends: fetch() refuses CONNECT */
 export const SENDABLE_METHODS = HTTP_METHODS.filter(method => method !== HttpMethods.CONNECT);
 
-/** fetch() throws when these methods carry a body */
 const BODYLESS_METHODS: readonly HttpMethod[] = [HttpMethods.GET, HttpMethods.HEAD];
 
 const REQUEST_ERRORS = {
@@ -94,13 +92,13 @@ export const isSendableMethod = (value: string): value is HttpMethod =>
     SENDABLE_METHODS.some(method => method === value);
 
 const getBodyError = (request: ApiRequest): NotRequired<string> => {
-    const hasBody = request.body.bodyType !== RequestBodyTypes.NONE;
+    const isRequestBodyEmpty = request.body.bodyType === RequestBodyTypes.NONE;
 
-    if (hasBody && isBodylessMethod(request.method)) {
-        return `${request.method} ${REQUEST_ERRORS.BODY_NOT_ALLOWED}`;
+    if (isRequestBodyEmpty || !isBodylessMethod(request.method)) {
+        return;
     }
 
-    return;
+    return `${request.method} ${REQUEST_ERRORS.BODY_NOT_ALLOWED}`;
 };
 
 const sendableMethod = oneOf(SENDABLE_METHODS);

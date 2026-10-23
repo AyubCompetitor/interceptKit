@@ -1,6 +1,5 @@
 import type { ApiResponse, OutgoingRequest } from '#entities/request';
 
-/** The API client always asks the server and tells it nothing about the extension's own pages */
 const FETCH_DEFAULTS = {
     cache: 'no-store',
     redirect: 'follow',
@@ -19,7 +18,6 @@ const buildFetchHeaders = (request: OutgoingRequest): Headers => {
     return headers;
 };
 
-/** The only network call of the extension: it sends a request the user started */
 export const sendRequest = async (request: OutgoingRequest, signal: AbortSignal): Promise<ApiResponse> => {
     const startedAt = performance.now();
 

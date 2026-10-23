@@ -13,9 +13,10 @@ import { useStorageItem } from '#shared/platform';
 
 /** The environments, the chosen one and the changes the user makes to them */
 export const useEnvironments = () => {
+    const [isActionFailed, setIsActionFailed] = useState(false);
+
     const environments = useStorageItem(environmentsItem);
     const choice = useStorageItem(environmentChoiceItem);
-    const [isActionFailed, setIsActionFailed] = useState(false);
 
     const isLoading = !environments || !choice;
     const activeEnvironment = findEnvironment(environments ?? [], choice?.activeId);

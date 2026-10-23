@@ -46,7 +46,6 @@ export const MAX_ENVIRONMENTS = 100;
 
 const ENV_RGXS = {
     BASE64: /^[A-Za-z0-9+/]*={0,2}$/,
-    /** The same name rule as the {{name}} templates in requests */
     VARIABLE_KEY: /^[A-Za-z_][A-Za-z0-9_.-]*$/,
 } as const;
 
@@ -82,26 +81,30 @@ const variableValue: Validator<string | EncryptedValue> = (input, path) => {
 };
 
 const getEncryptionError = (variable: EnvVariable): NotRequired<string> => {
-    if (isEncryptedValue(variable.value) && !variable.secret) {
-        return ENV_ERRORS.PLAIN_ENCRYPTED;
+    if (!isEncryptedValue(variable.value) || variable.secret) {
+        return;
     }
 
-    return;
+    return ENV_ERRORS.PLAIN_ENCRYPTED;
 };
 
 const getDuplicateKeyError = (environment: Environment): NotRequired<string> => {
     const keys = environment.variables.map(variable => variable.key);
 
-    if (isDuplicateValues(keys)) {
-        return ENV_ERRORS.DUPLICATE_KEY;
+    if (!isDuplicateValues(keys)) {
+        return;
     }
 
-    return;
+    return ENV_ERRORS.DUPLICATE_KEY;
 };
 
 const variable: Validator<EnvVariable> = refine(
     object({
-        key: string({ minLength: 1, maxLength: 100, pattern: ENV_RGXS.VARIABLE_KEY }),
+        key: string({
+            minLength: 1,
+            maxLength: 100,
+            pattern: ENV_RGXS.VARIABLE_KEY,
+        }),
         enabled: boolean(),
         secret: boolean(),
         value: variableValue,
@@ -121,11 +124,11 @@ export const environmentValidator: Validator<Environment> = refine(
 const getDuplicateIdError = (environments: readonly Environment[]): NotRequired<string> => {
     const ids = environments.map(environment => environment.id);
 
-    if (isDuplicateValues(ids)) {
-        return ENV_ERRORS.DUPLICATE_ID;
+    if (!isDuplicateValues(ids)) {
+        return;
     }
 
-    return;
+    return ENV_ERRORS.DUPLICATE_ID;
 };
 
 export const environmentsValidator: Validator<Environment[]> = refine(

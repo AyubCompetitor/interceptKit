@@ -16,7 +16,6 @@
     min-width: 0;
 }
 
-/** As tall as the buttons, so the name lines up with them */
 .title {
     display: flex;
     flex-wrap: wrap;

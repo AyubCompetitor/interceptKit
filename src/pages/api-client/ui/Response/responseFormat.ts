@@ -13,7 +13,6 @@ export const formatDuration = (durationMs: number, locale: Locale, t: TFunction)
     return t('apiClientDuration', duration);
 };
 
-/** Bytes below a kilobyte, then kilobytes and megabytes with one decimal */
 export const formatSize = (size: number, locale: Locale, t: TFunction): string => {
     const numberFormat = new Intl.NumberFormat(locale, SIZE_DIGITS);
 

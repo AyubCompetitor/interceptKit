@@ -16,11 +16,8 @@ export interface UrlPattern {
 
 const URL_FILTER_RGX = /^[\x20-\x7e]+$/;
 
-/** Where a URL filter names its host; the host ends at a port, path, separator or wildcard */
 const URL_FILTER_HOST_RGXS = {
-    /** ||api.example.com/v1/ */
     DOMAIN_ANCHOR: /^\|\|([^/:^*?|]+)/,
-    /** |https://api.example.com/ or https://api.example.com/ */
     SCHEME: /^\|?[a-z][a-z\d+.-]*:\/\/([^/:^*?|]+)/i,
 } as const;
 
@@ -29,15 +26,12 @@ const RGX_PATTERN_ERRORS = {
     LEADING_WILDCARD: 'must not start with ||*, use * instead',
 };
 
-/** Anchors of a URL filter; the domain anchor goes first, since it starts like the plain one */
 const URL_FILTER_ANCHORS = {
     DOMAIN: '||',
     EDGE: '|',
 } as const;
 
-/** URL filter syntax as regular expression sources, by the DNR rules */
 const URL_FILTER_SOURCES = {
-    /** Start of the host or of any subdomain in it */
     DOMAIN_ANCHOR: '^[a-z][a-z\\d+.-]*://(?:[^/?#]*\\.)?',
     START: '^',
     END: '$',
@@ -51,20 +45,18 @@ const URL_FILTER_SPECIAL_CHARS: Readonly<Record<string, string>> = {
     '^': URL_FILTER_SOURCES.SEPARATOR,
 };
 
-/** Every character with a meaning in a regular expression, the filter's * and ^ among them */
 const RGX_SPECIAL_CHARS_RGX = /[.*+?^${}()|[\]\\/]/g;
 
-/** DNR matches URLs case-insensitively unless a rule asks otherwise */
 const URL_PATTERN_RGX_FLAGS = 'i';
 
 const getUrlFilterError = (value: string): NotRequired<string> => {
-    const hasLeadingWildcard = value.startsWith('||*');
+    const isLeadingWildcard = value.startsWith('||*');
 
-    if (hasLeadingWildcard) {
-        return RGX_PATTERN_ERRORS.LEADING_WILDCARD;
+    if (!isLeadingWildcard) {
+        return;
     }
 
-    return;
+    return RGX_PATTERN_ERRORS.LEADING_WILDCARD;
 };
 
 const isValidRgx = (source: string): boolean => {
@@ -83,7 +75,6 @@ const getRgxError = (value: string): NotRequired<string> => {
     return RGX_PATTERN_ERRORS.NOT_VALID;
 };
 
-/** Host a URL filter is tied to, such as api.example.com in ||api.example.com/; a regex gives no reliable host */
 export const getPatternHost = (pattern: UrlPattern): NotRequired<string> => {
     if (pattern.syntaxType === SyntaxTypes.RGX) {
         return;
@@ -135,7 +126,6 @@ const START_ANCHORS = [
     { anchor: URL_FILTER_ANCHORS.EDGE, source: URL_FILTER_SOURCES.START },
 ] as const;
 
-/** The filter's own special characters become their sources, the rest are escaped */
 const mapSpecialCharToRgx = (char: string): string => {
     const filterSource = URL_FILTER_SPECIAL_CHARS[char];
 
@@ -160,7 +150,6 @@ const buildUrlFilterSource = (filter: string): string => {
     return startSource + bodySource + endSource;
 };
 
-/** The pattern as a regular expression that matches URLs the way DNR does, for code that checks URLs itself */
 export const buildUrlPatternRgx = (pattern: UrlPattern): RegExp => {
     if (pattern.syntaxType === SyntaxTypes.RGX) {
         return new RegExp(pattern.value, URL_PATTERN_RGX_FLAGS);

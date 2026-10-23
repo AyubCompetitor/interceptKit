@@ -6,7 +6,6 @@ import { useTranslation } from '#shared/i18n';
 
 import styles from './Brand.module.css';
 
-/** The extension's mark and name; inside a heading the name is the heading's text */
 export const Brand: FC = () => {
     const { t } = useTranslation();
 

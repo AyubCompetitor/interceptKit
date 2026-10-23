@@ -95,31 +95,29 @@ const isJson = (text: string): boolean => {
 };
 
 const getMockResponseError = (response: MockResponse): NotRequired<string> => {
-    const hasBody = response.body !== '';
-
+    const isResponseBodyEmpty = response.body === '';
     const isNullBodyStatus = NULL_BODY_STATUSES.has(response.status);
+    const isJsonBody = response.bodyType === MockBodyTypes.JSON;
 
-    if (isNullBodyStatus && hasBody) {
+    if (isNullBodyStatus && !isResponseBodyEmpty) {
         return `status ${response.status} ${MOCK_ERRORS.BODY_NOT_ALLOWED}`;
     }
 
-    const isJsonBody = response.bodyType === MockBodyTypes.JSON;
-
-    if (isJsonBody && hasBody && !isJson(response.body)) {
-        return MOCK_ERRORS.INVALID_JSON;
+    if (!isJsonBody || isResponseBodyEmpty || isJson(response.body)) {
+        return;
     }
 
-    return;
+    return MOCK_ERRORS.INVALID_JSON;
 };
 
 const getDuplicateIdError = (mocks: readonly Mock[]): NotRequired<string> => {
     const ids = mocks.map(mock => mock.id);
 
-    if (isDuplicateValues(ids)) {
-        return MOCK_ERRORS.DUPLICATE_ID;
+    if (!isDuplicateValues(ids)) {
+        return;
     }
 
-    return;
+    return MOCK_ERRORS.DUPLICATE_ID;
 };
 
 const mockHeader = object({ key: headerName, value: headerValue, enabled: boolean() });

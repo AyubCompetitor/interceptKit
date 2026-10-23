@@ -4,18 +4,18 @@ export const useModalRef = (isOpen: boolean) => {
     const modalRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
-        const dialog = modalRef.current;
+        const modal = modalRef.current;
 
-        if (!dialog) {
+        if (!modal) {
             return;
         }
 
-        if (isOpen && !dialog.open) {
-            dialog.showModal();
+        if (isOpen && !modal.open) {
+            modal.showModal();
         }
 
-        if (!isOpen && dialog.open) {
-            dialog.close();
+        if (!isOpen && modal.open) {
+            modal.close();
         }
     }, [isOpen]);
 
@@ -23,7 +23,6 @@ export const useModalRef = (isOpen: boolean) => {
 
     return {
         modalRef,
-
         onModalClose,
     };
 };

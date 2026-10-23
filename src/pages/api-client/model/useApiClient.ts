@@ -3,7 +3,6 @@ import { useActiveEnvironment } from './useActiveEnvironment.ts';
 import { useRequestSender } from './useRequestSender.ts';
 import { useRequestTabs } from './useRequestTabs.ts';
 
-/** The tabs of the page and the sending of the one on the screen, with the variables of the chosen environment */
 export const useApiClient = () => {
     const activeEnvironment = useActiveEnvironment();
     const {
@@ -17,13 +16,13 @@ export const useApiClient = () => {
         onDraftChange,
         onSendStateChange,
     } = useRequestTabs();
+
     const { onRequestSend, onRequestCancel } = useRequestSender(onSendStateChange);
 
     const isSending = activeTab?.sendState.stateType === SendStateTypes.SENDING;
 
-    /** A tab sends one request at a time: Enter in a field during sending does nothing */
     const onActiveRequestSend = () => {
-        if (activeTab === undefined || isSending) {
+        if (!activeTab || isSending) {
             return;
         }
 
@@ -31,14 +30,13 @@ export const useApiClient = () => {
     };
 
     const onActiveRequestCancel = () => {
-        if (activeTab === undefined) {
+        if (!activeTab) {
             return;
         }
 
         onRequestCancel(activeTab.draft.id);
     };
 
-    /** A closed tab takes its request on the way with it */
     const onRequestTabClose = (tabId: string) => {
         onRequestCancel(tabId);
         onTabClose(tabId);

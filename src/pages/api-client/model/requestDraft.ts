@@ -98,7 +98,9 @@ export const createRequestDraft = (): RequestDraft => ({ ...NEW_REQUEST_DRAFT, i
 /** GET and HEAD go without a body, which the editor keeps for when the method changes; the form says so */
 const buildBody = (draft: RequestDraft): RequestBody => {
     if (isBodylessMethod(draft.method)) {
-        return { bodyType: RequestBodyTypes.NONE };
+        return {
+            bodyType: RequestBodyTypes.NONE,
+        };
     }
 
     return BODY_BUILDERS[draft.bodyType](draft);
@@ -110,12 +112,10 @@ const isDroppedHeader = (row: KeyValueRow): boolean => {
     return row.enabled && name !== '' && isForbiddenHeader(name, row.value);
 };
 
-/** Names of the enabled headers the browser drops, so the editor can say they are not sent */
 export const getDroppedHeaderNames = (draft: RequestDraft): string[] => {
     return draft.headers.filter(isDroppedHeader).map(row => row.key.trim());
 };
 
-/** The request the tab describes, as typed */
 export const buildApiRequest = (draft: RequestDraft): ApiRequest => ({
     id: draft.id,
     method: draft.method,
@@ -126,26 +126,34 @@ export const buildApiRequest = (draft: RequestDraft): ApiRequest => ({
     sendCookies: draft.sendCookies,
 });
 
-/** The body goes into the field of its format; the other formats start empty */
 const mapBodyToDraft = (body: RequestBody): DraftBodyFields => {
     const emptyFields: DraftBodyFields = { ...EMPTY_BODY_FIELDS, bodyType: body.bodyType };
 
     if (body.bodyType === RequestBodyTypes.JSON) {
-        return { ...emptyFields, jsonBody: body.text };
+        return {
+            ...emptyFields,
+            jsonBody: body.text,
+        };
     }
 
     if (body.bodyType === RequestBodyTypes.RAW) {
-        return { ...emptyFields, rawBody: body.text, rawContentType: body.contentType };
+        return {
+            ...emptyFields,
+            rawBody: body.text,
+            rawContentType: body.contentType,
+        };
     }
 
     if (body.bodyType === RequestBodyTypes.FORM) {
-        return { ...emptyFields, formFields: body.fields.map(mapKeyValueToRow) };
+        return {
+            ...emptyFields,
+            formFields: body.fields.map(mapKeyValueToRow),
+        };
     }
 
     return emptyFields;
 };
 
-/** The tab of a saved request, under the same id */
 export const mapRequestToDraft = (request: ApiRequest): RequestDraft => ({
     id: request.id,
     method: request.method,
@@ -156,7 +164,6 @@ export const mapRequestToDraft = (request: ApiRequest): RequestDraft => ({
     sendCookies: request.sendCookies,
 });
 
-/** A new tab with a copy of the request, for example from the history */
 export const copyRequestToDraft = (request: ApiRequest): RequestDraft => ({
     ...mapRequestToDraft(request),
     id: getRandomUUID(),

@@ -183,7 +183,7 @@ export const buildOutgoingRequest = (request: ApiRequest): Result<OutgoingReques
         url: buildUrl(rawUrl, request.query),
         method: request.method,
         headers,
-        ...(body && { body: body.text }),
         credentials: request.sendCookies ? CredentialsModes.INCLUDE : CredentialsModes.OMIT,
+        ...(body && { body: body.text }),
     });
 };

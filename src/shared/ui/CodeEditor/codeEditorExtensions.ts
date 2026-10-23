@@ -10,7 +10,6 @@ import { lintJson } from './codeEditorLint.ts';
 import { buildCodeEditorTheme } from './codeEditorTheme.ts';
 import { CodeLanguages, type CodeEditorSettings, type CodeLanguage } from './types.ts';
 
-/** Pause after typing before the linter reports, so it does not flash on every key */
 const LINT_DELAY_MS = 300;
 
 const INDENT = '    ';
@@ -27,12 +26,9 @@ const isMultiLineSelection = (view: EditorView): boolean => {
     return view.state.doc.lineAt(from).number !== view.state.doc.lineAt(to).number;
 };
 
-/**
- * Text that spans lines, typed over a selection of several lines or inserted with line breaks, Chrome
- * lays out itself with inline styles, which style-src blocks with a console error; the editor inserts it.
- */
 const onBeforeInput = (event: InputEvent, view: EditorView): boolean => {
     const text = event.data ?? '';
+
     const isTyping = event.inputType === TYPING_INPUT && event.data !== null;
     const isMultiLine = isMultiLineSelection(view) || text.includes(LINE_BREAK);
 
@@ -44,12 +40,16 @@ const onBeforeInput = (event: InputEvent, view: EditorView): boolean => {
 
     const changes = view.state.replaceSelection(text);
 
-    view.dispatch(view.state.update(changes, { userEvent: TYPING_EVENT, scrollIntoView: true }));
+    view.dispatch(
+        view.state.update(changes, {
+            userEvent: TYPING_EVENT,
+            scrollIntoView: true,
+        }),
+    );
 
     return true;
 };
 
-/** Tab indents instead of leaving the editor; Escape and then Tab still move focus on */
 const BASE_EXTENSIONS: Extension = [
     EditorView.domEventHandlers({ beforeinput: onBeforeInput }),
     lineNumbers(),
@@ -69,7 +69,6 @@ const LANGUAGE_EXTENSIONS: Record<CodeLanguage, Extension> = {
     [CodeLanguages.TEXT]: [],
 };
 
-/** Everything that may change while the editor lives; it goes into one compartment */
 export const buildCodeEditorExtensions = (settings: CodeEditorSettings): Extension => [
     BASE_EXTENSIONS,
     LANGUAGE_EXTENSIONS[settings.language],

@@ -105,12 +105,14 @@ export const updateVariableDraft = (
     variables: readonly VariableDraft[],
     rowId: string,
     patch: VariableDraftPatch,
-): VariableDraft[] => {
-    return variables.map(variable => {
+): VariableDraft[] =>
+    variables.map(variable => {
         if (variable.rowId !== rowId) {
             return variable;
         }
 
-        return { ...variable, ...patch };
+        return {
+            ...variable,
+            ...patch,
+        };
     });
-};

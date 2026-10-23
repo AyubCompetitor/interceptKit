@@ -1,6 +1,5 @@
-import type { FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
-import { useVariableTableRow } from '../../lib/useVariableTableRow.ts';
 import type { VariableDraft, VariableDraftChange } from '../../model/environmentDraft.ts';
 
 import { useTranslation } from '#shared/i18n';
@@ -17,17 +16,29 @@ interface VariableTableRowProps {
     onRemove: (rowId: string) => void;
 }
 
-/** A secret value is hidden until its field has focus; it is plain text, so no password manager offers to keep it */
 export const VariableTableRow: FC<VariableTableRowProps> = ({ variable, onChange, onRemove }) => {
     const { t } = useTranslation();
-    const { onEnabledToggle, onKeyChange, onValueChange, onSecretToggle, onRowRemove } = useVariableTableRow(
-        variable,
-        onChange,
-        onRemove,
-    );
+
+    const { rowId, enabled, secret } = variable;
 
     const isEncrypted = variable.encryptedValue !== undefined;
     const valuePlaceholder = isEncrypted ? t('apiClientVariableEncrypted') : undefined;
+
+    const onRowRemove = () => onRemove(rowId);
+
+    const onEnabledToggle = () => onChange(rowId, { enabled: !enabled });
+
+    const onSecretToggle = () => onChange(rowId, { secret: !secret });
+
+    const onKeyChange = (event: ChangeEvent<HTMLInputElement>) =>
+        onChange(rowId, {
+            key: event.target.value,
+        });
+
+    const onValueChange = (event: ChangeEvent<HTMLInputElement>) =>
+        onChange(rowId, {
+            value: event.target.value,
+        });
 
     return (
         <div className={styles.row}>
@@ -37,6 +48,7 @@ export const VariableTableRow: FC<VariableTableRowProps> = ({ variable, onChange
                 isLabelHidden
                 onChange={onEnabledToggle}
             />
+
             <input
                 aria-label={t('apiClientVariableKey')}
                 className={styles.code}
@@ -45,6 +57,7 @@ export const VariableTableRow: FC<VariableTableRowProps> = ({ variable, onChange
                 required
                 onChange={onKeyChange}
             />
+
             <input
                 aria-label={t('apiClientValue')}
                 autoComplete='off'
@@ -54,12 +67,14 @@ export const VariableTableRow: FC<VariableTableRowProps> = ({ variable, onChange
                 value={variable.value}
                 onChange={onValueChange}
             />
+
             <Checkbox
                 checked={variable.secret}
                 label={t('apiClientVariableSecret')}
                 isLabelHidden
                 onChange={onSecretToggle}
             />
+
             <Button
                 aria-label={t('apiClientVariableDelete')}
                 size={ButtonSizes.SMALL}

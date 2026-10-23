@@ -14,7 +14,6 @@ interface MockHeaderListProps {
     onHeadersChange: (headers: KeyValueRow[]) => void;
 }
 
-/** Response headers of the mock; a header needs a name, the background refuses an empty one */
 export const MockHeaderList: FC<MockHeaderListProps> = ({ headers, onHeadersChange }) => {
     const { t } = useTranslation();
 

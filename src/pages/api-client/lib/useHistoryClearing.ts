@@ -19,7 +19,6 @@ export const useHistoryClearing = (onHistoryClear: VoidFunction) => {
 
     return {
         isConfirmOpen,
-
         onClearRequest,
         onClearCancel,
         onClearConfirm,

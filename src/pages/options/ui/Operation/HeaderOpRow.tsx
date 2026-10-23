@@ -1,9 +1,8 @@
-import type { FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
-import { useHeaderOpRow } from '../../lib/useHeaderOpRow.ts';
 import type { HeaderOpChange, HeaderOpDraft } from '../../model/ruleDraft.ts';
 
-import { HeaderOperations } from '#entities/rule';
+import { HeaderOperations, type HeaderOperation } from '#entities/rule';
 import { useTranslation } from '#shared/i18n';
 import { Button, ButtonSizes, ButtonVariants, Icon, IconNames } from '#shared/ui';
 
@@ -21,10 +20,18 @@ interface HeaderOpRowProps {
 }
 
 export const HeaderOpRow: FC<HeaderOpRowProps> = ({ op, onChange, onRemove }) => {
+    const { key, name, operation, value } = op;
     const { t } = useTranslation();
-    const { onNameChange, onOperationChange, onValueChange, onRowRemove } = useHeaderOpRow(op, onChange, onRemove);
 
-    const isRemoval = op.operation === HeaderOperations.REMOVE;
+    const isRemoval = operation === HeaderOperations.REMOVE;
+
+    const onNameChange = (event: ChangeEvent<HTMLInputElement>) => onChange(key, { name: event.target.value });
+
+    const onOperationChange = (nextOperation: HeaderOperation) => onChange(key, { operation: nextOperation });
+
+    const onValueChange = (event: ChangeEvent<HTMLInputElement>) => onChange(key, { value: event.target.value });
+
+    const onRowRemove = () => onRemove(key);
 
     return (
         <div className={styles.row}>
@@ -32,24 +39,27 @@ export const HeaderOpRow: FC<HeaderOpRowProps> = ({ op, onChange, onRemove }) =>
                 aria-label={t('ruleHeaderName')}
                 className={styles.code}
                 spellCheck={false}
-                value={op.name}
+                value={name}
                 required
                 onChange={onNameChange}
             />
+
             <ChoiceSelect
                 label={t('ruleHeaderOperation')}
                 labels={HEADER_OPERATION_LABELS}
-                value={op.operation}
+                value={operation}
                 onChange={onOperationChange}
             />
+
             <input
                 aria-label={t('ruleHeaderValue')}
                 className={styles.code}
                 disabled={isRemoval}
                 spellCheck={false}
-                value={op.value}
+                value={value}
                 onChange={onValueChange}
             />
+
             <Button
                 aria-label={t('ruleHeaderDelete')}
                 size={ButtonSizes.SMALL}

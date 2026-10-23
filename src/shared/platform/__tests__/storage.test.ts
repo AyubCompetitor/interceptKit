@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 
 import { defineStoreItem, number, object, Stores } from '#shared/lib';
 
-import { readItem, writeStoreData, watchItem, writeItem } from '../storage.ts';
+import { readItem, subscribeItem, writeStoreData, watchItem, writeItem } from '../storage/storage.ts';
 
 import { installFakeStorage } from './mocks.ts';
 
@@ -12,6 +12,8 @@ const counterItem = defineStoreItem({
     fallback: { value: 0 },
     validator: object({ value: number({ min: 0 }) }),
 });
+
+const tick = (): Promise<void> => new Promise(resolve => setTimeout(resolve, 1));
 
 describe('storage adapter', () => {
     let data: Record<string, unknown>;
@@ -30,13 +32,9 @@ describe('storage adapter', () => {
         });
 
         it('degrades corrupted data to the fallback instead of crashing', async () => {
-            const warn = rs.spyOn(console, 'warn').mockImplementation(() => undefined);
-
             data['counter'] = { value: -5, injected: '<script>' };
 
             expect(await readItem(counterItem)).toEqual({ value: 0 });
-
-            expect(warn).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -65,6 +63,37 @@ describe('storage adapter', () => {
             await writeItem(counterItem, { value: 2 });
 
             expect(seen).toEqual([{ value: 1 }]);
+        });
+    });
+
+    describe('subscribeItem', () => {
+        it('calls with the stored value, then with each change until stopped', async () => {
+            const seen: unknown[] = [];
+
+            data['counter'] = { value: 1 };
+
+            const stopSubscription = subscribeItem(counterItem, value => seen.push(value));
+
+            await tick();
+            await writeItem(counterItem, { value: 2 });
+
+            stopSubscription();
+
+            await writeItem(counterItem, { value: 3 });
+
+            expect(seen).toEqual([{ value: 1 }, { value: 2 }]);
+        });
+
+        it('drops a read that resolves after stop', async () => {
+            const seen: unknown[] = [];
+
+            const stopSubscription = subscribeItem(counterItem, value => seen.push(value));
+
+            stopSubscription();
+
+            await tick();
+
+            expect(seen).toEqual([]);
         });
     });
 

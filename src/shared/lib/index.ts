@@ -13,3 +13,4 @@ export * from './contentScript.ts';
 export * from './shellWords.ts';
 export * from './jsonText.ts';
 export * from './keyValueRows.ts';
+export * from './fallbacks.ts';

@@ -26,7 +26,6 @@ interface ResponseContentProps {
 
 const NAME_SEPARATOR = ', ';
 
-/** What the panel shows for each stage of sending */
 export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessRequest }) => {
     const { t } = useTranslation();
 
@@ -35,14 +34,15 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
     }
 
     if (sendState.stateType === SendStateTypes.NO_ACCESS) {
-        const accessButton = (
-            <Button size={ButtonSizes.SMALL} onClick={onAccessRequest}>
-                {t('apiClientAllowAccess')}
-            </Button>
-        );
-
         return (
-            <Notice action={accessButton} tone={NoticeTones.WARNING}>
+            <Notice
+                action={
+                    <Button size={ButtonSizes.SMALL} onClick={onAccessRequest}>
+                        {t('apiClientAllowAccess')}
+                    </Button>
+                }
+                tone={NoticeTones.WARNING}
+            >
                 {t('apiClientNoAccess', sendState.host)}
             </Notice>
         );

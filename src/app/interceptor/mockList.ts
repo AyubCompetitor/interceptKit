@@ -8,7 +8,6 @@ import {
 } from '#entities/mock';
 import { validate } from '#shared/lib';
 
-/** How long the first requests of a page wait for the bridge to deliver the mocks */
 const MOCK_LIST_WAIT_MS = 2000;
 
 const MESSAGE_EVENT = 'message';
@@ -43,7 +42,6 @@ const onBridgeMessage = (event: MessageEvent<unknown>) => {
     markListReady();
 };
 
-/** Takes mock lists from the bridge; without one, requests stop waiting after a while and go to the network */
 export const startMockList: VoidFunction = () => {
     window.addEventListener(MESSAGE_EVENT, onBridgeMessage);
 

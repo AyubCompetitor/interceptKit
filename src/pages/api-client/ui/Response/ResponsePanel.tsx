@@ -16,7 +16,6 @@ interface ResponsePanelProps {
 
 export const ResponsePanel: FC<ResponsePanelProps> = ({ sendState, onAccessRequest }) => {
     const titleId = useId();
-
     const { t } = useTranslation();
 
     return (

@@ -34,7 +34,6 @@ export const useMockForm = (mock: NotRequired<Mock>, onSaved: VoidFunction) => {
     return {
         draft,
         saveError,
-
         onDraftChange,
         onMockSubmit,
     };

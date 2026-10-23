@@ -1,7 +1,6 @@
 import type { FC } from 'react';
 
-import { useHeaderOpList } from '../../lib/useHeaderOpList.ts';
-import type { HeaderOpDraft } from '../../model/ruleDraft.ts';
+import { createHeaderOpDraft, updateHeaderOp, type HeaderOpDraft } from '../../model/ruleDraft.ts';
 
 import { useTranslation } from '#shared/i18n';
 import { Button, ButtonSizes, Icon, IconNames, Typography, TypographyColors, TypographySizes } from '#shared/ui';
@@ -21,15 +20,18 @@ interface HeaderOpListProps {
 /** Header changes as a table: every field of a row is named for assistive technology, so the column titles are visual */
 export const HeaderOpList: FC<HeaderOpListProps> = ({ legend, ops, onOpsChange }) => {
     const { t } = useTranslation();
-    const { onOpAdd, onOpChange, onOpRemove } = useHeaderOpList(ops, onOpsChange);
 
-    const hasOps = ops.length > 0;
+    const onOpAdd = () => onOpsChange([...ops, createHeaderOpDraft()]);
+
+    const onOpChange = (key: string, patch: Partial<HeaderOpDraft>) => onOpsChange(updateHeaderOp(ops, key, patch));
+
+    const onOpRemove = (key: string) => onOpsChange(ops.filter(op => op.key !== key));
 
     return (
         <fieldset className={styles.group}>
             <legend className={styles.legend}>{legend}</legend>
 
-            {hasOps && (
+            {!!ops.length && (
                 <div className={styles.table}>
                     <div aria-hidden='true' className={styles.columns}>
                         <span>{t('ruleHeaderName')}</span>
@@ -37,13 +39,14 @@ export const HeaderOpList: FC<HeaderOpListProps> = ({ legend, ops, onOpsChange }
                         <span>{t('ruleHeaderValue')}</span>
                         <span />
                     </div>
+
                     {ops.map(op => (
                         <HeaderOpRow key={op.key} op={op} onChange={onOpChange} onRemove={onOpRemove} />
                     ))}
                 </div>
             )}
 
-            {!hasOps && (
+            {!ops.length && (
                 <Typography color={TypographyColors.HINT} size={TypographySizes.SMALL}>
                     {t('ruleHeadersEmpty')}
                 </Typography>

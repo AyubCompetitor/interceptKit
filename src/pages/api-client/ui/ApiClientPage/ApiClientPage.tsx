@@ -13,6 +13,7 @@ import { ApiClientSidebar } from '../Sidebar/ApiClientSidebar.tsx';
 /** The tabs live here: the history in the sidebar opens its requests in them */
 export const ApiClientPage: FC = () => {
     const { t } = useTranslation();
+
     const {
         tabs,
         activeTab,
@@ -25,6 +26,7 @@ export const ApiClientPage: FC = () => {
         onActiveRequestSend,
         onActiveRequestCancel,
     } = useApiClient();
+
     const title = createDocumentTitle('apiClientTitle', 'extName', t);
 
     useDocumentTitle(title);

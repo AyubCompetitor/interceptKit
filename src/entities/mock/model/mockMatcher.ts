@@ -42,14 +42,12 @@ export const buildMockMatchers = (mocks: readonly PageMock[]): MockMatcher[] => 
     }));
 };
 
-/** The first mock that answers the request: as with rules, the list order is the priority */
 export const findPageMock = (matchers: readonly MockMatcher[], request: MockRequest): NotRequired<PageMock> => {
     const matcher = matchers.find(current => isRequestMatched(current, request));
 
     return matcher?.mock;
 };
 
-/** The URL the network would get: resolved against the page, without the fragment */
 export const resolveRequestUrl = (rawUrl: string, baseUrl: string): NotRequired<string> => {
     if (!URL.canParse(rawUrl, baseUrl)) {
         return;

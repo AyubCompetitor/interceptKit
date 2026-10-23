@@ -1,4 +1,3 @@
-/** Parts of the request editor, one on the screen at a time */
 export enum RequestSections {
     PARAMS = 'params',
     HEADERS = 'headers',
@@ -8,7 +7,6 @@ export enum RequestSections {
 
 export type RequestSection = `${RequestSections}`;
 
-/** Parts of a received response, one on the screen at a time */
 export enum ResponseSections {
     BODY = 'body',
     HEADERS = 'headers',

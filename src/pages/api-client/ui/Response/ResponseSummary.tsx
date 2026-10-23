@@ -12,7 +12,6 @@ interface ResponseSummaryProps {
     response: ApiResponse;
 }
 
-/** The status, red for errors, then how long the response took and how big its body is */
 export const ResponseSummary: FC<ResponseSummaryProps> = ({ response }) => {
     const { locale, t } = useTranslation();
 
