@@ -885,7 +885,7 @@
         "message": "Secret"
     },
     "apiClientVariableEncrypted": {
-        "message": "Encrypted"
+        "message": "Encrypted: type to replace"
     },
     "apiClientVariableAdd": {
         "message": "Add variable"
@@ -897,7 +897,123 @@
         "message": "A request uses a variable as {{name}}: in the URL, parameters, headers and body."
     },
     "apiClientSecretsWarning": {
-        "message": "Secret values are hidden on the screen, but this browser's profile keeps them unencrypted. Encryption with a master password comes in a later version."
+        "message": "Secret values are hidden on the screen, but this browser's profile keeps them unencrypted. To encrypt them with a master password, use the button at the top of the page."
+    },
+    "apiClientSecretsEncrypted": {
+        "message": "Secret values are encrypted with the master password. The editor never shows them: type a new value to replace one."
+    },
+    "apiClientSecretsLocked": {
+        "message": "The vault is locked, so these encrypted variables have no value: $1. Unlock it at the top of the page.",
+        "description": "$1 is a comma-separated list of variable names."
+    },
+    "apiClientVaultSetupOpen": {
+        "message": "Encrypt secrets"
+    },
+    "apiClientVaultUnlockOpen": {
+        "message": "Unlock secrets"
+    },
+    "apiClientVaultLock": {
+        "message": "Lock secrets"
+    },
+    "apiClientVaultDisableOpen": {
+        "message": "Turn off encryption"
+    },
+    "apiClientVaultFailed": {
+        "message": "The vault did not respond. Try again."
+    },
+    "apiClientVaultCancel": {
+        "message": "Cancel"
+    },
+    "apiClientVaultSetupTitle": {
+        "message": "Encrypt secrets"
+    },
+    "apiClientVaultSetupText": {
+        "message": "Secret values of every environment are encrypted with a key derived from the master password. The password itself is stored nowhere."
+    },
+    "apiClientVaultPassword": {
+        "message": "Master password"
+    },
+    "apiClientVaultPasswordHint": {
+        "message": "At least $1 characters",
+        "description": "$1 is a number."
+    },
+    "apiClientVaultPasswordRepeat": {
+        "message": "Repeat the password"
+    },
+    "apiClientVaultSetupWarning": {
+        "message": "If you forget the password, the encrypted values cannot be recovered: you can only reset the vault and type them again."
+    },
+    "apiClientVaultAutoLockHint": {
+        "message": "The vault locks itself after $1 minutes without use and when the browser closes.",
+        "description": "$1 is a number of minutes."
+    },
+    "apiClientVaultPasswordMismatch": {
+        "message": "The passwords do not match."
+    },
+    "apiClientVaultSetupSubmit": {
+        "message": "Encrypt"
+    },
+    "apiClientVaultUnlockTitle": {
+        "message": "Unlock secrets"
+    },
+    "apiClientVaultUnlockText": {
+        "message": "Enter the master password to put encrypted values into requests."
+    },
+    "apiClientVaultUnlockSubmit": {
+        "message": "Unlock"
+    },
+    "apiClientVaultWrongPassword": {
+        "message": "Wrong password."
+    },
+    "apiClientVaultForgot": {
+        "message": "Forgot the password?"
+    },
+    "apiClientVaultDisableTitle": {
+        "message": "Turn off encryption?"
+    },
+    "apiClientVaultDisableText": {
+        "message": "Secret values are decrypted and kept in this browser's profile unencrypted again. Enter the master password to confirm."
+    },
+    "apiClientVaultDisableSubmit": {
+        "message": "Turn off encryption"
+    },
+    "apiClientVaultResetTitle": {
+        "message": "Reset the vault?"
+    },
+    "apiClientVaultResetText": {
+        "message": "The encrypted values are deleted and encryption turns off. The variables stay, but empty: type their values again."
+    },
+    "apiClientVaultResetSubmit": {
+        "message": "Delete encrypted values"
+    },
+    "apiClientVaultLockedSave": {
+        "message": "The vault is locked: unlock it at the top of the page to save secret values."
+    },
+    "apiClientCurlImportOpen": {
+        "message": "Import cURL"
+    },
+    "apiClientCurlImportTitle": {
+        "message": "Import a cURL command"
+    },
+    "apiClientCurlCommand": {
+        "message": "cURL command"
+    },
+    "apiClientCurlCommandHint": {
+        "message": "For example, from “Copy as cURL (bash)” in the browser's developer tools. The request opens in a new tab. Commands for cmd and PowerShell are not supported."
+    },
+    "apiClientCurlCommandPlaceholder": {
+        "message": "curl 'https://api.example.com/users' -H 'Accept: application/json'",
+        "description": "An example command; keep it as is."
+    },
+    "apiClientCurlImportFailed": {
+        "message": "Couldn't import the command: $1",
+        "description": "$1 is the technical reason, in English."
+    },
+    "apiClientCurlImportSubmit": {
+        "message": "Import"
+    },
+    "apiClientCurlCancel": {
+        "message": "Cancel"
     },
     "dialogClose": {
         "message": "Close",

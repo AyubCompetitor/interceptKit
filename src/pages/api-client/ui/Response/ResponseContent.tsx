@@ -56,6 +56,14 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
         );
     }
 
+    if (sendState.stateType === SendStateTypes.SECRETS_LOCKED) {
+        return (
+            <Typography color={TypographyColors.DANGER} role='alert'>
+                {t('apiClientSecretsLocked', sendState.names.join(NAME_SEPARATOR))}
+            </Typography>
+        );
+    }
+
     if (sendState.stateType === SendStateTypes.INVALID) {
         return (
             <Typography color={TypographyColors.DANGER} role='alert'>

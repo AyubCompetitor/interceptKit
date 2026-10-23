@@ -40,6 +40,8 @@ const ICON_SHAPES: Record<IconName, ReactNode> = {
     [IconNames.POLICY]: <path d='M10 3l5.5 2v4.5c0 3.5-2.4 6-5.5 7.5-3.1-1.5-5.5-4-5.5-7.5V5z' />,
     [IconNames.TRANSFER]: <path d='M6.5 4v12M3.5 7l3-3 3 3M13.5 16V4M10.5 13l3 3 3-3' />,
     [IconNames.API_CLIENT]: <path d='M4 6l4 4-4 4M10 14.5h6' />,
+    [IconNames.LOCK]: <path d='M5 9.5h10v7H5zM7 9.5V7a3 3 0 0 1 6 0v2.5M10 12.5v1.5' />,
+    [IconNames.UNLOCK]: <path d='M5 9.5h10v7H5zM7 9.5V7a3 3 0 0 1 5.8-1.1M10 12.5v1.5' />,
 };
 
 export const Icon: FC<IconProps> = ({ name, className }) => (

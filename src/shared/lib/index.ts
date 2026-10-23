@@ -14,3 +14,4 @@ export * from './shellWords.ts';
 export * from './jsonText.ts';
 export * from './keyValueRows.ts';
 export * from './fallbacks.ts';
+export * from './crypto.ts';

@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { buildApiRequest, createRequestDraft, getDroppedHeaderNames } from '../requestDraft.ts';
+import { buildApiRequest, createRequestDraft, getDroppedHeaderNames, mapCurlToDraft } from '../requestDraft.ts';
 
-import { apiRequestValidator, RequestBodyTypes } from '#entities/request';
+import { apiRequestValidator, RequestBodyTypes, type CurlImport } from '#entities/request';
 import { HttpMethods, validate } from '#shared/lib';
 
 import { makeDraft, makeRow } from './mocks.ts';
@@ -70,5 +70,35 @@ describe('request drafts', () => {
         ];
 
         expect(getDroppedHeaderNames(makeDraft({ headers }))).toEqual(['Cookie']);
+    });
+});
+
+describe('mapCurlToDraft', () => {
+    const imported: CurlImport = {
+        method: HttpMethods.POST,
+        url: 'https://api.example.com/users',
+        query: [{ key: 'page', value: '2', enabled: true }],
+        headers: [{ key: 'Cookie', value: 'session=abc', enabled: true }],
+        body: { bodyType: RequestBodyTypes.JSON, text: '{"name":"Ada"}' },
+    };
+
+    it('opens the command as a request with its method, URL, query, headers and body', () => {
+        const request = buildApiRequest(mapCurlToDraft(imported));
+
+        expect(request).toMatchObject({
+            method: imported.method,
+            url: imported.url,
+            query: imported.query,
+            headers: imported.headers,
+            body: imported.body,
+        });
+    });
+
+    it('keeps the cookie switch off, since cookies of the command come as a header', () => {
+        expect(mapCurlToDraft(imported).sendCookies).toBe(false);
+    });
+
+    it('gives each import a tab of its own', () => {
+        expect(mapCurlToDraft(imported).id).not.toBe(mapCurlToDraft(imported).id);
     });
 });

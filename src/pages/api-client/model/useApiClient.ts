@@ -2,15 +2,18 @@ import { SendStateTypes } from './sendState.ts';
 import { useActiveEnvironment } from './useActiveEnvironment.ts';
 import { useRequestSender } from './useRequestSender.ts';
 import { useRequestTabs } from './useRequestTabs.ts';
+import { useVaultSecrets } from './useVaultSecrets.ts';
 
 export const useApiClient = () => {
     const activeEnvironment = useActiveEnvironment();
+    const secrets = useVaultSecrets(activeEnvironment);
     const {
         tabs,
         activeTab,
         isLoading,
         onTabOpen,
         onRequestOpen,
+        onCurlImport,
         onTabSelect,
         onTabClose,
         onDraftChange,
@@ -26,7 +29,7 @@ export const useApiClient = () => {
             return;
         }
 
-        onRequestSend(activeTab.draft, activeEnvironment);
+        onRequestSend(activeTab.draft, activeEnvironment, secrets);
     };
 
     const onActiveRequestCancel = () => {
@@ -51,6 +54,7 @@ export const useApiClient = () => {
 
         onTabOpen,
         onRequestOpen,
+        onCurlImport,
         onTabSelect,
         onRequestTabClose,
         onDraftChange,

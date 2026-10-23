@@ -7,3 +7,4 @@ export * from './scripting/scripting.ts';
 export * from './permissions/useHostPatterns.ts';
 export * from './database/database.ts';
 export * from './database/useDatabaseRecords.ts';
+export * from './alarms/alarms.ts';

@@ -12,6 +12,8 @@ export enum SendStateTypes {
     INVALID = 'invalid',
     /** The request uses variables that have no value */
     MISSING_VARIABLES = 'missingVariables',
+    /** The request uses encrypted variables while the vault is locked */
+    SECRETS_LOCKED = 'secretsLocked',
     /** The request went, but no response came back */
     FAILED = 'failed',
     /** The user refused access to the host */
@@ -51,6 +53,13 @@ interface MissingVariablesState {
     readonly names: readonly string[];
 }
 
+interface SecretsLockedState {
+    /** The request uses encrypted variables while the vault is locked */
+    readonly stateType: SendStateTypes.SECRETS_LOCKED;
+    /** Names of those variables */
+    readonly names: readonly string[];
+}
+
 interface FailedState {
     /** No response came back */
     readonly stateType: SendStateTypes.FAILED;
@@ -66,7 +75,14 @@ interface NoAccessState {
 }
 
 export type SendState =
-    IdleState | SendingState | ReceivedState | InvalidState | MissingVariablesState | FailedState | NoAccessState;
+    | IdleState
+    | SendingState
+    | ReceivedState
+    | InvalidState
+    | MissingVariablesState
+    | SecretsLockedState
+    | FailedState
+    | NoAccessState;
 
 export const IDLE_STATE: SendState = { stateType: SendStateTypes.IDLE };
 

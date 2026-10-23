@@ -1,4 +1,4 @@
-import type { Environment } from './environment.ts';
+import { isEncryptedValue, type Environment, type EnvVariable } from './environment.ts';
 
 /** Values of the variables by name */
 export type VariableValues = ReadonlyMap<string, string>;
@@ -6,15 +6,32 @@ export type VariableValues = ReadonlyMap<string, string>;
 /** {{name}} with the same name rule as variable keys; no spaces inside the braces */
 const TEMPLATE_RGX = /\{\{([A-Za-z_][A-Za-z0-9_.-]*)\}\}/g;
 
-/** What the templates of a request can use: switched-off variables are kept but not used, and encrypted ones wait for the vault */
-export const getVariableValues = (environment: NotRequired<Environment>): VariableValues => {
+const NO_SECRETS: VariableValues = new Map();
+
+const getVariableValue = (variable: EnvVariable, secrets: VariableValues): NotRequired<string> => {
+    if (!variable.enabled) {
+        return;
+    }
+
+    if (isEncryptedValue(variable.value)) {
+        return secrets.get(variable.key);
+    }
+
+    return variable.value;
+};
+
+/** What the templates can use: switched-off variables are skipped, encrypted ones come from the unlocked vault */
+export const getVariableValues = (
+    environment: NotRequired<Environment>,
+    secrets: VariableValues = NO_SECRETS,
+): VariableValues => {
     const values = new Map<string, string>();
 
-    for (const { key, value, enabled } of environment?.variables ?? []) {
-        const isPlainValue = typeof value === 'string';
+    for (const variable of environment?.variables ?? []) {
+        const value = getVariableValue(variable, secrets);
 
-        if (enabled && isPlainValue) {
-            values.set(key, value);
+        if (value !== undefined) {
+            values.set(variable.key, value);
         }
     }
 
@@ -32,10 +49,16 @@ const getTemplateNames = (text: string): string[] => {
     return matches.map(match => match[1] ?? '');
 };
 
+/** Names used in the texts, once each, in the order they appear */
+export const getUsedVariables = (texts: readonly string[]): string[] => {
+    const names = texts.flatMap(getTemplateNames);
+
+    return [...new Set(names)];
+};
+
 /** Names used in the texts that have no value, once each, in the order they appear */
 export const getMissingVariables = (texts: readonly string[], values: VariableValues): string[] => {
-    const names = texts.flatMap(getTemplateNames);
-    const missingNames = names.filter(name => !values.has(name));
+    const names = getUsedVariables(texts);
 
-    return [...new Set(missingNames)];
+    return names.filter(name => !values.has(name));
 };

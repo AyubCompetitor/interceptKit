@@ -10,6 +10,8 @@ import { startRuleSync } from './ruleSync.ts';
 import { registerSettingsHandlers } from './settingsHandlers.ts';
 import { registerSiteHandlers } from './siteHandlers.ts';
 import { migrateStorage } from './storageSchema.ts';
+import { registerVaultHandlers } from './vaultHandlers.ts';
+import { startVaultLock } from './vaultKey.ts';
 
 const FAIL_MESSAGES = {
     STORAGE_ACCESS: 'restricting storage access',
@@ -34,9 +36,11 @@ export const startListenBackground: VoidFunction = () => {
     registerMockHandlers(router, storageReady, enqueue);
     registerSiteHandlers(router, storageReady, enqueue);
     registerEnvironmentHandlers(router, storageReady, enqueue);
+    registerVaultHandlers(router, storageReady, enqueue);
 
     startRuleSync(storageReady, enqueue);
     startMockSync(storageReady, enqueue);
+    startVaultLock(enqueue);
 
     router.listen();
 };

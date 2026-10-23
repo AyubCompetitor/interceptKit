@@ -40,12 +40,12 @@ These rules are checked by `oxlint` (`.oxlintrc.json`): `no-restricted-imports` 
 
 ## Data
 
-| Store                    | Contents                                                                                    | Notes                                                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `chrome.storage.local`   | `settings`, `rules`, `mocks`, `sites`, `environments`, `environmentChoice`, `schemaVersion` | Closed to content scripts: the service worker calls `storage.local.setAccessLevel('TRUSTED_CONTEXTS')` on every start |
-| `chrome.storage.session` | Short-lived state                                                                           | In memory only; closed to content scripts by default                                                                  |
-| `chrome.storage.managed` | Administrator policy                                                                        | Read-only; validated field by field, see below                                                                        |
-| IndexedDB                | API client history and open tabs (`interceptkit-api-client`)                                | Written by the API client page itself; content scripts cannot reach the extension's IndexedDB                         |
+| Store                    | Contents                                                                                             | Notes                                                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `chrome.storage.local`   | `settings`, `rules`, `mocks`, `sites`, `environments`, `environmentChoice`, `vault`, `schemaVersion` | Closed to content scripts: the service worker calls `storage.local.setAccessLevel('TRUSTED_CONTEXTS')` on every start |
+| `chrome.storage.session` | `vaultKey`, `vaultStatus` of the unlocked vault                                                      | In memory only; closed to content scripts by default; cleared when the browser closes                                 |
+| `chrome.storage.managed` | Administrator policy                                                                                 | Read-only; validated field by field, see below                                                                        |
+| IndexedDB                | API client history and open tabs (`interceptkit-api-client`)                                         | Written by the API client page itself; content scripts cannot reach the extension's IndexedDB                         |
 
 Every value is validated on read and on write with the dependency-free validators in `shared/lib/validation.ts`. Corrupted or foreign data degrades to defaults instead of crashing; invalid data is never written. The layout of `chrome.storage.local` is versioned (`schemaVersion`); migrations run in the service worker before any write.
 
@@ -132,8 +132,18 @@ Environments:
 - An environment is a named set of variables. A request uses a variable as `{{name}}` in its URL, parameters, headers and body. The environment chosen at the top of the page fills them just before sending, while the tab keeps the templates, so the values of secrets never become part of the request as typed.
 - Environments live in `chrome.storage.local` next to rules and mocks, and only the service worker writes them (`environments/save`, `environments/remove`, `environments/choose`). The choice is a key of its own (`environmentChoice`), not a setting, so switching the environment wakes no rule or mock sync. Deleting the chosen environment clears the choice; a choice of an environment that does not exist is refused.
 - A request that uses a variable without a value does not go: the response panel names the variables. Switched-off variables are kept but not used.
-- Values of secret variables are hidden on the screen. The field is plain text drawn with hidden characters rather than a password field, so the browser's password manager never offers to keep them. Until the vault exists they are stored unencrypted, and the editor says so.
+- Values of secret variables are hidden on the screen. The field is plain text drawn with hidden characters rather than a password field, so the browser's password manager never offers to keep them. Without the vault they are stored unencrypted, and the editor says so.
 - Pure parts: `fillVariables`, `getMissingVariables` and `getVariableValues` in `entities/environment`; `mapRequestTexts` and `getRequestTexts` in `entities/request`. The page joins the two entities in `resolveRequestVariables`.
+
+Vault of secrets:
+
+- Optional. Turned on with a master password, it encrypts the value of every secret variable in every environment; other variables stay as typed. The key is 256 bits of PBKDF2-SHA256 over the password with a random 16-byte salt and 600,000 rounds (`VAULT_CONFIG` in `shared/config`, the rounds of each vault are stored with it). Each value is encrypted with AES-GCM under its own random 12-byte nonce and stored as `{ v: 1, iv, ct }`. WebCrypto has no Argon2, so PBKDF2 at the OWASP figure is what works without a dependency.
+- The password is stored nowhere. The vault keeps the salt, the rounds and a known text encrypted with the key: unlocking derives the key again and checks that the text opens.
+- The key lives in `chrome.storage.session` (memory only, closed to content scripts) while the vault is unlocked, and only the service worker reads it. Pages get the decrypted values of the chosen environment for the requests they send (`vault/reveal`) and never the key. Pages watch `vaultStatus`, which holds only the time of the auto-lock.
+- The vault locks itself after 15 minutes without use: unlocking, opening secrets, saving them or sending a request that uses them. Each use moves an `alarms` alarm that wakes the service worker to wipe the key, even with no extension page open; every use of the key also checks the time itself, since an alarm can come late. "Lock secrets" wipes the key at once, and closing the browser clears the session store.
+- With the vault on, the service worker encrypts a typed secret value on save and refuses it while the vault is locked. The editor never shows an encrypted value: typing a new one replaces it.
+- Turning the vault off asks for the password again and writes the values back unencrypted. A forgotten password leaves only a reset: the encrypted values are deleted, their variables stay, empty.
+- What the vault does not protect against: anyone who can run code in the extension's pages or service worker while it is unlocked, and guessing a weak password from a copy of the browser profile. A strong password is the only defence against the latter.
 
 History:
 
@@ -142,11 +152,15 @@ History:
 - The history and the open tabs live in IndexedDB, not in `chrome.storage.local`: bodies can be large and must never take space from rules, and a write there wakes no service worker. The page writes them itself through `shared/platform/database/database.ts`, a small adapter without a library. Like `chrome.storage`, it validates every record on read and on write and skips a broken record.
 - A page that changes the records tells the other pages of the extension through a `BroadcastChannel`, so two open API client pages show the same history. The open tabs are one record: two pages open at once overwrite each other's tabs.
 
+cURL import:
+
+- "Import cURL" in the header takes a command, for example from the browser's "Copy as cURL (bash)", and opens it in a new tab. `parseCurl` in `entities/request`, a pure function, reads the method, the URL, query parameters, headers and the body. It follows bash quoting (`'…'`, `"…"`, `$'…'`, `\` and line breaks); cmd and PowerShell syntax is not supported.
+- What it cannot import faithfully, such as multipart forms and file uploads (`-F`, `-T`), is refused with a reason, and the dialog stays open. Options that change nothing for the API client, such as `--compressed` or `-o`, are skipped.
+- Cookies of the command (`-b` or a `Cookie` header) arrive as a header, and the cookie switch stays off. The editor names such headers among those `fetch` drops.
+
 Planned:
 
-- `parseCurl` in `entities/request` reads a command from the browser's "Copy as cURL (bash)" into a method, a URL, query parameters, headers and a body. It refuses what it cannot import faithfully, such as multipart forms, with a reason.
 - Headers that `fetch` cannot set will be set by a session rule limited to requests the extension itself starts (`initiatorDomains` is the extension's id), so browsing is unaffected.
-- A vault encrypts the values of secret variables with a key derived from a master password.
 
 ## Site access
 
@@ -197,5 +211,5 @@ dist/chrome-mv3/
 - **Interception tests** (`e2e/interception.spec.ts`) check the effect of rules on real requests. A local HTTP server (`e2e/testServer.ts`, Node's `node:http` on `127.0.0.1` with a random port) serves a test page and echoes every other request back with the headers it received. The tests load a copy of the build with install-time access to `http://127.0.0.1/*`, so the shipped manifest stays unchanged. They cover a block rule on fetches and navigations, redirects to a URL, a regex substitution and a URL transform, and request and response header changes. The browser maps a second host, `foreign.test`, to the same server, but the extension has no access to it. A request from a page on that host passes even when a rule blocks its URL: a rule acts only when the extension has access to both the request URL and the page that started it.
 - **Interceptor tests** (`e2e/interceptor.spec.ts`) inject the built `content/interceptor.js` into the test page before its scripts, post a mock list the way the bridge does, and check `fetch` and XHR in the real browser. A mocked XHR is compared with a real request to the test server, so its events must match the browser's own.
 - **Mock delivery tests** (`e2e/mocks.spec.ts`) go through the real registration: they turn mocks on for the test server's granted pattern, save a mock and wait until the browser has both scripts. A page of the site then gets the mock, including a request its own script sends while the page is still parsing; a page of a site without mocks reaches the server. They also check that switching mocks off or pausing interception takes the scripts away, and that the background refuses page mocks to extension pages, mocks for sites it has not granted, and mocks that claim to come from the policy. The dashboard tests do the same through the interface: they turn mocks on in Sites, create a mock in the editor and load a page of the site.
-- **API client tests** (`e2e/apiClient.spec.ts`) send requests from the page to the test server: parameters and headers, a JSON body, cookies off and on, a host without access, where the access prompt is replaced as in the Sites tests, variables of an environment created in the editor, and the history with its limit and the open tabs after a reload. The server keeps what reached it (`getLastRequest`), and the tests check it there: the response editor draws only the lines on the screen.
+- **API client tests** (`e2e/apiClient.spec.ts`) send requests from the page to the test server: parameters and headers, a JSON body, cookies off and on, a host without access, where the access prompt is replaced as in the Sites tests, variables of an environment created in the editor, the vault (encrypted storage, a wrong password, lock and auto-lock through the alarm, turning off and reset), the cURL import, and the history with its limit and the open tabs after a reload. The server keeps what reached it (`getLastRequest`), and the tests check it there: the response editor draws only the lines on the screen.
 - **Type checking** runs two programs. `tsconfig.json` covers the whole repository with Node typings for configs, unit tests and e2e. `tsconfig.browser.json` covers `src` without tests and without Node typings, so extension code cannot use Node APIs by accident.

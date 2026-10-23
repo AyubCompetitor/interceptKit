@@ -12,7 +12,7 @@ export const buildManifest = (): chrome.runtime.ManifestV3 => ({
     version: pkg.version,
     default_locale: 'en',
     minimum_chrome_version: '140',
-    permissions: ['storage', 'declarativeNetRequestWithHostAccess', 'scripting'],
+    permissions: ['storage', 'declarativeNetRequestWithHostAccess', 'scripting', 'alarms'],
     optional_host_permissions: ['*://*/*'],
     storage: { managed_schema: 'managed-schema.json' },
     background: { service_worker: 'background/background.js' },

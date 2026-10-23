@@ -3,6 +3,7 @@ import {
     isForbiddenHeader,
     RequestBodyTypes,
     type ApiRequest,
+    type CurlImport,
     type RequestBody,
     type RequestBodyType,
 } from '#entities/request';
@@ -167,4 +168,14 @@ export const mapRequestToDraft = (request: ApiRequest): RequestDraft => ({
 export const copyRequestToDraft = (request: ApiRequest): RequestDraft => ({
     ...mapRequestToDraft(request),
     id: getRandomUUID(),
+});
+
+/** Cookies of the command arrive as a header, so the cookie switch stays off */
+export const mapCurlToDraft = (imported: CurlImport): RequestDraft => ({
+    ...createRequestDraft(),
+    method: imported.method,
+    url: imported.url,
+    query: imported.query.map(mapKeyValueToRow),
+    headers: imported.headers.map(mapKeyValueToRow),
+    ...mapBodyToDraft(imported.body),
 });

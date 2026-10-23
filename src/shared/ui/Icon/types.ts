@@ -13,6 +13,8 @@ export enum IconNames {
     POLICY = 'policy',
     TRANSFER = 'transfer',
     API_CLIENT = 'apiClient',
+    LOCK = 'lock',
+    UNLOCK = 'unlock',
 }
 
 export type IconName = `${IconNames}`;

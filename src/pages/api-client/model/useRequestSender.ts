@@ -2,10 +2,11 @@ import { useRef } from 'react';
 
 import { sendRequest } from '../api/sendRequest.ts';
 
-import type { Environment } from '#entities/environment';
+import { vaultRpc, type Environment, type VariableValues } from '#entities/environment';
 import { buildOutgoingRequest, type ApiRequest, type ApiResponse, type OutgoingRequest } from '#entities/request';
 import { buildHostPattern, isHostCovered } from '#entities/site';
-import { formatIssues } from '#shared/lib';
+import { formatIssues, noop } from '#shared/lib';
+import { executeRpc } from '#shared/messaging';
 import { requestHostAccess, useHostPatterns } from '#shared/platform';
 
 import { addHistoryEntry, buildHistoryEntry } from './historyEntries.ts';
@@ -45,6 +46,11 @@ const saveToHistory = (typedRequest: ApiRequest, sentAt: number, response: NotRe
     addHistoryEntry(buildHistoryEntry(typedRequest, sentAt, response)).catch(logHistoryFailure);
 };
 
+/** A request with secrets is a use of the vault, so the auto-lock waits again */
+const extendVaultUnlock = () => {
+    executeRpc(vaultRpc.touch, null).catch(noop);
+};
+
 export const useRequestSender = (onSendStateChange: (tabId: string, sendState: SendState) => void) => {
     const patterns = useHostPatterns();
     const controllers = useRef(new Map<string, AbortController>());
@@ -75,11 +81,18 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
         sendRequest(outgoing, controller.signal).then(onResponse).catch(onFailure);
     };
 
-    const onRequestSend = (draft: RequestDraft, environment: NotRequired<Environment>) => {
+    const onRequestSend = (draft: RequestDraft, environment: NotRequired<Environment>, secrets: VariableValues) => {
         const tabId = draft.id;
         const typedRequest = buildApiRequest(draft);
 
-        const { request, missingNames } = resolveRequestVariables(typedRequest, environment);
+        const { request, missingNames, secretNames } = resolveRequestVariables(typedRequest, environment, secrets);
+        const lockedNames = missingNames.filter(name => secretNames.includes(name));
+
+        if (lockedNames.length > 0) {
+            onSendStateChange(tabId, { stateType: SendStateTypes.SECRETS_LOCKED, names: lockedNames });
+
+            return;
+        }
 
         if (missingNames.length > 0) {
             onSendStateChange(tabId, { stateType: SendStateTypes.MISSING_VARIABLES, names: missingNames });
@@ -93,6 +106,10 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
             onSendStateChange(tabId, { stateType: SendStateTypes.INVALID, reason: formatIssues(result.issues) });
 
             return;
+        }
+
+        if (secretNames.length > 0) {
+            extendVaultUnlock();
         }
 
         const outgoing = result.value;

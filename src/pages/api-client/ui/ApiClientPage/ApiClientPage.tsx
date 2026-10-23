@@ -6,11 +6,13 @@ import { useTranslation } from '#shared/i18n';
 import { Brand, createDocumentTitle, useDocumentTitle } from '#shared/ui';
 
 import styles from './ApiClientPage.module.css';
+import { CurlImportControl } from '../Curl/CurlImportControl.tsx';
 import { EnvironmentSelect } from '../Environment/EnvironmentSelect.tsx';
 import { RequestWorkspace } from '../Request/RequestWorkspace.tsx';
 import { ApiClientSidebar } from '../Sidebar/ApiClientSidebar.tsx';
+import { VaultControl } from '../Vault/VaultControl.tsx';
 
-/** The tabs live here: the history in the sidebar opens its requests in them */
+/** The tabs live here: the history in the sidebar and the cURL import in the header open requests in them */
 export const ApiClientPage: FC = () => {
     const { t } = useTranslation();
 
@@ -20,6 +22,7 @@ export const ApiClientPage: FC = () => {
         isSending,
         onTabOpen,
         onRequestOpen,
+        onCurlImport,
         onTabSelect,
         onRequestTabClose,
         onDraftChange,
@@ -37,6 +40,10 @@ export const ApiClientPage: FC = () => {
                 <Brand />
                 <h1 className={styles.title}>{t('apiClientTitle')}</h1>
                 <div className={styles.tools}>
+                    <CurlImportControl onImport={onCurlImport} />
+
+                    <VaultControl />
+
                     <EnvironmentSelect />
                 </div>
             </header>

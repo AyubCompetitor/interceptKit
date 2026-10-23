@@ -14,7 +14,7 @@ test('manifest requests only the reviewed permissions', async ({ serviceWorker }
 
     expect(manifest.manifest_version).toBe(3);
 
-    expect(manifest.permissions).toEqual(['storage', 'declarativeNetRequestWithHostAccess', 'scripting']);
+    expect(manifest.permissions).toEqual(['storage', 'declarativeNetRequestWithHostAccess', 'scripting', 'alarms']);
 
     expect(manifest.host_permissions ?? []).toEqual([]);
 

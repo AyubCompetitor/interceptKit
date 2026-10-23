@@ -1,5 +1,5 @@
-import { isEncryptedValue, type EncryptedValue, type Environment, type EnvVariable } from '#entities/environment';
-import { getRandomUUID } from '#shared/lib';
+import { isEncryptedValue, type Environment, type EnvVariable } from '#entities/environment';
+import { getRandomUUID, type EncryptedValue } from '#shared/lib';
 
 /** A variable as the editor edits it */
 export interface VariableDraft {

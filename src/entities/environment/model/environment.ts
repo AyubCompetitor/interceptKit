@@ -2,25 +2,16 @@ import {
     array,
     boolean,
     displayName,
+    encryptedValue,
     fail,
     isDuplicateValues,
     identifier,
-    literal,
     object,
     refine,
     string,
+    type EncryptedValue,
     type Validator,
 } from '#shared/lib';
-
-/** A secret encrypted with AES-GCM under a key derived from the master password */
-export interface EncryptedValue {
-    /** Envelope format version */
-    readonly v: 1;
-    /** Base64 of a 12-byte nonce */
-    readonly iv: string;
-    /** Base64 ciphertext with the authentication tag */
-    readonly ct: string;
-}
 
 export interface EnvVariable {
     /** Name used in {{key}} templates */
@@ -44,10 +35,7 @@ export interface Environment {
 
 export const MAX_ENVIRONMENTS = 100;
 
-const ENV_RGXS = {
-    BASE64: /^[A-Za-z0-9+/]*={0,2}$/,
-    VARIABLE_KEY: /^[A-Za-z_][A-Za-z0-9_.-]*$/,
-} as const;
+const VARIABLE_KEY_RGX = /^[A-Za-z_][A-Za-z0-9_.-]*$/;
 
 const ENV_ERRORS = {
     INVALID_VALUE: 'expected a string or an encrypted value',
@@ -57,12 +45,6 @@ const ENV_ERRORS = {
 } as const;
 
 export const isEncryptedValue = (value: string | EncryptedValue): value is EncryptedValue => typeof value !== 'string';
-
-const encryptedValue: Validator<EncryptedValue> = object({
-    v: literal(1),
-    iv: string({ minLength: 16, maxLength: 16, pattern: ENV_RGXS.BASE64 }),
-    ct: string({ minLength: 1, maxLength: 1_000_000, pattern: ENV_RGXS.BASE64 }),
-});
 
 const plainValue = string({ maxLength: 100_000 });
 
@@ -103,7 +85,7 @@ const variable: Validator<EnvVariable> = refine(
         key: string({
             minLength: 1,
             maxLength: 100,
-            pattern: ENV_RGXS.VARIABLE_KEY,
+            pattern: VARIABLE_KEY_RGX,
         }),
         enabled: boolean(),
         secret: boolean(),

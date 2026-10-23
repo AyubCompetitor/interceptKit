@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
 
-import { apiClientDatabase, OPEN_REQUESTS_KEY, openRequestsStore, type ApiRequest } from '#entities/request';
+import {
+    apiClientDatabase,
+    OPEN_REQUESTS_KEY,
+    openRequestsStore,
+    type ApiRequest,
+    type CurlImport,
+} from '#entities/request';
 import { API_CLIENT_CONFIG } from '#shared/config';
 import { readRecord, writeRecord } from '#shared/platform';
 
-import { copyRequestToDraft, type RequestDraftPatch } from './requestDraft.ts';
+import { copyRequestToDraft, mapCurlToDraft, type RequestDraftPatch } from './requestDraft.ts';
 import {
     closeRequestTab,
     createRequestTabs,
@@ -71,6 +77,10 @@ export const useRequestTabs = () => {
         updateState(current => openRequestTab(current, copyRequestToDraft(request)));
     };
 
+    const onCurlImport = (imported: CurlImport) => {
+        updateState(current => openRequestTab(current, mapCurlToDraft(imported)));
+    };
+
     const onTabSelect = (tabId: string) => {
         updateState(current => selectRequestTab(current, tabId));
     };
@@ -95,6 +105,7 @@ export const useRequestTabs = () => {
 
         onTabOpen,
         onRequestOpen,
+        onCurlImport,
         onTabSelect,
         onTabClose,
         onDraftChange,

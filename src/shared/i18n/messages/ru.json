@@ -837,7 +837,7 @@
         "message": "Секрет"
     },
     "apiClientVariableEncrypted": {
-        "message": "Зашифровано"
+        "message": "Зашифровано: введите новое значение"
     },
     "apiClientVariableAdd": {
         "message": "Добавить переменную"
@@ -849,7 +849,118 @@
         "message": "В запросе переменная пишется как {{name}} — в адресе, параметрах, заголовках и теле."
     },
     "apiClientSecretsWarning": {
-        "message": "Значения секретов скрыты на экране, но в профиле браузера хранятся без шифрования. Шифрование мастер-паролем появится в одной из следующих версий."
+        "message": "Значения секретов скрыты на экране, но в профиле браузера хранятся без шифрования. Зашифровать их мастер-паролем можно кнопкой в шапке страницы."
+    },
+    "apiClientSecretsEncrypted": {
+        "message": "Значения секретов зашифрованы мастер-паролем. Редактор их не показывает: чтобы заменить значение, введите новое."
+    },
+    "apiClientSecretsLocked": {
+        "message": "Хранилище заблокировано, и у этих зашифрованных переменных нет значений: $1. Разблокируйте его кнопкой в шапке страницы."
+    },
+    "apiClientVaultSetupOpen": {
+        "message": "Зашифровать секреты"
+    },
+    "apiClientVaultUnlockOpen": {
+        "message": "Разблокировать секреты"
+    },
+    "apiClientVaultLock": {
+        "message": "Заблокировать секреты"
+    },
+    "apiClientVaultDisableOpen": {
+        "message": "Выключить шифрование"
+    },
+    "apiClientVaultFailed": {
+        "message": "Хранилище не ответило. Попробуйте ещё раз."
+    },
+    "apiClientVaultCancel": {
+        "message": "Отмена"
+    },
+    "apiClientVaultSetupTitle": {
+        "message": "Шифрование секретов"
+    },
+    "apiClientVaultSetupText": {
+        "message": "Значения секретов во всех окружениях будут зашифрованы ключом, который выводится из мастер-пароля. Сам пароль нигде не хранится."
+    },
+    "apiClientVaultPassword": {
+        "message": "Мастер-пароль"
+    },
+    "apiClientVaultPasswordHint": {
+        "message": "Не короче $1 символов"
+    },
+    "apiClientVaultPasswordRepeat": {
+        "message": "Повторите пароль"
+    },
+    "apiClientVaultSetupWarning": {
+        "message": "Если забудете пароль, зашифрованные значения не восстановить: останется сбросить хранилище и ввести их заново."
+    },
+    "apiClientVaultAutoLockHint": {
+        "message": "Хранилище блокируется само через $1 минут простоя и при закрытии браузера."
+    },
+    "apiClientVaultPasswordMismatch": {
+        "message": "Пароли не совпадают."
+    },
+    "apiClientVaultSetupSubmit": {
+        "message": "Зашифровать"
+    },
+    "apiClientVaultUnlockTitle": {
+        "message": "Разблокировка секретов"
+    },
+    "apiClientVaultUnlockText": {
+        "message": "Введите мастер-пароль, чтобы подставлять зашифрованные значения в запросы."
+    },
+    "apiClientVaultUnlockSubmit": {
+        "message": "Разблокировать"
+    },
+    "apiClientVaultWrongPassword": {
+        "message": "Неверный пароль."
+    },
+    "apiClientVaultForgot": {
+        "message": "Забыли пароль?"
+    },
+    "apiClientVaultDisableTitle": {
+        "message": "Выключить шифрование?"
+    },
+    "apiClientVaultDisableText": {
+        "message": "Значения секретов будут расшифрованы и снова будут храниться в профиле браузера без шифрования. Для подтверждения введите мастер-пароль."
+    },
+    "apiClientVaultDisableSubmit": {
+        "message": "Выключить шифрование"
+    },
+    "apiClientVaultResetTitle": {
+        "message": "Сбросить хранилище?"
+    },
+    "apiClientVaultResetText": {
+        "message": "Зашифрованные значения будут удалены, а шифрование выключится. Сами переменные останутся, но пустыми — их значения придётся ввести заново."
+    },
+    "apiClientVaultResetSubmit": {
+        "message": "Удалить зашифрованные значения"
+    },
+    "apiClientVaultLockedSave": {
+        "message": "Хранилище заблокировано: чтобы сохранить значения секретов, разблокируйте его кнопкой в шапке страницы."
+    },
+    "apiClientCurlImportOpen": {
+        "message": "Импорт cURL"
+    },
+    "apiClientCurlImportTitle": {
+        "message": "Импорт команды cURL"
+    },
+    "apiClientCurlCommand": {
+        "message": "Команда cURL"
+    },
+    "apiClientCurlCommandHint": {
+        "message": "Например, из «Copy as cURL (bash)» в инструментах разработчика. Запрос откроется в новой вкладке. Команды для cmd и PowerShell не поддерживаются."
+    },
+    "apiClientCurlCommandPlaceholder": {
+        "message": "curl 'https://api.example.com/users' -H 'Accept: application/json'"
+    },
+    "apiClientCurlImportFailed": {
+        "message": "Не удалось импортировать команду: $1"
+    },
+    "apiClientCurlImportSubmit": {
+        "message": "Импортировать"
+    },
+    "apiClientCurlCancel": {
+        "message": "Отмена"
     },
     "dialogClose": {
         "message": "Закрыть"

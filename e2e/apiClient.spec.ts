@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import type { Environment } from '#entities/environment';
+import { VAULT_LOCK_ALARM, type Environment } from '#entities/environment';
 import {
     apiClientDatabase,
     historyStore,
@@ -31,6 +31,9 @@ const PATHS = {
     TABS: '/api-client/tabs',
     ENVIRONMENT: '/api-client/environment',
     HISTORY: '/api-client/history',
+    VAULT_UNLOCKED: '/api-client/vault-unlocked',
+    VAULT_OPENED: '/api-client/vault-opened',
+    CURL: '/api-client/curl',
 } as const;
 
 /** Where the page keeps its database, for tests that read or fill it directly */
@@ -63,6 +66,8 @@ const STAGING: Environment = {
     name: 'Staging',
     variables: [{ key: 'token', value: 'abc', enabled: true, secret: true }],
 };
+
+const MASTER_PASSWORD = 'correct horse battery';
 
 const SESSION_COOKIE = {
     name: 'session',
@@ -200,6 +205,47 @@ const readSavedUrls = (page: Page) =>
 /** What reached the server at the path; polled, since the server answers a moment after the click */
 const getReceived = (testServer: TestServer, path: string) => {
     return expect.poll(() => testServer.getLastRequest(path));
+};
+
+/** Values of every stored variable, the way the background keeps them */
+const readStoredValues = (page: Page) =>
+    page.evaluate(async () => {
+        const { environments } = await chrome.storage.local.get<{ environments: Environment[] }>('environments');
+
+        return environments.flatMap(environment => environment.variables.map(variable => variable.value));
+    });
+
+const getVaultButton = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+
+/** The chosen environment with the secret token, and a request that sends it */
+const prepareSecretRequest = async (page: Page) => {
+    await callBackground(page, 'environments/save', STAGING);
+
+    await callBackground(page, 'environments/choose', { activeId: STAGING.id });
+
+    await openSection(page, 'Headers');
+
+    await addRow(page, 'Add header', 'Header', 'Authorization', 'Bearer {{token}}');
+};
+
+const createVault = async (page: Page) => {
+    await callBackground(page, 'vault/create', { password: MASTER_PASSWORD });
+
+    await expect(getVaultButton(page, 'Lock secrets')).toBeVisible();
+};
+
+const lockVault = async (page: Page) => {
+    await callBackground(page, 'vault/lock', null);
+
+    await expect(getVaultButton(page, 'Unlock secrets')).toBeVisible();
+};
+
+const submitPassword = async (page: Page, dialogName: string, submitName: string, password: string) => {
+    const dialog = page.getByRole('dialog', { name: dialogName });
+
+    await dialog.getByLabel('Master password', { exact: true }).fill(password);
+
+    await dialog.getByRole('button', { name: submitName, exact: true }).click();
 };
 
 apiClientTest.describe('sending', () => {
@@ -372,6 +418,193 @@ apiClientTest.describe('environments', () => {
         const answer = await callBackground(apiClientPage, 'environments/choose', { activeId: 'missing' });
 
         expect(answer).toMatchObject({ ok: false, error: { code: RpcErrorCodes.BAD_REQUEST } });
+    });
+});
+
+apiClientTest.describe('vault', () => {
+    apiClientTest('encrypts the secrets and fills them in while unlocked', async ({ apiClientPage, testServer }) => {
+        await prepareSecretRequest(apiClientPage);
+
+        await getVaultButton(apiClientPage, 'Encrypt secrets').click();
+
+        const setup = apiClientPage.getByRole('dialog', { name: 'Encrypt secrets' });
+
+        await setup.getByLabel('Master password', { exact: true }).fill(MASTER_PASSWORD);
+
+        await setup.getByLabel('Repeat the password', { exact: true }).fill('another password');
+
+        await setup.getByRole('button', { name: 'Encrypt', exact: true }).click();
+
+        await expect(setup.getByRole('alert')).toHaveText('The passwords do not match.');
+
+        await setup.getByLabel('Repeat the password', { exact: true }).fill(MASTER_PASSWORD);
+
+        await setup.getByRole('button', { name: 'Encrypt', exact: true }).click();
+
+        await expect(setup).toBeHidden();
+
+        await expect.poll(() => readStoredValues(apiClientPage)).toEqual([expect.objectContaining({ v: 1 })]);
+
+        await sendRequest(apiClientPage, `${testServer.origin}${PATHS.VAULT_UNLOCKED}`);
+
+        await getReceived(testServer, PATHS.VAULT_UNLOCKED).toMatchObject({ headers: { authorization: 'Bearer abc' } });
+
+        await getVaultButton(apiClientPage, 'Lock secrets').click();
+
+        await expect(getVaultButton(apiClientPage, 'Unlock secrets')).toBeVisible();
+
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
+
+        await expect(getResponsePanel(apiClientPage)).toContainText('encrypted variables have no value: token');
+    });
+
+    apiClientTest('unlocks with the right password only', async ({ apiClientPage, testServer }) => {
+        await prepareSecretRequest(apiClientPage);
+
+        await createVault(apiClientPage);
+
+        await lockVault(apiClientPage);
+
+        await getVaultButton(apiClientPage, 'Unlock secrets').click();
+
+        await submitPassword(apiClientPage, 'Unlock secrets', 'Unlock', 'wrong horse');
+
+        const unlockDialog = apiClientPage.getByRole('dialog', { name: 'Unlock secrets' });
+
+        await expect(unlockDialog.getByRole('alert')).toHaveText('Wrong password.');
+
+        await submitPassword(apiClientPage, 'Unlock secrets', 'Unlock', MASTER_PASSWORD);
+
+        await expect(getVaultButton(apiClientPage, 'Lock secrets')).toBeVisible();
+
+        await sendRequest(apiClientPage, `${testServer.origin}${PATHS.VAULT_OPENED}`);
+
+        await getReceived(testServer, PATHS.VAULT_OPENED).toMatchObject({ headers: { authorization: 'Bearer abc' } });
+    });
+
+    apiClientTest('locks itself once the idle time runs out', async ({ apiClientPage, serviceWorker }) => {
+        await createVault(apiClientPage);
+
+        const alarm = await serviceWorker.evaluate(name => chrome.alarms.get(name), VAULT_LOCK_ALARM);
+
+        expect(alarm?.scheduledTime).toBeGreaterThan(Date.now() + 14 * 60_000);
+
+        /** The alarm of an unpacked extension may fire at once, so the test moves the idle time into the past */
+        await serviceWorker.evaluate(async name => {
+            await chrome.storage.session.set({ vaultStatus: { unlockedUntil: Date.now() - 1 } });
+
+            await chrome.alarms.create(name, { when: Date.now() });
+        }, VAULT_LOCK_ALARM);
+
+        await expect
+            .poll(() => serviceWorker.evaluate(() => chrome.storage.session.get(null)))
+            .toEqual({
+                vaultKey: {},
+                vaultStatus: {},
+            });
+
+        await expect(getVaultButton(apiClientPage, 'Unlock secrets')).toBeVisible();
+    });
+
+    apiClientTest('refuses a typed secret while locked', async ({ apiClientPage }) => {
+        await createVault(apiClientPage);
+
+        await lockVault(apiClientPage);
+
+        const answer = await callBackground(apiClientPage, 'environments/save', STAGING);
+
+        expect(answer).toMatchObject({ ok: false, error: { code: RpcErrorCodes.FORBIDDEN } });
+    });
+
+    apiClientTest('turns off with the password and keeps the secrets as typed', async ({ apiClientPage }) => {
+        await callBackground(apiClientPage, 'environments/save', STAGING);
+
+        await createVault(apiClientPage);
+
+        await expect.poll(() => readStoredValues(apiClientPage)).toEqual([expect.objectContaining({ v: 1 })]);
+
+        await getVaultButton(apiClientPage, 'Turn off encryption').click();
+
+        await submitPassword(apiClientPage, 'Turn off encryption?', 'Turn off encryption', MASTER_PASSWORD);
+
+        await expect(getVaultButton(apiClientPage, 'Encrypt secrets')).toBeVisible();
+
+        await expect.poll(() => readStoredValues(apiClientPage)).toEqual(['abc']);
+    });
+
+    apiClientTest('resets a forgotten password and empties the encrypted values', async ({ apiClientPage }) => {
+        await callBackground(apiClientPage, 'environments/save', STAGING);
+
+        await createVault(apiClientPage);
+
+        await lockVault(apiClientPage);
+
+        await getVaultButton(apiClientPage, 'Unlock secrets').click();
+
+        await apiClientPage
+            .getByRole('dialog', { name: 'Unlock secrets' })
+            .getByRole('button', { name: 'Forgot the password?', exact: true })
+            .click();
+
+        await apiClientPage
+            .getByRole('dialog', { name: 'Reset the vault?' })
+            .getByRole('button', { name: 'Delete encrypted values', exact: true })
+            .click();
+
+        await expect(getVaultButton(apiClientPage, 'Encrypt secrets')).toBeVisible();
+
+        await expect.poll(() => readStoredValues(apiClientPage)).toEqual(['']);
+    });
+});
+
+/** Imports the command through the dialog in the header */
+const importCurl = async (page: Page, command: string) => {
+    await page.getByRole('button', { name: 'Import cURL', exact: true }).click();
+
+    const dialog = page.getByRole('dialog', { name: 'Import a cURL command' });
+
+    await dialog.getByRole('textbox', { name: 'cURL command', exact: true }).fill(command);
+
+    await dialog.getByRole('button', { name: 'Import', exact: true }).click();
+
+    return dialog;
+};
+
+apiClientTest.describe('cURL import', () => {
+    apiClientTest('opens a command in a new tab, ready to send', async ({ apiClientPage, testServer }) => {
+        const url = `${testServer.origin}${PATHS.CURL}`;
+
+        /** The shape of "Copy as cURL (bash)" in the browser's developer tools */
+        const command = [
+            `curl '${url}?page=2' \\`,
+            "  -H 'accept: application/json' \\",
+            "  -H 'content-type: application/json' \\",
+            `  --data-raw '{"name":"Ada"}'`,
+        ].join('\n');
+
+        const dialog = await importCurl(apiClientPage, command);
+
+        await expect(dialog).toBeHidden();
+
+        await expect(getTabBar(apiClientPage).getByRole('listitem')).toHaveCount(2);
+
+        await expect(getUrlField(apiClientPage)).toHaveValue(url);
+
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
+
+        await getReceived(testServer, `${PATHS.CURL}?page=2`).toMatchObject({
+            method: HttpMethods.POST,
+            headers: { accept: 'application/json', 'content-type': 'application/json' },
+            body: '{"name":"Ada"}',
+        });
+    });
+
+    apiClientTest('names what it cannot import and keeps the dialog open', async ({ apiClientPage }) => {
+        const dialog = await importCurl(apiClientPage, 'curl -F file=@photo.png https://api.example.com/upload');
+
+        await expect(dialog.getByRole('alert')).toContainText('-F is not supported');
+
+        await expect(dialog).toBeVisible();
     });
 });
 

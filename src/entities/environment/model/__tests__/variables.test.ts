@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@rstest/core';
 
 import type { Environment } from '../environment.ts';
-import { fillVariables, getMissingVariables, getVariableValues } from '../variables.ts';
+import { fillVariables, getMissingVariables, getUsedVariables, getVariableValues } from '../variables.ts';
 
 const ENCRYPTED_VALUE = { v: 1, iv: 'AAAAAAAAAAAAAAAA', ct: 'c2VjcmV0' } as const;
 
@@ -25,6 +25,25 @@ describe('getVariableValues', () => {
 
     it('gives nothing without an environment', () => {
         expect(getVariableValues(undefined).size).toBe(0);
+    });
+
+    it('takes the values of encrypted variables from the opened secrets', () => {
+        const secrets = new Map([
+            ['locked', 'opened'],
+            ['baseUrl', 'not used'],
+        ]);
+
+        const values = getVariableValues(STAGING, secrets);
+
+        expect(values.get('locked')).toBe('opened');
+
+        expect(values.get('baseUrl')).toBe('https://staging.example.com');
+    });
+});
+
+describe('getUsedVariables', () => {
+    it('names each variable once, in order', () => {
+        expect(getUsedVariables(['{{id}}/{{baseUrl}}', '{{id}}', 'plain'])).toEqual(['id', 'baseUrl']);
     });
 });
 

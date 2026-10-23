@@ -2,8 +2,9 @@ import type { ChangeEvent, FC } from 'react';
 
 import type { VariableDraft } from '../../model/environmentDraft.ts';
 import { useEnvironmentForm } from '../../model/useEnvironmentForm.ts';
+import { useVault } from '../../model/useVault.ts';
 
-import type { Environment } from '#entities/environment';
+import { VaultStates, type Environment } from '#entities/environment';
 import { useTranslation } from '#shared/i18n';
 import { Field, Notice, NoticeTones, Typography, TypographyColors } from '#shared/ui';
 
@@ -19,12 +20,17 @@ interface EnvironmentFormProps {
     onSaved: VoidFunction;
 }
 
-/** Secrets are only hidden on the screen until the vault encrypts them, and the form says so */
+/** Without the vault secrets are only hidden on the screen, and the form says so */
 export const EnvironmentForm: FC<EnvironmentFormProps> = ({ formId, environment, onSaved }) => {
     const { t } = useTranslation();
-    const { draft, saveError, onDraftChange, onEnvironmentSubmit } = useEnvironmentForm(environment, onSaved);
+    const { vaultState } = useVault();
+    const { draft, saveError, isVaultLocked, onDraftChange, onEnvironmentSubmit } = useEnvironmentForm(
+        environment,
+        onSaved,
+    );
 
     const isSaveFailed = saveError !== undefined;
+    const isVaultOff = vaultState === VaultStates.OFF;
 
     const onNameChange = (event: ChangeEvent<HTMLInputElement>) => onDraftChange({ name: event.target.value });
 
@@ -43,7 +49,15 @@ export const EnvironmentForm: FC<EnvironmentFormProps> = ({ formId, environment,
 
             <VariableTable variables={draft.variables} onVariablesChange={onVariablesChange} />
 
-            <Notice tone={NoticeTones.WARNING}>{t('apiClientSecretsWarning')}</Notice>
+            {isVaultOff && <Notice tone={NoticeTones.WARNING}>{t('apiClientSecretsWarning')}</Notice>}
+
+            {!isVaultOff && <Notice tone={NoticeTones.INFO}>{t('apiClientSecretsEncrypted')}</Notice>}
+
+            {isVaultLocked && (
+                <Typography color={TypographyColors.DANGER} role='alert'>
+                    {t('apiClientVaultLockedSave')}
+                </Typography>
+            )}
 
             {isSaveFailed && (
                 <Typography color={TypographyColors.DANGER} role='alert'>

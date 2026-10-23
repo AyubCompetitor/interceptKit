@@ -14,6 +14,8 @@ import { formatIssues, validate, type TaskQueue } from '#shared/lib';
 import { RpcErrorCodes, throwRpcError, type Router } from '#shared/messaging';
 import { readItem, writeItem } from '#shared/platform';
 
+import { prepareEnvironment } from './vaultKey.ts';
+
 const CHOICE_ERRORS = {
     UNKNOWN_ENVIRONMENT: 'there is no environment with this id',
 } as const;
@@ -23,8 +25,9 @@ const NO_CHOICE: EnvironmentChoice = {};
 const saveEnvironmentHandler = async (environment: Environment, storageReady: Promise<void>): Promise<Environment> => {
     await storageReady;
 
+    const preparedEnvironment = await prepareEnvironment(environment);
     const environments = await readItem(environmentsItem);
-    const nextEnvironments = upsertEnvironment(environments, environment);
+    const nextEnvironments = upsertEnvironment(environments, preparedEnvironment);
 
     const listResult = validate(environmentsValidator, nextEnvironments);
 
@@ -34,7 +37,7 @@ const saveEnvironmentHandler = async (environment: Environment, storageReady: Pr
 
     await writeItem(environmentsItem, nextEnvironments);
 
-    return environment;
+    return preparedEnvironment;
 };
 
 /** Deleting the chosen environment leaves requests without variables */
