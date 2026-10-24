@@ -2,6 +2,7 @@ import type { FC } from 'react';
 
 import { SendStateTypes, type SendState } from '../../model/sendState.ts';
 
+import { API_CLIENT_CONFIG } from '#shared/config';
 import { useTranslation } from '#shared/i18n';
 import {
     Button,
@@ -25,6 +26,8 @@ interface ResponseContentProps {
 }
 
 const NAME_SEPARATOR = ', ';
+
+const TIMEOUT_SECONDS = String(API_CLIENT_CONFIG.REQUEST_TIMEOUT_MS / 1000);
 
 export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessRequest }) => {
     const { t } = useTranslation();
@@ -68,6 +71,14 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
         return (
             <Typography color={TypographyColors.DANGER} role='alert'>
                 {t('apiClientInvalidRequest', sendState.reason)}
+            </Typography>
+        );
+    }
+
+    if (sendState.stateType === SendStateTypes.TIMED_OUT) {
+        return (
+            <Typography color={TypographyColors.DANGER} role='alert'>
+                {t('apiClientTimedOut', TIMEOUT_SECONDS)}
             </Typography>
         );
     }

@@ -46,8 +46,8 @@ describe('mapRequestTexts', () => {
 });
 
 describe('getRequestTexts', () => {
-    it('gives the texts that go out, without switched-off pairs', () => {
-        expect(getRequestTexts(makeApiRequest(FORM_BODY))).toEqual(['url', 'qk', 'qv', 'hk', 'hv', 'fk', 'fv']);
+    it('gives the texts that go out: the URL with its query, then the switched-on pairs', () => {
+        expect(getRequestTexts(makeApiRequest(FORM_BODY))).toEqual(['url', 'hk', 'hv', 'fk', 'fv']);
     });
 
     it('gives the text and the type of a raw body', () => {

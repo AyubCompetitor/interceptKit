@@ -1,19 +1,10 @@
 import { useState, type SubmitEvent } from 'react';
 
 import { environmentsRpc, type Environment } from '#entities/environment';
+import { getErrorText } from '#shared/lib';
 import { executeRpc, RpcError, RpcErrorCodes } from '#shared/messaging';
 
 import { buildEnvironment, createEnvironmentDraft, type EnvironmentDraftPatch } from './environmentDraft.ts';
-
-const UNKNOWN_ERROR = 'unknown error';
-
-const getErrorText = (error: unknown): string => {
-    if (error instanceof Error) {
-        return error.message;
-    }
-
-    return UNKNOWN_ERROR;
-};
 
 /** The background refuses to store a typed secret while the vault is locked */
 const isVaultLockedError = (error: unknown): boolean =>

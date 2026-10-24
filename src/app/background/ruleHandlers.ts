@@ -19,31 +19,60 @@ const SAVE_ERRORS = {
     TOO_MANY_REGEX_RULES: 'too many regex rules',
 } as const;
 
-const getRegexError = async (rule: Rule, rules: readonly Rule[]): Promise<NotRequired<string>> => {
-    const isRgxSyntax = rule.match.url.syntaxType === SyntaxTypes.RGX;
+const isRgxRule = (rule: Rule): boolean => rule.match.url.syntaxType === SyntaxTypes.RGX;
 
-    if (!isRgxSyntax) {
-        return;
-    }
-
+const getRegexSupportError = async (rule: Rule): Promise<NotRequired<string>> => {
     const isRgxSubstitution =
         rule.type === RuleTypes.REDIRECT && rule.to.targetType === RuleTargetTypes.RGX_SUBSTITUTION;
 
     const { reason, isSupported } = await getRegexSupport(rule.match.url.value, isRgxSubstitution);
 
-    if (!isSupported) {
-        const errorMessage = `${SAVE_ERRORS.UNSUPPORTED_REGEX}: ${reason ?? 'unknown reason'}`;
-
-        return errorMessage;
+    if (isSupported) {
+        return;
     }
 
-    const rgxRules = rules.filter(current => current.match.url.syntaxType === SyntaxTypes.RGX);
+    return `"${rule.name}": ${SAVE_ERRORS.UNSUPPORTED_REGEX}: ${reason ?? 'unknown reason'}`;
+};
 
-    const rgxRulesCount = rgxRules.length;
+/** An import brings thousands of rules, so the regex ones are counted in one pass, not filtered out */
+const countRgxRules = (rules: readonly Rule[]): number => {
+    let count = 0;
 
-    const rgxRuleLimit = getRegexRuleLimit();
+    for (const rule of rules) {
+        if (isRgxRule(rule)) {
+            count += 1;
+        }
+    }
 
-    if (rgxRulesCount <= rgxRuleLimit) {
+    return count;
+};
+
+export const getRegexError = async (
+    changedRules: readonly Rule[],
+    nextRules: readonly Rule[],
+): Promise<NotRequired<string>> => {
+    const supportChecks: Promise<NotRequired<string>>[] = [];
+
+    for (const rule of changedRules) {
+        if (isRgxRule(rule)) {
+            supportChecks.push(getRegexSupportError(rule));
+        }
+    }
+
+    if (!supportChecks.length) {
+        return;
+    }
+
+    const supportErrors = await Promise.all(supportChecks);
+    const supportError = supportErrors.find(error => error !== undefined);
+
+    if (supportError !== undefined) {
+        return supportError;
+    }
+
+    const isWithinLimit = countRgxRules(nextRules) <= getRegexRuleLimit();
+
+    if (isWithinLimit) {
         return;
     }
 
@@ -67,7 +96,7 @@ const saveRuleHandler = async (rule: Rule, storageReady: Promise<void>): Promise
         throwRpcError(RpcErrorCodes.BAD_REQUEST, formatIssues(listResult.issues));
     }
 
-    const rgxError = await getRegexError(rule, nextRules);
+    const rgxError = await getRegexError([rule], nextRules);
 
     if (rgxError) {
         throwRpcError(RpcErrorCodes.BAD_REQUEST, rgxError);

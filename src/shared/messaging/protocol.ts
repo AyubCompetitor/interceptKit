@@ -77,7 +77,7 @@ export const rpcFailure = (code: RpcErrorCode, message: string): RpcResponse => 
     },
 });
 
-export const throwRpcError = (code: RpcErrorCode, message: string) => {
+export const throwRpcError = (code: RpcErrorCode, message: string): never => {
     throw new RpcError(code, message);
 };
 

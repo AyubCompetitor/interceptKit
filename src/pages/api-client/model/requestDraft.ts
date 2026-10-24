@@ -1,6 +1,9 @@
 import {
     isBodylessMethod,
+    isBrowserHeader,
     isForbiddenHeader,
+    parseRawQuery,
+    replaceRawQuery,
     RequestBodyTypes,
     type ApiRequest,
     type CurlImport,
@@ -22,9 +25,9 @@ export interface RequestDraft {
     readonly id: string;
     /** HTTP method */
     readonly method: HttpMethod;
-    /** URL as typed */
+    /** URL as typed, with its query */
     readonly url: string;
-    /** Query parameters added to the URL */
+    /** The query of the URL, raw, then the switched-off parameters that only the table keeps */
     readonly query: readonly KeyValueRow[];
     /** Request headers */
     readonly headers: readonly KeyValueRow[];
@@ -113,9 +116,30 @@ const isDroppedHeader = (row: KeyValueRow): boolean => {
     return row.enabled && name !== '' && isForbiddenHeader(name, row.value);
 };
 
-export const getDroppedHeaderNames = (draft: RequestDraft): string[] => {
-    return draft.headers.filter(isDroppedHeader).map(row => row.key.trim());
+const getRowName = (row: KeyValueRow): string => row.key.trim();
+
+const getFilteredHeaderNames = (
+    headers: readonly KeyValueRow[],
+    predicate: (row: KeyValueRow) => boolean,
+): string[] => {
+    const result: string[] = [];
+
+    for (const row of headers) {
+        if (!isDroppedHeader(row) || !predicate(row)) {
+            continue;
+        }
+
+        result.push(getRowName(row));
+    }
+
+    return result;
 };
+
+export const getRuleHeaderNames = (draft: RequestDraft): string[] =>
+    getFilteredHeaderNames(draft.headers, row => !isBrowserHeader(row.key));
+
+export const getBrowserHeaderNames = (draft: RequestDraft): string[] =>
+    getFilteredHeaderNames(draft.headers, row => isBrowserHeader(row.key));
 
 export const buildApiRequest = (draft: RequestDraft): ApiRequest => ({
     id: draft.id,
@@ -178,4 +202,30 @@ export const mapCurlToDraft = (imported: CurlImport): RequestDraft => ({
     query: imported.query.map(mapKeyValueToRow),
     headers: imported.headers.map(mapKeyValueToRow),
     ...mapBodyToDraft(imported.body),
+});
+
+export const syncQueryWithUrl = (draft: RequestDraft, url: string): RequestDraftPatch => {
+    const [enabledRows, disabledRows] = draft.query.reduce<[KeyValueRow[], KeyValueRow[]]>(
+        (acc, row) => {
+            acc[row.enabled ? 0 : 1].push(row);
+            return acc;
+        },
+        [[], []],
+    );
+
+    const urlRows = parseRawQuery(url).map((pair, idx) => ({
+        ...pair,
+        rowId: enabledRows[idx]?.rowId ?? getRandomUUID(),
+    }));
+
+    return {
+        url,
+        query: urlRows.concat(disabledRows),
+    };
+};
+
+/** An edited table rewrites the query of the URL from its switched-on rows */
+export const syncUrlWithQuery = (draft: RequestDraft, query: readonly KeyValueRow[]): RequestDraftPatch => ({
+    url: replaceRawQuery(draft.url, query),
+    query,
 });

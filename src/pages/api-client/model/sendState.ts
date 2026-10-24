@@ -16,6 +16,8 @@ export enum SendStateTypes {
     SECRETS_LOCKED = 'secretsLocked',
     /** The request went, but no response came back */
     FAILED = 'failed',
+    /** The whole response did not come back in time */
+    TIMED_OUT = 'timedOut',
     /** The user refused access to the host */
     NO_ACCESS = 'noAccess',
 }
@@ -60,6 +62,11 @@ interface SecretsLockedState {
     readonly names: readonly string[];
 }
 
+interface TimedOutState {
+    /** The whole response did not come back in time */
+    readonly stateType: SendStateTypes.TIMED_OUT;
+}
+
 interface FailedState {
     /** No response came back */
     readonly stateType: SendStateTypes.FAILED;
@@ -81,9 +88,12 @@ export type SendState =
     | InvalidState
     | MissingVariablesState
     | SecretsLockedState
+    | TimedOutState
     | FailedState
     | NoAccessState;
 
 export const IDLE_STATE: SendState = { stateType: SendStateTypes.IDLE };
 
 export const SENDING_STATE: SendState = { stateType: SendStateTypes.SENDING };
+
+export const TIMED_OUT_STATE: SendState = { stateType: SendStateTypes.TIMED_OUT };

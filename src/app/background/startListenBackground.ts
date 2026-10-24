@@ -3,6 +3,7 @@ import { createRouter } from '#shared/messaging';
 import { restrictLocalStore } from '#shared/platform';
 
 import { registerEnvironmentHandlers } from './environmentHandlers.ts';
+import { registerHeaderRuleHandlers } from './headerRuleHandlers.ts';
 import { registerMockHandlers } from './mockHandlers.ts';
 import { startMockSync } from './mockSync.ts';
 import { registerRuleHandlers } from './ruleHandlers.ts';
@@ -10,6 +11,7 @@ import { startRuleSync } from './ruleSync.ts';
 import { registerSettingsHandlers } from './settingsHandlers.ts';
 import { registerSiteHandlers } from './siteHandlers.ts';
 import { migrateStorage } from './storageSchema.ts';
+import { registerTransferHandlers } from './transferHandlers.ts';
 import { registerVaultHandlers } from './vaultHandlers.ts';
 import { startVaultLock } from './vaultKey.ts';
 
@@ -37,6 +39,8 @@ export const startListenBackground: VoidFunction = () => {
     registerSiteHandlers(router, storageReady, enqueue);
     registerEnvironmentHandlers(router, storageReady, enqueue);
     registerVaultHandlers(router, storageReady, enqueue);
+    registerHeaderRuleHandlers(router, enqueue);
+    registerTransferHandlers(router, storageReady, enqueue);
 
     startRuleSync(storageReady, enqueue);
     startMockSync(storageReady, enqueue);

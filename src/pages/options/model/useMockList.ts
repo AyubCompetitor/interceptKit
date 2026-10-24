@@ -1,12 +1,11 @@
-import { useState } from 'react';
-
 import { mocksItem, mocksRpc, type Mock } from '#entities/mock';
 import { getMockPatterns, sitesItem } from '#entities/site';
 import { executeRpc } from '#shared/messaging';
 import { useHostPatterns, useStorageItem } from '#shared/platform';
+import { useProcessAction } from '#shared/ui';
 
 export const useMockList = () => {
-    const [isActionFailed, setIsActionFailed] = useState(false);
+    const { isFailed: isActionFailed, processAction } = useProcessAction();
 
     const mocks = useStorageItem(mocksItem);
     const sites = useStorageItem(sitesItem);
@@ -15,17 +14,9 @@ export const useMockList = () => {
     const isLoading = !mocks || !sites || !patterns;
     const mockPatterns = getMockPatterns(sites ?? [], patterns ?? []);
 
-    const onMockToggle = (mock: Mock) => {
-        executeRpc(mocksRpc.save, { ...mock, enabled: !mock.enabled })
-            .then(() => setIsActionFailed(false))
-            .catch(() => setIsActionFailed(true));
-    };
+    const onMockToggle = (mock: Mock) => processAction(executeRpc(mocksRpc.save, { ...mock, enabled: !mock.enabled }));
 
-    const onMockDelete = (mock: Mock) => {
-        executeRpc(mocksRpc.remove, { id: mock.id })
-            .then(() => setIsActionFailed(false))
-            .catch(() => setIsActionFailed(true));
-    };
+    const onMockDelete = (mock: Mock) => processAction(executeRpc(mocksRpc.remove, { id: mock.id }));
 
     return {
         mocks: mocks ?? [],

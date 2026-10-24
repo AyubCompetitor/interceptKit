@@ -41,29 +41,24 @@ describe('buildOutgoingRequest', () => {
     describe('the URL', () => {
         it.each([
             {
-                name: 'adds parameters to a URL without a query',
-                url: 'https://api.example.com/users',
-                expected: 'https://api.example.com/users?page=2&q=a+b',
+                name: 'sends the query of the URL as typed',
+                url: 'https://api.example.com/users?sort=a%20b&flag',
+                expected: 'https://api.example.com/users?sort=a%20b&flag',
             },
             {
-                name: 'keeps the query of the URL as typed',
-                url: 'https://api.example.com/users?sort=a%20b',
-                expected: 'https://api.example.com/users?sort=a%20b&page=2&q=a+b',
-            },
-            {
-                name: 'puts the parameters before the fragment',
-                url: 'https://api.example.com/users#top',
-                expected: 'https://api.example.com/users?page=2&q=a+b#top',
+                name: 'lets the browser escape what the URL cannot carry',
+                url: 'https://api.example.com/users?q=a b',
+                expected: 'https://api.example.com/users?q=a%20b',
             },
         ])('$name', ({ url, expected }) => {
-            const query = [
-                makePair('page', '2'),
-                makePair('q', 'a b'),
-                makePair('off', '1', false),
-                makePair(' ', 'x'),
-            ];
+            expect(getOutgoing({ url }).url).toBe(expected);
+        });
 
-            expect(getOutgoing({ url, query }).url).toBe(expected);
+        it('adds nothing from the table: it only mirrors the query of the URL', () => {
+            const url = 'https://api.example.com/users';
+            const query = [makePair('page', '2'), makePair('off', '1', false)];
+
+            expect(getOutgoing({ url, query }).url).toBe(url);
         });
 
         it.each([
@@ -87,9 +82,36 @@ describe('buildOutgoingRequest', () => {
             expect(getOutgoing({ headers }).headers).toEqual([['X-Trace', '1']]);
         });
 
+        it('hands the headers fetch() drops to a browser rule, joined the way HTTP joins them', () => {
+            const headers = [
+                makePair('Cookie', 'a=1'),
+                makePair('User-Agent', 'Test'),
+                makePair('cookie', 'b=2'),
+                makePair('Sec-Fetch-Site', 'none'),
+                makePair('Referer', 'https://a.example', false),
+            ];
+
+            expect(getOutgoing({ headers }).ruleHeaders).toEqual([
+                { name: 'cookie', value: 'a=1; b=2' },
+                { name: 'user-agent', value: 'Test' },
+                { name: 'sec-fetch-site', value: 'none' },
+            ]);
+        });
+
+        it('leaves the headers the browser builds itself to the browser', () => {
+            const headers = [makePair('Host', 'other.example'), makePair('Content-Length', '5')];
+
+            const outgoing = getOutgoing({ headers });
+
+            expect(outgoing.headers).toEqual([]);
+
+            expect(outgoing.ruleHeaders).toEqual([]);
+        });
+
         it.each([
             { name: 'a name with a space', header: makePair('X Trace', '1') },
             { name: 'a value with a line break', header: makePair('X-Trace', 'a\nb') },
+            { name: 'a rule header with a line break', header: makePair('Cookie', 'a\nb') },
         ])('refuses $name', ({ header }) => {
             expect(buildOutgoingRequest(makeApiRequest({ headers: [header] })).ok).toBe(false);
         });

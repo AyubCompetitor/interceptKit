@@ -8,6 +8,7 @@ const makeResponse = (overrides: Partial<ApiResponse> = {}): ApiResponse => ({
     headers: [['Content-Type', 'application/json']],
     body: '{}',
     size: 2,
+    isTruncated: false,
     durationMs: 10,
     ...overrides,
 });

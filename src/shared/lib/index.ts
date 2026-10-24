@@ -15,3 +15,5 @@ export * from './jsonText.ts';
 export * from './keyValueRows.ts';
 export * from './fallbacks.ts';
 export * from './crypto.ts';
+export * from './getErrorText.ts';
+export * from './subscribeOnce.ts';

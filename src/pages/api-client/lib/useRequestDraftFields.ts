@@ -1,6 +1,11 @@
 import type { ChangeEvent } from 'react';
 
-import type { RequestDraft, RequestDraftChange } from '../model/requestDraft.ts';
+import {
+    syncQueryWithUrl,
+    syncUrlWithQuery,
+    type RequestDraft,
+    type RequestDraftChange,
+} from '../model/requestDraft.ts';
 
 import { isSendableMethod, type RequestBodyType } from '#entities/request';
 import type { KeyValueRow } from '#shared/lib';
@@ -15,11 +20,11 @@ export const useRequestDraftFields = (draft: RequestDraft, onDraftChange: Reques
     };
 
     const onUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
-        onDraftChange({ url: event.target.value });
+        onDraftChange(syncQueryWithUrl(draft, event.target.value));
     };
 
     const onQueryChange = (query: KeyValueRow[]) => {
-        onDraftChange({ query });
+        onDraftChange(syncUrlWithQuery(draft, query));
     };
 
     const onHeadersChange = (headers: KeyValueRow[]) => {

@@ -121,6 +121,21 @@ describe('createRouter', () => {
                 result: 'https://app.example.com',
             });
         });
+
+        it.each([
+            { name: 'in a tab', sender: { ...EXTENSION_PAGE, tab: { id: 3 } }, tabId: 3 },
+            { name: 'outside a tab', sender: EXTENSION_PAGE, tabId: undefined },
+        ])('gives the browser-reported tab of an extension page $name', async ({ sender, tabId }) => {
+            const router = createRouter({ extensionId: EXTENSION_ID });
+            const tabMethod = defineMethod<null, NotRequired<number>>('tabs/current', nothing);
+
+            router.on(tabMethod, (_params, context) => context.tabId);
+
+            expect(await router.dispatch(makeRequest('tabs/current', null), sender)).toEqual({
+                ok: true,
+                result: tabId,
+            });
+        });
     });
 
     describe('on', () => {

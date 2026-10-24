@@ -1,0 +1,18 @@
+.card {
+    padding: var(--space-xl);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-l);
+    background: var(--color-surface);
+}
+
+.text {
+    width: 100%;
+    font-family: var(--font-mono);
+    resize: vertical;
+}
+
+.issues {
+    padding-inline-start: var(--space-l);
+    font-family: var(--font-mono);
+    list-style: disc;
+}

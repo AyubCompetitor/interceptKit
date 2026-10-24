@@ -31,7 +31,7 @@ describe('parseCurl', () => {
     it("reads Chrome's Copy as cURL", () => {
         expect(getImport(CHROME_COMMAND)).toEqual({
             method: HttpMethods.POST,
-            url: 'https://api.example.com/users',
+            url: 'https://api.example.com/users?page=2',
             query: [pair('page', '2')],
             headers: [pair('accept', 'application/json'), pair('content-type', 'application/json')],
             body: { bodyType: RequestBodyTypes.JSON, text: `{"name":"O'Brien"}` },
@@ -88,8 +88,16 @@ describe('parseCurl', () => {
 
     it('moves the data of -G into the query', () => {
         expect(getImport("curl -G 'https://example.com/?a=1' -d 'b=2&c=3'")).toMatchObject({
+            url: 'https://example.com/?a=1&b=2&c=3',
             query: [pair('a', '1'), pair('b', '2'), pair('c', '3')],
             body: NO_BODY,
+        });
+    });
+
+    it('keeps the query as the command writes it', () => {
+        expect(getImport("curl 'https://example.com/search?q=a%20b&flag#top'")).toMatchObject({
+            url: 'https://example.com/search?q=a%20b&flag#top',
+            query: [pair('q', 'a%20b'), pair('flag', '')],
         });
     });
 

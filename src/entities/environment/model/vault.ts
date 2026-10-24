@@ -148,7 +148,15 @@ export const openVaultKey = async (password: string, keyParams: VaultKeyParams):
 };
 
 /** A typed secret waits to be encrypted, and an encrypted value of a variable that is no longer secret waits to be opened */
-const isSealPending = (variable: EnvVariable): boolean => variable.secret !== isEncryptedValue(variable.value);
+const isSealPending = (variable: EnvVariable): boolean => {
+    const isEmptySecret = variable.secret && variable.value === '';
+
+    if (isEmptySecret) {
+        return false;
+    }
+
+    return variable.secret !== isEncryptedValue(variable.value);
+};
 
 export const isEnvironmentSealed = (environment: Environment): boolean => !environment.variables.some(isSealPending);
 
@@ -193,6 +201,16 @@ export const decryptEnvironment = async (environment: Environment, keyBytes: str
     variables: await Promise.all(environment.variables.map(variable => openVariable(variable, keyBytes))),
 });
 
+export const resealEnvironment = async (
+    environment: Environment,
+    oldKeyBytes: string,
+    newKeyBytes: string,
+): Promise<Environment> => {
+    const decrypted = await decryptEnvironment(environment, oldKeyBytes);
+
+    return sealEnvironment(decrypted, newKeyBytes);
+};
+
 const dropEncryptedValue = (variable: EnvVariable): EnvVariable => {
     if (!isEncryptedValue(variable.value)) {
         return variable;
@@ -213,11 +231,19 @@ export const dropEncryptedValues = (environment: Environment): Environment => ({
 const isUsableSecret = (variable: EnvVariable): variable is EncryptedVariable =>
     variable.enabled && isEncryptedValue(variable.value);
 
-/** Names of the switched-on variables whose values only the unlocked vault opens */
+/** Names of the switched-on variables whose values only the unlocked vault opens; every send asks for them */
 export const getEncryptedNames = (environment: NotRequired<Environment>): string[] => {
-    const variables = environment?.variables.filter(isUsableSecret) ?? [];
+    const names: string[] = [];
 
-    return variables.map(variable => variable.key);
+    for (const variable of environment?.variables ?? []) {
+        if (!isUsableSecret(variable)) {
+            continue;
+        }
+
+        names.push(variable.key);
+    }
+
+    return names;
 };
 
 /** A value that does not open with the key is left out */
@@ -237,8 +263,17 @@ const revealVariable = async (variable: EncryptedVariable, keyBytes: string): Pr
 };
 
 export const revealSecrets = async (environment: Environment, keyBytes: string): Promise<SecretValue[]> => {
-    const variables = environment.variables.filter(isUsableSecret);
-    const revealed = await Promise.all(variables.map(variable => revealVariable(variable, keyBytes)));
+    const reveals: Promise<SecretValue[]>[] = [];
+
+    for (const variable of environment.variables) {
+        if (!isUsableSecret(variable)) {
+            continue;
+        }
+
+        reveals.push(revealVariable(variable, keyBytes));
+    }
+
+    const revealed = await Promise.all(reveals);
 
     return revealed.flat();
 };

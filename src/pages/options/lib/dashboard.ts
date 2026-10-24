@@ -4,6 +4,7 @@ export enum DashboardSections {
     RULES = 'rules',
     MOCKS = 'mocks',
     SITES = 'sites',
+    TRANSFER = 'transfer',
     SETTINGS = 'settings',
 }
 

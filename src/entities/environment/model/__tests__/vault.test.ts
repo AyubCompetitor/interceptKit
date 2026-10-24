@@ -9,6 +9,7 @@ import {
     getVaultState,
     isEnvironmentSealed,
     openVaultKey,
+    resealEnvironment,
     revealSecrets,
     sealEnvironment,
     vaultValidator,
@@ -117,6 +118,14 @@ describe('isEnvironmentSealed', () => {
     it.each([
         { name: 'a typed secret', environment: PLAIN_ENVIRONMENT, isSealed: false },
         { name: 'encrypted secrets only', environment: SEALED_ENVIRONMENT, isSealed: true },
+        {
+            name: 'an empty secret, which has nothing to hide',
+            environment: {
+                ...PLAIN_ENVIRONMENT,
+                variables: [{ key: 'token', value: '', enabled: true, secret: true }],
+            },
+            isSealed: true,
+        },
     ])('is $isSealed with $name', ({ environment, isSealed }) => {
         expect(isEnvironmentSealed(environment)).toBe(isSealed);
     });
@@ -128,6 +137,16 @@ describe('decryptEnvironment', () => {
         const values = decrypted.variables.map(variable => variable.value);
 
         expect(values).toEqual(['https://staging.example.com', 'abc', 'abc']);
+    });
+});
+
+describe('resealEnvironment', () => {
+    it('moves the secrets from the old key to the new one', async () => {
+        const resealed = await resealEnvironment(SEALED_ENVIRONMENT, keyBytes, OTHER_VAULT.keyBytes);
+
+        expect(await revealSecrets(resealed, OTHER_VAULT.keyBytes)).toEqual([{ key: 'token', value: 'abc' }]);
+
+        expect(await revealSecrets(resealed, keyBytes)).toEqual([]);
     });
 });
 

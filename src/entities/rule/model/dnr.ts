@@ -23,6 +23,10 @@ export interface DnrCondition {
     resourceTypes?: ResourceType[];
     /** Only requests started by pages on these domains, subdomains included */
     initiatorDomains?: string[];
+    /** Only requests to these domains, subdomains included */
+    requestDomains?: string[];
+    /** Only requests of these tabs; session rules only */
+    tabIds?: number[];
 }
 
 export interface DnrHeaderInfo {

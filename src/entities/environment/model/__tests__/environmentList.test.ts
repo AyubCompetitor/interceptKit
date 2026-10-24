@@ -1,7 +1,13 @@
 import { describe, expect, it } from '@rstest/core';
 
 import type { Environment } from '../environment.ts';
-import { findEnvironment, removeEnvironment, upsertEnvironment } from '../environmentList.ts';
+import {
+    findEnvironment,
+    hideSecretValues,
+    mergeImportedEnvironment,
+    removeEnvironment,
+    upsertEnvironment,
+} from '../environmentList.ts';
 
 const STAGING: Environment = { id: 'staging', name: 'Staging', variables: [] };
 
@@ -32,5 +38,33 @@ describe('environment lists', () => {
         { name: 'nothing once it is deleted', id: 'deleted', found: undefined },
     ])('find $name', ({ id, found }) => {
         expect(findEnvironment(ENVIRONMENTS, id)).toBe(found);
+    });
+});
+
+const withToken = (value: string): Environment => ({
+    id: 'staging',
+    name: 'Staging',
+    variables: [
+        { key: 'baseUrl', value: 'https://staging.example.com', enabled: true, secret: false },
+        { key: 'token', value, enabled: true, secret: true },
+    ],
+});
+
+describe('hideSecretValues', () => {
+    it('empties the values of secrets and keeps the variables', () => {
+        const values = hideSecretValues(withToken('abc')).variables.map(variable => variable.value);
+
+        expect(values).toEqual(['https://staging.example.com', '']);
+    });
+});
+
+describe('mergeImportedEnvironment', () => {
+    it.each([
+        { name: 'keeps the stored value of a secret the file brings empty', imported: '', value: 'abc' },
+        { name: 'takes a secret value the file does bring', imported: 'new', value: 'new' },
+    ])('$name', ({ imported, value }) => {
+        const merged = mergeImportedEnvironment(withToken('abc'), withToken(imported));
+
+        expect(merged.variables[1]?.value).toBe(value);
     });
 });

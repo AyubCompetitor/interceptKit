@@ -43,6 +43,9 @@ export const EARLY_PAGE_PATH = '/early';
 
 export const EARLY_REQUEST_PATH = '/api/early';
 
+/** Answers with as many bytes as the number after it, for tests of the response limit */
+export const BYTES_PATH = '/bytes/';
+
 /** Where the early page leaves the status its request got */
 export const EARLY_STATUS_ATTRIBUTE = 'data-early-status';
 
@@ -75,6 +78,16 @@ const sendPage = (response: ServerResponse, html: string) => {
     response.setHeader('content-type', 'text/html');
 
     response.end(html);
+};
+
+const sendBytes = (response: ServerResponse, size: number) => {
+    response.writeHead(200, {
+        'content-type': 'text/plain',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+    });
+
+    response.end(Buffer.alloc(size, 'a'));
 };
 
 const readBody = async (request: IncomingMessage): Promise<string> => {
@@ -118,6 +131,14 @@ export const startTestServer = async (): Promise<TestServer> => {
 
         if (html !== undefined) {
             sendPage(response, html);
+
+            return;
+        }
+
+        const path = request.url ?? '';
+
+        if (path.startsWith(BYTES_PATH)) {
+            sendBytes(response, Number(path.slice(BYTES_PATH.length)));
 
             return;
         }

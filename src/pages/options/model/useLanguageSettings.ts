@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 
 import {
     DEFAULT_SETTINGS,
@@ -9,18 +9,16 @@ import {
 } from '#entities/config';
 import { executeRpc } from '#shared/messaging';
 import { useStorageItem } from '#shared/platform';
+import { useProcessAction } from '#shared/ui';
 
 export const useLanguageSettings = () => {
     const settings = useStorageItem(settingsItem);
-    const [isSaveFailed, setIsSaveFailed] = useState(false);
+    const { isFailed: isSaveFailed, processAction } = useProcessAction();
 
     const locale = settings?.locale ?? DEFAULT_SETTINGS.locale;
 
-    const onLocaleSave = (nextLocale: LocalePreference) => {
-        executeRpc(settingsRpc.update, { locale: nextLocale })
-            .then(() => setIsSaveFailed(false))
-            .catch(() => setIsSaveFailed(true));
-    };
+    const onLocaleSave = (nextLocale: LocalePreference) =>
+        processAction(executeRpc(settingsRpc.update, { locale: nextLocale }));
 
     const onLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
         if (!isLocalePreference(event.target.value)) {

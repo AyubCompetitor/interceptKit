@@ -1,17 +1,12 @@
-import { useState } from 'react';
-
 import { buildHostPattern } from '#entities/site';
 import { requestHostAccess, useHostPatterns } from '#shared/platform';
+import { useProcessAction } from '#shared/ui';
 
 export const useSiteAccess = () => {
-    const [isRequestFailed, setIsRequestFailed] = useState(false);
+    const { isFailed: isRequestFailed, processAction } = useProcessAction();
     const patterns = useHostPatterns();
 
-    const onAccessRequest = (host: string) => {
-        requestHostAccess(buildHostPattern(host, true))
-            .then(() => setIsRequestFailed(false))
-            .catch(() => setIsRequestFailed(true));
-    };
+    const onAccessRequest = (host: string) => processAction(requestHostAccess(buildHostPattern(host, true)));
 
     return {
         patterns,

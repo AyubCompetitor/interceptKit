@@ -12,8 +12,14 @@ export interface MessageSender {
     readonly id?: string;
     /** Origin of the sending page or frame */
     readonly origin?: string;
-    /** Present when a content script sent the message */
-    readonly tab?: unknown;
+    /** Present when a content script or an extension page in a tab sent the message */
+    readonly tab?: MessageSenderTab;
+}
+
+/** The part of chrome.tabs.Tab the router relies on */
+interface MessageSenderTab {
+    /** Id of the tab */
+    readonly id?: NotRequired<number>;
 }
 
 export interface HandlerContext {
@@ -21,6 +27,8 @@ export interface HandlerContext {
     readonly caller: RpcCaller;
     /** Origin reported by the browser, never taken from the message itself */
     readonly origin: string;
+    /** Tab of the sender as the browser reports it; none for a page outside a tab, such as the popup */
+    readonly tabId?: number;
 }
 
 export type Handler<Params, Result> = (params: Params, context: HandlerContext) => Result | Promise<Result>;
@@ -58,6 +66,7 @@ const getCallerCtx = (sender: MessageSender, extensionId: string): NotRequired<H
         return {
             caller: RpcCallers.EXTENSION,
             origin: sender.origin,
+            ...(sender.tab?.id !== undefined && { tabId: sender.tab.id }),
         };
     }
 

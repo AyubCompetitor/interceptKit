@@ -39,17 +39,52 @@ const waitForTransaction = (transaction: IDBTransaction): Promise<void> =>
         transaction.addEventListener('abort', () => reject(transaction.error));
     });
 
-/** Creates the stores and indexes a new version adds; records of existing stores stay */
-const upgradeDatabase = (database: Database, request: IDBOpenDBRequest): void => {
+const parseRecord = <T>(store: DatabaseStore<T>, raw: unknown): NotRequired<T> => {
+    const result = validate(store.validator, raw);
+
+    if (!result.ok) {
+        return;
+    }
+
+    return result.value;
+};
+
+const upgradeRecords = (store: DatabaseStore<unknown>, objectStore: IDBObjectStore, oldVersion: number): void => {
+    const request = objectStore.openCursor();
+
+    request.addEventListener('success', () => {
+        const cursor = request.result;
+
+        if (!cursor) {
+            return;
+        }
+
+        const record = parseRecord(store, cursor.value);
+        const upgraded = record === undefined ? undefined : store.upgrade?.(record, oldVersion);
+
+        if (upgraded !== undefined && parseRecord(store, upgraded) !== undefined) {
+            cursor.update(upgraded);
+        }
+
+        cursor.continue();
+    });
+};
+
+const upgradeDatabase = (database: Database, request: IDBOpenDBRequest, oldVersion: number): void => {
     const connection = request.result;
     const transaction = request.transaction;
 
     for (const store of database.stores) {
+        const isExistingStore = connection.objectStoreNames.contains(store.name);
         const objectStore = getObjectStore(store, connection, transaction);
         const isNewIndex = store.orderBy !== undefined && !objectStore.indexNames.contains(store.orderBy);
 
         if (isNewIndex) {
             objectStore.createIndex(store.orderBy, store.orderBy);
+        }
+
+        if (isExistingStore && store.upgrade) {
+            upgradeRecords(store, objectStore, oldVersion);
         }
     }
 };
@@ -58,7 +93,7 @@ const openConnection = (database: Database): Promise<IDBDatabase> =>
     new Promise((resolve, reject) => {
         const request = indexedDB.open(database.name, database.version);
 
-        request.addEventListener('upgradeneeded', () => upgradeDatabase(database, request));
+        request.addEventListener('upgradeneeded', event => upgradeDatabase(database, request, event.oldVersion));
         request.addEventListener('error', () => reject(request.error));
         request.addEventListener('success', () => {
             const connection = request.result;
@@ -94,16 +129,6 @@ const sendChangesNotify = (database: Database, store: DatabaseStore<unknown>): v
     // oxlint-disable-next-line unicorn/require-post-message-target-origin -- a BroadcastChannel takes no target origin and reaches only pages of the extension
     channel.postMessage(store.name);
     channel.close();
-};
-
-const parseRecord = <T>(store: DatabaseStore<T>, raw: unknown): NotRequired<T> => {
-    const result = validate(store.validator, raw);
-
-    if (!result.ok) {
-        return;
-    }
-
-    return result.value;
 };
 
 export const readRecords = async <T>(database: Database, store: DatabaseStore<T>): Promise<T[]> => {

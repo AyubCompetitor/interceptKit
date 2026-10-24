@@ -23,6 +23,7 @@ export const makeResponse = (overrides: Partial<ApiResponse> = {}): ApiResponse 
     headers: [['content-type', 'application/json']],
     body: '{"a":1}',
     size: 7,
+    isTruncated: false,
     durationMs: 12,
     ...overrides,
 });

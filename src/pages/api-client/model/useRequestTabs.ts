@@ -8,6 +8,7 @@ import {
     type CurlImport,
 } from '#entities/request';
 import { API_CLIENT_CONFIG } from '#shared/config';
+import { subscribeOnce } from '#shared/lib';
 import { readRecord, writeRecord } from '#shared/platform';
 
 import { copyRequestToDraft, mapCurlToDraft, type RequestDraftPatch } from './requestDraft.ts';
@@ -27,28 +28,20 @@ import type { SendState } from './sendState.ts';
 
 const logSaveFailure = (error: unknown) => console.warn('[api-client] open tabs were not saved', error);
 
+const loadRequestTabs = async (): Promise<RequestTabs> => {
+    const openRequests = await readRecord(apiClientDatabase, openRequestsStore, OPEN_REQUESTS_KEY);
+
+    return restoreRequestTabs(openRequests);
+};
+
+/** The tabs of the last visit; one empty tab when they cannot be read */
+const subscribeSavedTabs = (listener: (tabs: RequestTabs) => void): VoidFunction =>
+    subscribeOnce(loadRequestTabs(), createRequestTabs(), listener);
+
 export const useRequestTabs = () => {
     const [state, setState] = useState<NotRequired<RequestTabs>>();
 
-    useEffect(() => {
-        let isActive = true;
-
-        const onTabsRestore = (nextState: RequestTabs) => {
-            if (!isActive) {
-                return;
-            }
-
-            setState(nextState);
-        };
-
-        readRecord(apiClientDatabase, openRequestsStore, OPEN_REQUESTS_KEY)
-            .then(openRequests => onTabsRestore(restoreRequestTabs(openRequests)))
-            .catch(() => onTabsRestore(createRequestTabs()));
-
-        return () => {
-            isActive = false;
-        };
-    }, []);
+    useEffect(() => subscribeSavedTabs(setState), []);
 
     useEffect(() => {
         if (!state) {

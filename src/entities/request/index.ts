@@ -6,4 +6,6 @@ export * from './model/apiResponse.ts';
 export * from './model/history.ts';
 export * from './model/openRequests.ts';
 export * from './model/curl.ts';
+export * from './model/urlQuery.ts';
 export * from './api/apiClientDatabase.ts';
+export * from './api/headerRules.ts';

@@ -19,3 +19,16 @@ export const getRegexSupport = (regex: string, isCapturing: boolean): Promise<Dn
     });
 
 export const getRegexRuleLimit = (): number => chrome.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES;
+
+export const getDynamicRuleLimit = (): number => chrome.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES;
+
+/** Session rules live in memory until the browser closes or the extension updates */
+export const getSessionRules = (): Promise<ChromeDeclarativeNetRules> => chrome.declarativeNetRequest.getSessionRules();
+
+/** Removes, then adds, in one atomic update */
+export const updateSessionRules = async (
+    removeRuleIds: readonly number[],
+    addRules: ChromeDeclarativeNetRules,
+): Promise<void> => {
+    await chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [...removeRuleIds], addRules });
+};

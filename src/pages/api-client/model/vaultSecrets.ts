@@ -5,6 +5,7 @@ import {
     type SecretValue,
     type VariableValues,
 } from '#entities/environment';
+import { subscribeOnce } from '#shared/lib';
 import { executeRpc } from '#shared/messaging';
 
 export const NO_SECRETS: VariableValues = new Map();
@@ -24,26 +25,8 @@ const loadSecrets = async (environment: NotRequired<Environment>, isUnlocked: bo
 };
 
 /** Calls listener once with the secrets the environment can use; after the returned stop a late answer is dropped */
-export const requestSecrets = (
+export const subscribeSecrets = (
     environment: NotRequired<Environment>,
     isUnlocked: boolean,
     listener: (secrets: VariableValues) => void,
-): VoidFunction => {
-    let isWaiting = true;
-
-    const updateSecrets = (secrets: VariableValues) => {
-        if (!isWaiting) {
-            return;
-        }
-
-        listener(secrets);
-    };
-
-    loadSecrets(environment, isUnlocked)
-        .then(updateSecrets)
-        .catch(() => updateSecrets(NO_SECRETS));
-
-    return () => {
-        isWaiting = false;
-    };
-};
+): VoidFunction => subscribeOnce(loadSecrets(environment, isUnlocked), NO_SECRETS, listener);

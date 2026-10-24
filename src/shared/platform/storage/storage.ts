@@ -22,8 +22,22 @@ export const readItem = async <T>(item: StoreItem<T>): Promise<T> => {
     return parseStored(item, stored[item.key]);
 };
 
-/** Refuses to persist anything the items validator rejects */
-export const writeItem = async <T>(item: StoreItem<T>, value: T): Promise<void> => {
+/** A checked value of one item, ready for writeItems */
+export interface ItemWrite {
+    /** Area that holds the key */
+    readonly area: Store;
+    /** Key inside the area */
+    readonly key: string;
+    /** Value the validator accepted */
+    readonly value: unknown;
+}
+
+const WRITE_ERRORS = {
+    MIXED_AREAS: 'items written together must share one area',
+} as const;
+
+/** Refuses anything the items validator rejects */
+export const prepareWrite = <T>(item: StoreItem<T>, value: T): ItemWrite => {
     const result = validate(item.validator, value);
 
     if (!result.ok) {
@@ -32,7 +46,33 @@ export const writeItem = async <T>(item: StoreItem<T>, value: T): Promise<void> 
         throw new Error(errorMessage);
     }
 
-    await getStore(item.area).set({ [item.key]: result.value });
+    return {
+        area: item.area,
+        key: item.key,
+        value: result.value,
+    };
+};
+
+/** One set() call for items that must change together; the browser writes it as one database batch */
+export const writeItems = async (writes: readonly ItemWrite[]): Promise<void> => {
+    const [firstWrite] = writes;
+
+    if (!firstWrite) {
+        return;
+    }
+
+    const isOneArea = writes.every(write => write.area === firstWrite.area);
+
+    if (!isOneArea) {
+        throw new Error(WRITE_ERRORS.MIXED_AREAS);
+    }
+
+    await getStore(firstWrite.area).set(Object.fromEntries(writes.map(write => [write.key, write.value])));
+};
+
+/** Refuses to persist anything the items validator rejects */
+export const writeItem = async <T>(item: StoreItem<T>, value: T): Promise<void> => {
+    await writeItems([prepareWrite(item, value)]);
 };
 
 /** Calls listener with the validated new value whenever the item changes in any context */

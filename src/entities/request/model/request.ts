@@ -64,9 +64,9 @@ export interface ApiRequest {
     readonly name?: string;
     /** HTTP method */
     readonly method: HttpMethod;
-    /** Not validated as a URL here: it may contain variables until it is sent */
+    /** Not validated as a URL here: it may contain variables until it is sent; holds the query as typed */
     readonly url: string;
-    /** Query parameters added to the URL */
+    /** The query of the URL, raw, plus the switched-off parameters that only the table keeps */
     readonly query: readonly KeyValue[];
     /** Request headers */
     readonly headers: readonly KeyValue[];

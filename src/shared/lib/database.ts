@@ -10,13 +10,15 @@ export interface DatabaseStore<T> {
     readonly orderBy?: string;
     /** Checks records after reading and before writing */
     readonly validator: Validator<T>;
+    /** Rewrites a record that an older version kept, once, when the database opens at the new version */
+    upgrade?(record: T, oldVersion: number): T;
 }
 
 /** An IndexedDB database of the extension; a new version creates the stores and indexes it lacks */
 export interface Database {
     /** Name of the database */
     readonly name: string;
-    /** Version; raise it when a store or an index is added */
+    /** Version; raise it when a store or an index is added, or when records change their meaning */
     readonly version: number;
     /** Every store of the database */
     readonly stores: readonly DatabaseStore<unknown>[];

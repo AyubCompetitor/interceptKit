@@ -1,8 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 
-import { defineStoreItem, number, object, Stores } from '#shared/lib';
+import { defineStoreItem, number, object, Stores, string } from '#shared/lib';
 
-import { readItem, subscribeItem, writeStoreData, watchItem, writeItem } from '../storage/storage.ts';
+import {
+    prepareWrite,
+    readItem,
+    subscribeItem,
+    watchItem,
+    writeItem,
+    writeItems,
+    writeStoreData,
+} from '../storage/storage.ts';
 
 import { installFakeStorage } from './mocks.ts';
 
@@ -11,6 +19,13 @@ const counterItem = defineStoreItem({
     area: Stores.LOCAL,
     fallback: { value: 0 },
     validator: object({ value: number({ min: 0 }) }),
+});
+
+const labelItem = defineStoreItem({
+    key: 'label',
+    area: Stores.LOCAL,
+    fallback: '',
+    validator: string({ maxLength: 10 }),
 });
 
 const tick = (): Promise<void> => new Promise(resolve => setTimeout(resolve, 1));
@@ -47,6 +62,20 @@ describe('storage adapter', () => {
             await expect(writeItem(counterItem, { value: -1 })).rejects.toThrow('Refusing to store');
 
             expect(data['counter']).toEqual({ value: 3 });
+        });
+    });
+
+    describe('writeItems', () => {
+        it('writes several items in one call', async () => {
+            await writeItems([prepareWrite(counterItem, { value: 1 }), prepareWrite(labelItem, 'one')]);
+
+            expect(data).toMatchObject({ counter: { value: 1 }, label: 'one' });
+        });
+
+        it('writes nothing when one of the values is invalid', () => {
+            expect(() => prepareWrite(counterItem, { value: -1 })).toThrow('Refusing to store');
+
+            expect(data).toEqual({});
         });
     });
 

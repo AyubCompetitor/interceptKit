@@ -68,10 +68,9 @@ const getBodyTexts = (body: RequestBody): string[] => {
     return [body.text];
 };
 
-/** The texts that go out with the request: switched-off pairs stay home */
+/** The texts that go out with the request: the URL holds its query, and switched-off pairs stay home */
 export const getRequestTexts = (request: ApiRequest): string[] => [
     request.url,
-    ...getPairTexts(request.query),
     ...getPairTexts(request.headers),
     ...getBodyTexts(request.body),
 ];

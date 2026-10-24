@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { VaultStates, type Environment, type VariableValues } from '#entities/environment';
 
 import { useVault } from './useVault.ts';
-import { NO_SECRETS, requestSecrets } from './vaultSecrets.ts';
+import { NO_SECRETS, subscribeSecrets } from './vaultSecrets.ts';
 
 /** Decrypted values of the environment, held only while the vault is unlocked */
 export const useVaultSecrets = (environment: NotRequired<Environment>) => {
@@ -13,7 +13,7 @@ export const useVaultSecrets = (environment: NotRequired<Environment>) => {
 
     const isUnlocked = vaultState === VaultStates.UNLOCKED;
 
-    useEffect(() => requestSecrets(environment, isUnlocked, setSecrets), [environment, isUnlocked]);
+    useEffect(() => subscribeSecrets(environment, isUnlocked, setSecrets), [environment, isUnlocked]);
 
     return secrets;
 };

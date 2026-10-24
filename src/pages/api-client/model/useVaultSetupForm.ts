@@ -2,12 +2,14 @@ import { useState, type ChangeEvent, type SubmitEvent } from 'react';
 
 import { vaultRpc } from '#entities/environment';
 import { executeRpc } from '#shared/messaging';
+import { useProcessAction } from '#shared/ui';
 
 export const useVaultSetupForm = (onDone: VoidFunction) => {
     const [password, setPassword] = useState('');
     const [repeatedPassword, setRepeatedPassword] = useState('');
     const [isMismatch, setIsMismatch] = useState(false);
-    const [isFailed, setIsFailed] = useState(false);
+
+    const { isFailed, processAction } = useProcessAction();
 
     const onPasswordChange = (event: ChangeEvent<HTMLInputElement>) => setPassword(event.target.value);
 
@@ -24,9 +26,7 @@ export const useVaultSetupForm = (onDone: VoidFunction) => {
             return;
         }
 
-        executeRpc(vaultRpc.create, { password })
-            .then(() => onDone())
-            .catch(() => setIsFailed(true));
+        processAction(executeRpc(vaultRpc.create, { password }).then(onDone));
     };
 
     return {

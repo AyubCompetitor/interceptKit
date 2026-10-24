@@ -23,6 +23,19 @@ const FORBIDDEN_HEADERS: readonly string[] = [
     'via',
 ];
 
+/** The browser builds these for every request itself, and a rule that changes them breaks the request */
+const BROWSER_HEADERS: readonly string[] = [
+    'connection',
+    'content-length',
+    'expect',
+    'host',
+    'keep-alive',
+    'te',
+    'trailer',
+    'transfer-encoding',
+    'upgrade',
+];
+
 const FORBIDDEN_PREFIXES: readonly string[] = ['proxy-', 'sec-'];
 
 const METHOD_OVERRIDE_HEADERS: readonly string[] = ['x-http-method', 'x-http-method-override', 'x-method-override'];
@@ -55,3 +68,6 @@ export const isForbiddenHeader = (name: string, value: string): boolean => {
 
     return isMethodOverride && hasForbiddenMethod(value);
 };
+
+/** Whether the browser keeps this header to itself, so no rule may set it */
+export const isBrowserHeader = (name: string): boolean => BROWSER_HEADERS.includes(name.trim().toLowerCase());

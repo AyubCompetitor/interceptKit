@@ -12,8 +12,16 @@ import { API_CLIENT_CONFIG } from '#shared/config';
 import { HttpMethods } from '#shared/lib';
 import { RpcErrorCodes } from '#shared/messaging';
 
-import { callBackground, expect, networkTest, REQUESTED_ORIGINS, stubAccessRequest, trackErrors } from './fixtures.ts';
-import { FOREIGN_HOST, LOOPBACK_HOST, type TestServer } from './testServer.ts';
+import {
+    callBackground,
+    expect,
+    getSessionRules,
+    networkTest,
+    REQUESTED_ORIGINS,
+    stubAccessRequest,
+    trackErrors,
+} from './fixtures.ts';
+import { BYTES_PATH, FOREIGN_HOST, LOOPBACK_HOST, type TestServer } from './testServer.ts';
 
 interface ApiClientFixtures {
     /** The API client in a new tab; the test fails if the page logs an error */
@@ -33,7 +41,11 @@ const PATHS = {
     HISTORY: '/api-client/history',
     VAULT_UNLOCKED: '/api-client/vault-unlocked',
     VAULT_OPENED: '/api-client/vault-opened',
+    VAULT_CHANGED: '/api-client/vault-changed',
     CURL: '/api-client/curl',
+    RULE_HEADERS: '/api-client/rule-headers',
+    QUERY: '/api-client/query',
+    LEGACY: '/api-client/legacy',
 } as const;
 
 /** Where the page keeps its database, for tests that read or fill it directly */
@@ -68,6 +80,8 @@ const STAGING: Environment = {
 };
 
 const MASTER_PASSWORD = 'correct horse battery';
+
+const NEW_MASTER_PASSWORD = 'another horse battery';
 
 const SESSION_COOKIE = {
     name: 'session',
@@ -250,13 +264,17 @@ const submitPassword = async (page: Page, dialogName: string, submitName: string
 
 apiClientTest.describe('sending', () => {
     apiClientTest('sends parameters and headers and shows the response', async ({ apiClientPage, testServer }) => {
+        await getUrlField(apiClientPage).fill(testServer.origin + PATHS.PARAMS);
+
         await addRow(apiClientPage, 'Add parameter', 'Parameter', 'page', '2');
 
         await openSection(apiClientPage, 'Headers');
 
         await addRow(apiClientPage, 'Add header', 'Header', 'X-Trace', 'e2e');
 
-        await sendRequest(apiClientPage, testServer.origin + PATHS.PARAMS);
+        await expect(getUrlField(apiClientPage)).toHaveValue(`${testServer.origin}${PATHS.PARAMS}?page=2`);
+
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
 
         await getReceived(testServer, `${PATHS.PARAMS}?page=2`).toMatchObject({
             method: 'GET',
@@ -310,13 +328,163 @@ apiClientTest.describe('sending', () => {
         },
     );
 
-    apiClientTest('names the headers that the browser drops', async ({ apiClientPage }) => {
+    apiClientTest(
+        'downloads only the beginning of a response past the limit',
+        async ({ apiClientPage, testServer }) => {
+            const size = API_CLIENT_CONFIG.MAX_RESPONSE_BYTES + 1024 * 1024;
+
+            await sendRequest(apiClientPage, `${testServer.origin}${BYTES_PATH}${size}`);
+
+            const panel = getResponsePanel(apiClientPage);
+
+            await expect(panel.getByText('The response is larger than 10 MB')).toBeVisible();
+
+            await expect(panel.getByText('10 MB', { exact: true })).toBeVisible();
+        },
+    );
+
+    apiClientTest('names the headers a rule sets and those the browser builds', async ({ apiClientPage }) => {
         await openSection(apiClientPage, 'Headers');
 
         await addRow(apiClientPage, 'Add header', 'Header', 'Cookie', 'a=1');
 
-        await expect(apiClientPage.getByText("so they aren't sent: Cookie.")).toBeVisible();
+        await addRow(apiClientPage, 'Add header', 'Header', 'Host', 'other.example');
+
+        await expect(apiClientPage.getByText('sets them on this request only: Cookie.')).toBeVisible();
+
+        await expect(apiClientPage.getByText("the values typed here aren't sent: Host.")).toBeVisible();
     });
+
+    apiClientTest(
+        'sends the headers fetch() drops through a rule that ends with the request',
+        async ({ apiClientPage, context, serviceWorker, testServer }) => {
+            await context.addCookies([{ ...SESSION_COOKIE, url: testServer.origin }]);
+
+            await openSection(apiClientPage, 'Headers');
+
+            await addRow(apiClientPage, 'Add header', 'Header', 'Cookie', 'typed=1');
+
+            await addRow(apiClientPage, 'Add header', 'Header', 'User-Agent', 'InterceptKit-Test');
+
+            await addRow(apiClientPage, 'Add header', 'Header', 'Origin', 'https://origin.example');
+
+            await sendRequest(apiClientPage, testServer.origin + PATHS.RULE_HEADERS);
+
+            await getReceived(testServer, PATHS.RULE_HEADERS).toMatchObject({
+                headers: {
+                    cookie: 'typed=1',
+                    'user-agent': 'InterceptKit-Test',
+                    origin: 'https://origin.example',
+                },
+            });
+
+            await expect.poll(() => getSessionRules(serviceWorker)).toEqual([]);
+        },
+    );
+});
+
+/** A request as the client saved it before the URL held its query: the table added the parameters at sending */
+const makeLegacyRequest = (url: string) => ({
+    id: 'legacy',
+    method: HttpMethods.GET,
+    url,
+    query: [
+        { key: 'page', value: '2', enabled: true },
+        { key: 'off', value: '1', enabled: false },
+    ],
+    headers: [],
+    body: { bodyType: RequestBodyTypes.NONE },
+    sendCookies: false,
+});
+
+/** Creates the database at version 1 with an open tab and a history entry, before the API client ever opens it */
+const seedLegacyDatabase = async (page: Page, legacyRequest: object) => {
+    await page.evaluate(
+        async ({ database, request }) => {
+            const connection = await new Promise<IDBDatabase>((resolve, reject) => {
+                const opening = indexedDB.open(database.NAME, 1);
+
+                opening.addEventListener('upgradeneeded', () => {
+                    opening.result
+                        .createObjectStore(database.HISTORY, { keyPath: 'id' })
+                        .createIndex('sentAt', 'sentAt');
+                    opening.result.createObjectStore(database.OPEN_REQUESTS, { keyPath: 'id' });
+                });
+                opening.addEventListener('success', () => resolve(opening.result));
+                opening.addEventListener('error', () => reject(opening.error));
+            });
+
+            const transaction = connection.transaction([database.HISTORY, database.OPEN_REQUESTS], 'readwrite');
+
+            transaction
+                .objectStore(database.OPEN_REQUESTS)
+                .put({ id: database.OPEN_REQUESTS_KEY, requests: [request], activeId: 'legacy' });
+            transaction.objectStore(database.HISTORY).put({ id: 'legacy-entry', sentAt: 1, request });
+
+            await new Promise((resolve, reject) => {
+                transaction.addEventListener('complete', resolve);
+                transaction.addEventListener('error', () => reject(transaction.error));
+            });
+
+            connection.close();
+        },
+        { database: DATABASE, request: legacyRequest },
+    );
+};
+
+apiClientTest.describe('query of the URL', () => {
+    apiClientTest('mirrors the query in the table and back', async ({ apiClientPage, testServer }) => {
+        const url = `${testServer.origin}${PATHS.QUERY}`;
+
+        await getUrlField(apiClientPage).fill(`${url}?a=1&flag`);
+
+        const keys = apiClientPage.getByRole('textbox', { name: 'Parameter', exact: true });
+
+        await expect(keys).toHaveCount(2);
+
+        await expect(keys.first()).toHaveValue('a');
+
+        await expect(keys.last()).toHaveValue('flag');
+
+        await apiClientPage.getByRole('switch', { name: 'Send the parameter' }).first().click();
+
+        await expect(getUrlField(apiClientPage)).toHaveValue(`${url}?flag`);
+
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
+
+        await getReceived(testServer, `${PATHS.QUERY}?flag`).toMatchObject({ method: HttpMethods.GET });
+    });
+
+    networkTest(
+        'moves the parameters of tabs and history saved before into their URL once',
+        async ({ context, extensionId, testServer }) => {
+            const url = `${testServer.origin}${PATHS.LEGACY}`;
+            const seedPage = await context.newPage();
+
+            await seedPage.goto(`chrome-extension://${extensionId}/pages/popup.html`);
+
+            await seedLegacyDatabase(seedPage, makeLegacyRequest(url));
+
+            await seedPage.close();
+
+            const page = await context.newPage();
+            const errors = trackErrors(page);
+
+            await page.goto(`chrome-extension://${extensionId}/${API_CLIENT_PATH}`);
+
+            await expect(getUrlField(page)).toHaveValue(`${url}?page=2`);
+
+            await expect(page.getByRole('switch', { name: 'Send the parameter' })).toHaveCount(2);
+
+            await expect(getHistoryPanel(page)).toContainText('?page=2');
+
+            await page.getByRole('button', { name: 'Send', exact: true }).click();
+
+            await getReceived(testServer, `${PATHS.LEGACY}?page=2`).toMatchObject({ method: HttpMethods.GET });
+
+            expect(errors).toEqual([]);
+        },
+    );
 });
 
 apiClientTest.describe('host access', () => {
@@ -523,13 +691,52 @@ apiClientTest.describe('vault', () => {
 
         await expect.poll(() => readStoredValues(apiClientPage)).toEqual([expect.objectContaining({ v: 1 })]);
 
-        await getVaultButton(apiClientPage, 'Turn off encryption').click();
+        await getVaultButton(apiClientPage, 'Vault settings').click();
+
+        await apiClientPage
+            .getByRole('dialog', { name: 'Change the master password' })
+            .getByRole('button', { name: 'Turn off encryption', exact: true })
+            .click();
 
         await submitPassword(apiClientPage, 'Turn off encryption?', 'Turn off encryption', MASTER_PASSWORD);
 
         await expect(getVaultButton(apiClientPage, 'Encrypt secrets')).toBeVisible();
 
         await expect.poll(() => readStoredValues(apiClientPage)).toEqual(['abc']);
+    });
+
+    apiClientTest('changes the master password and keeps the secrets', async ({ apiClientPage, testServer }) => {
+        await prepareSecretRequest(apiClientPage);
+
+        await createVault(apiClientPage);
+
+        await getVaultButton(apiClientPage, 'Vault settings').click();
+
+        const settings = apiClientPage.getByRole('dialog', { name: 'Change the master password' });
+
+        await settings.getByLabel('Current password', { exact: true }).fill(MASTER_PASSWORD);
+
+        await settings.getByLabel('New password', { exact: true }).fill(NEW_MASTER_PASSWORD);
+
+        await settings.getByLabel('Repeat the password', { exact: true }).fill(NEW_MASTER_PASSWORD);
+
+        await settings.getByRole('button', { name: 'Change password', exact: true }).click();
+
+        await expect(settings).toBeHidden();
+
+        await lockVault(apiClientPage);
+
+        const oldAnswer = await callBackground(apiClientPage, 'vault/unlock', { password: MASTER_PASSWORD });
+
+        expect(oldAnswer).toEqual({ ok: true, result: false });
+
+        await callBackground(apiClientPage, 'vault/unlock', { password: NEW_MASTER_PASSWORD });
+
+        await expect(getVaultButton(apiClientPage, 'Lock secrets')).toBeVisible();
+
+        await sendRequest(apiClientPage, `${testServer.origin}${PATHS.VAULT_CHANGED}`);
+
+        await getReceived(testServer, PATHS.VAULT_CHANGED).toMatchObject({ headers: { authorization: 'Bearer abc' } });
     });
 
     apiClientTest('resets a forgotten password and empties the encrypted values', async ({ apiClientPage }) => {
@@ -588,7 +795,7 @@ apiClientTest.describe('cURL import', () => {
 
         await expect(getTabBar(apiClientPage).getByRole('listitem')).toHaveCount(2);
 
-        await expect(getUrlField(apiClientPage)).toHaveValue(url);
+        await expect(getUrlField(apiClientPage)).toHaveValue(`${url}?page=2`);
 
         await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
 

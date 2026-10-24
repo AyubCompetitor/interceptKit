@@ -11,14 +11,15 @@ import {
 } from '#shared/lib';
 
 import { RequestBodyTypes, type RequestBody } from './request.ts';
+import { appendRawQuery, parseRawQuery } from './urlQuery.ts';
 
 /** What a curl command describes, ready to become an API client request */
 export interface CurlImport {
     /** HTTP method */
     readonly method: HttpMethod;
-    /** URL without its query */
+    /** URL with its query as the command writes it */
     readonly url: string;
-    /** Query parameters of the URL */
+    /** The query of the URL, raw */
     readonly query: readonly KeyValue[];
     /** Request headers in the order of the command */
     readonly headers: readonly KeyValue[];
@@ -382,26 +383,15 @@ const buildBody = (options: CurlOptions): RequestBody => {
     };
 };
 
-const splitUrl = (options: CurlOptions, rawUrl: string): Pick<CurlImport, 'url' | 'query'> => {
+/** The URL keeps its query as the command has it; with -G, curl adds the data to that query */
+const buildUrlWithQuery = (options: CurlOptions, rawUrl: string): Pick<CurlImport, 'url' | 'query'> => {
     const hasScheme = rawUrl.includes(SCHEME_SEPARATOR);
     const fullUrl = hasScheme ? rawUrl : DEFAULT_SCHEME + rawUrl;
-    const dataQuery = options.isGet ? options.data.flatMap(part => part.split('&')).map(parseFormPair) : [];
-
-    if (!URL.canParse(fullUrl)) {
-        return {
-            url: rawUrl,
-            query: dataQuery,
-        };
-    }
-
-    const url = new URL(fullUrl);
-    const urlQuery = [...url.searchParams].map(([key, value]) => makePair(key, value));
-
-    url.search = '';
+    const url = options.isGet ? appendRawQuery(fullUrl, options.data) : fullUrl;
 
     return {
-        url: url.href,
-        query: [...urlQuery, ...dataQuery],
+        url,
+        query: parseRawQuery(url),
     };
 };
 
@@ -438,7 +428,7 @@ export const parseCurl = (command: string): Result<CurlImport> => {
 
     return ok({
         method,
-        ...splitUrl(options, options.url),
+        ...buildUrlWithQuery(options, options.url),
         headers: options.headers,
         body: buildBody(options),
     });

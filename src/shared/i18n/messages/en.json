@@ -42,6 +42,65 @@
     "transferTitle": {
         "message": "Import and export"
     },
+    "transferDescription": {
+        "message": "Move rules, mocks and environments between browsers and people as a JSON file that is easy to keep in git."
+    },
+    "transferExportTitle": {
+        "message": "Export"
+    },
+    "transferExportParts": {
+        "message": "What goes into the file"
+    },
+    "transferPartRules": {
+        "message": "Rules"
+    },
+    "transferPartMocks": {
+        "message": "Mocks"
+    },
+    "transferPartEnvironments": {
+        "message": "Environments"
+    },
+    "transferExportHint": {
+        "message": "Records of the organization policy and the values of secrets never go into the file: secret variables keep their names, empty."
+    },
+    "transferExportSubmit": {
+        "message": "Download JSON"
+    },
+    "transferImportTitle": {
+        "message": "Import"
+    },
+    "transferImportHint": {
+        "message": "A record with a known id replaces the one stored here, and nothing is deleted. Secret values this browser keeps stay, and records of the policy are never touched."
+    },
+    "transferImportFile": {
+        "message": "File"
+    },
+    "transferImportText": {
+        "message": "Or paste the text of a file"
+    },
+    "transferFileUnreadable": {
+        "message": "The file could not be read."
+    },
+    "transferImportInvalid": {
+        "message": "The file cannot be imported:"
+    },
+    "transferPreview": {
+        "message": "What the import will do"
+    },
+    "transferCounts": {
+        "message": "$1 — new: $2, replaced: $3, kept from the policy: $4",
+        "description": "$1 is a list such as Rules; $2, $3 and $4 are numbers."
+    },
+    "transferImportSubmit": {
+        "message": "Import"
+    },
+    "transferImportDone": {
+        "message": "The import is done."
+    },
+    "transferImportFailed": {
+        "message": "The import did not go through: $1",
+        "description": "$1 is the technical reason, in English."
+    },
     "interceptionLabel": {
         "message": "Intercept requests"
     },
@@ -652,8 +711,12 @@
     "apiClientHeadersEmpty": {
         "message": "The browser adds headers of its own, such as Accept and User-Agent."
     },
-    "apiClientForbiddenHeaders": {
-        "message": "The browser doesn't let the API client set these headers yet, so they aren't sent: $1.",
+    "apiClientRuleHeaders": {
+        "message": "fetch() cannot send these headers, so a browser rule sets them on this request only: $1. A Cookie header replaces the site's cookies.",
+        "description": "$1 is a comma-separated list of header names."
+    },
+    "apiClientBrowserHeaders": {
+        "message": "The browser builds these headers itself, so the values typed here aren't sent: $1.",
         "description": "$1 is a comma-separated list of header names."
     },
     "apiClientFieldKey": {
@@ -759,6 +822,14 @@
     "apiClientSendFailed": {
         "message": "No response came back: $1",
         "description": "$1 is what the browser reported, in English."
+    },
+    "apiClientTimedOut": {
+        "message": "The whole response did not come back within $1 seconds, so the request was given up.",
+        "description": "$1 is a number of seconds."
+    },
+    "apiClientResponseTruncated": {
+        "message": "The response is larger than $1, so only its beginning was downloaded.",
+        "description": "$1 is a size such as 10 MB."
     },
     "apiClientSendFailedHint": {
         "message": "The server may be down or out of reach, or the browser may not trust its certificate."
@@ -917,6 +988,24 @@
     },
     "apiClientVaultDisableOpen": {
         "message": "Turn off encryption"
+    },
+    "apiClientVaultSettingsOpen": {
+        "message": "Vault settings"
+    },
+    "apiClientVaultSettingsTitle": {
+        "message": "Change the master password"
+    },
+    "apiClientVaultChangeText": {
+        "message": "Secret values are encrypted again with a key from the new password."
+    },
+    "apiClientVaultCurrentPassword": {
+        "message": "Current password"
+    },
+    "apiClientVaultNewPassword": {
+        "message": "New password"
+    },
+    "apiClientVaultChangeSubmit": {
+        "message": "Change password"
     },
     "apiClientVaultFailed": {
         "message": "The vault did not respond. Try again."

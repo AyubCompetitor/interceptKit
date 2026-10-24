@@ -5,6 +5,7 @@ import {
     environmentsItem,
     findEnvironment,
     openVaultKey,
+    resealEnvironment,
     revealSecrets,
     sealEnvironment,
     vaultItem,
@@ -12,12 +13,13 @@ import {
     type EnvironmentIdParams,
     type RevealedSecrets,
     type Vault,
+    type VaultPasswordChangeParams,
     type VaultPasswordParams,
 } from '#entities/environment';
 import { VAULT_CONFIG } from '#shared/config';
 import type { TaskQueue } from '#shared/lib';
 import { RpcError, RpcErrorCodes, type Router } from '#shared/messaging';
-import { readItem, writeItem } from '#shared/platform';
+import { prepareWrite, readItem, writeItem, writeItems } from '#shared/platform';
 
 import { lockVault, readKeyParams, readVaultKey, takeVaultKey, unlockVault } from './vaultKey.ts';
 
@@ -95,6 +97,36 @@ const revealSecretsHandler = async (
     };
 };
 
+const changePasswordHandler = async (
+    { password, newPassword }: VaultPasswordChangeParams,
+    storageReady: Promise<void>,
+): Promise<boolean> => {
+    await storageReady;
+
+    const keyParams = await readKeyParams();
+    const oldKeyBytes = await openVaultKey(password, keyParams);
+
+    if (oldKeyBytes === undefined) {
+        return false;
+    }
+
+    const newVault = await createVaultKey(newPassword, VAULT_CONFIG.KEY_ITERATIONS);
+    const environments = await readItem(environmentsItem);
+
+    const resealedEnvironments = await Promise.all(
+        environments.map(environment => resealEnvironment(environment, oldKeyBytes, newVault.keyBytes)),
+    );
+
+    await writeItems([
+        prepareWrite(vaultItem, { keyParams: newVault.keyParams }),
+        prepareWrite(environmentsItem, resealedEnvironments),
+    ]);
+
+    await unlockVault(newVault.keyBytes);
+
+    return true;
+};
+
 /** Asks for the password again: an unlocked vault left unattended must not be turned off by someone else */
 const disableVaultHandler = async (
     { password }: VaultPasswordParams,
@@ -138,6 +170,7 @@ export const registerVaultHandlers = (router: Router, storageReady: Promise<void
     router.on(vaultRpc.lock, () => enqueue(lockVault));
     router.on(vaultRpc.touch, () => enqueue(touchVaultHandler));
     router.on(vaultRpc.reveal, params => enqueue(() => revealSecretsHandler(params, storageReady)));
+    router.on(vaultRpc.changePassword, params => enqueue(() => changePasswordHandler(params, storageReady)));
     router.on(vaultRpc.disable, params => enqueue(() => disableVaultHandler(params, storageReady)));
     router.on(vaultRpc.reset, () => enqueue(() => resetVaultHandler(storageReady)));
 };

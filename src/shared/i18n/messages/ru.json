@@ -38,6 +38,63 @@
     "transferTitle": {
         "message": "Импорт и экспорт"
     },
+    "transferDescription": {
+        "message": "Переносите правила, моки и окружения между браузерами и людьми JSON-файлом, который удобно хранить в git."
+    },
+    "transferExportTitle": {
+        "message": "Экспорт"
+    },
+    "transferExportParts": {
+        "message": "Что попадёт в файл"
+    },
+    "transferPartRules": {
+        "message": "Правила"
+    },
+    "transferPartMocks": {
+        "message": "Моки"
+    },
+    "transferPartEnvironments": {
+        "message": "Окружения"
+    },
+    "transferExportHint": {
+        "message": "Записи из политики организации и значения секретов в файл не попадают: у секретных переменных остаются только имена."
+    },
+    "transferExportSubmit": {
+        "message": "Скачать JSON"
+    },
+    "transferImportTitle": {
+        "message": "Импорт"
+    },
+    "transferImportHint": {
+        "message": "Запись с тем же id заменит сохранённую, ничего не удаляется. Значения секретов в этом браузере сохранятся, записи из политики останутся как есть."
+    },
+    "transferImportFile": {
+        "message": "Файл"
+    },
+    "transferImportText": {
+        "message": "Или вставьте текст файла"
+    },
+    "transferFileUnreadable": {
+        "message": "Не удалось прочитать файл."
+    },
+    "transferImportInvalid": {
+        "message": "Этот файл нельзя импортировать:"
+    },
+    "transferPreview": {
+        "message": "Что сделает импорт"
+    },
+    "transferCounts": {
+        "message": "$1 — новых: $2, заменится: $3, оставлено из политики: $4"
+    },
+    "transferImportSubmit": {
+        "message": "Импортировать"
+    },
+    "transferImportDone": {
+        "message": "Импорт выполнен."
+    },
+    "transferImportFailed": {
+        "message": "Импорт не выполнен: $1"
+    },
     "interceptionLabel": {
         "message": "Перехват запросов"
     },
@@ -617,8 +674,11 @@
     "apiClientHeadersEmpty": {
         "message": "Часть заголовков, например Accept и User-Agent, браузер добавит сам."
     },
-    "apiClientForbiddenHeaders": {
-        "message": "Браузер пока не даёт API-клиенту задать эти заголовки, поэтому они не отправятся: $1."
+    "apiClientRuleHeaders": {
+        "message": "Эти заголовки fetch() отправить не может, поэтому их поставит правило браузера — только для этого запроса: $1. Заголовок Cookie заменит куки сайта."
+    },
+    "apiClientBrowserHeaders": {
+        "message": "Эти заголовки браузер собирает сам, поэтому набранные значения не отправятся: $1."
     },
     "apiClientFieldKey": {
         "message": "Поле"
@@ -718,6 +778,12 @@
     },
     "apiClientSendFailed": {
         "message": "Ответ не пришёл: $1"
+    },
+    "apiClientTimedOut": {
+        "message": "Ответ не пришёл целиком за $1 секунд, и запрос прерван."
+    },
+    "apiClientResponseTruncated": {
+        "message": "Ответ больше $1, поэтому загружено только его начало."
     },
     "apiClientSendFailedHint": {
         "message": "Возможно, сервер не работает или недоступен либо браузер не доверяет его сертификату."
@@ -868,6 +934,24 @@
     },
     "apiClientVaultDisableOpen": {
         "message": "Выключить шифрование"
+    },
+    "apiClientVaultSettingsOpen": {
+        "message": "Настройки хранилища"
+    },
+    "apiClientVaultSettingsTitle": {
+        "message": "Смена мастер-пароля"
+    },
+    "apiClientVaultChangeText": {
+        "message": "Значения секретов будут заново зашифрованы ключом от нового пароля."
+    },
+    "apiClientVaultCurrentPassword": {
+        "message": "Текущий пароль"
+    },
+    "apiClientVaultNewPassword": {
+        "message": "Новый пароль"
+    },
+    "apiClientVaultChangeSubmit": {
+        "message": "Сменить пароль"
     },
     "apiClientVaultFailed": {
         "message": "Хранилище не ответило. Попробуйте ещё раз."

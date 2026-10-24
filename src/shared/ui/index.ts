@@ -1,5 +1,6 @@
 export * from './useDocumentTitle.ts';
 export * from './useDocumentTheme.ts';
+export * from './useProcessAction.ts';
 export * from './joinClassNames.ts';
 export * from './tokens.ts';
 export * from './Badge/index.ts';

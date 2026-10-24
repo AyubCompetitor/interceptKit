@@ -1,24 +1,26 @@
 import { useRef } from 'react';
 
-import { sendRequest } from '../api/sendRequest.ts';
-
 import { vaultRpc, type Environment, type VariableValues } from '#entities/environment';
 import { buildOutgoingRequest, type ApiRequest, type ApiResponse, type OutgoingRequest } from '#entities/request';
 import { buildHostPattern, isHostCovered } from '#entities/site';
-import { formatIssues, noop } from '#shared/lib';
+import { formatIssues, getErrorText, noop } from '#shared/lib';
 import { executeRpc } from '#shared/messaging';
 import { requestHostAccess, useHostPatterns } from '#shared/platform';
 
 import { addHistoryEntry, buildHistoryEntry } from './historyEntries.ts';
 import { buildApiRequest, type RequestDraft } from './requestDraft.ts';
 import { resolveRequestVariables } from './requestVariables.ts';
-import { IDLE_STATE, SENDING_STATE, SendStateTypes, type SendState } from './sendState.ts';
+import { sendWithRuleHeaders } from './ruleHeaders.ts';
+import { IDLE_STATE, SENDING_STATE, SendStateTypes, TIMED_OUT_STATE, type SendState } from './sendState.ts';
 
-const ABORT_ERROR = 'AbortError';
+const DOM_ERRORS = {
+    ABORT: 'AbortError',
+    TIMEOUT: 'TimeoutError',
+} as const;
 
-const UNKNOWN_ERROR = 'unknown error';
+const isAbortError = (error: unknown): boolean => error instanceof DOMException && error.name === DOM_ERRORS.ABORT;
 
-const isAbortError = (error: unknown): boolean => error instanceof DOMException && error.name === ABORT_ERROR;
+const isTimeoutError = (error: unknown): boolean => error instanceof DOMException && error.name === DOM_ERRORS.TIMEOUT;
 
 /** A cancelled request leaves the tab as it was before sending */
 const mapErrorToSendState = (error: unknown): SendState => {
@@ -26,16 +28,13 @@ const mapErrorToSendState = (error: unknown): SendState => {
         return IDLE_STATE;
     }
 
-    if (error instanceof Error) {
-        return {
-            stateType: SendStateTypes.FAILED,
-            reason: error.message,
-        };
+    if (isTimeoutError(error)) {
+        return TIMED_OUT_STATE;
     }
 
     return {
         stateType: SendStateTypes.FAILED,
-        reason: UNKNOWN_ERROR,
+        reason: getErrorText(error),
     };
 };
 
@@ -78,7 +77,7 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
             saveToHistory(typedRequest, sentAt, undefined);
         };
 
-        sendRequest(outgoing, controller.signal).then(onResponse).catch(onFailure);
+        sendWithRuleHeaders(outgoing, controller.signal).then(onResponse).catch(onFailure);
     };
 
     const onRequestSend = (draft: RequestDraft, environment: NotRequired<Environment>, secrets: VariableValues) => {

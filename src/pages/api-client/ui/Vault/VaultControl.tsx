@@ -9,6 +9,7 @@ import { Button, ButtonVariants, Icon, IconNames, Typography, TypographyColors }
 
 import { ResetVaultModal } from './ResetVaultModal.tsx';
 import { VaultDisableModal } from './VaultDisableModal.tsx';
+import { VaultSettingsModal } from './VaultSettingsModal.tsx';
 import { VaultSetupModal } from './VaultSetupModal.tsx';
 import { VaultUnlockModal } from './VaultUnlockModal.tsx';
 
@@ -19,10 +20,12 @@ export const VaultControl: FC = () => {
         dialog,
         onSetupOpen,
         onUnlockOpen,
+        onSettingsOpen,
         onDisableOpen,
         onResetOpen,
         onSetupClose,
         onUnlockClose,
+        onSettingsClose,
         onDisableClose,
         onResetClose,
     } = useVaultDialog();
@@ -60,11 +63,11 @@ export const VaultControl: FC = () => {
                     </Button>
 
                     <Button
-                        aria-label={t('apiClientVaultDisableOpen')}
-                        title={t('apiClientVaultDisableOpen')}
+                        aria-label={t('apiClientVaultSettingsOpen')}
+                        title={t('apiClientVaultSettingsOpen')}
                         variant={ButtonVariants.GHOST}
                         isIconOnly
-                        onClick={onDisableOpen}
+                        onClick={onSettingsOpen}
                     >
                         <Icon name={IconNames.SETTINGS} />
                     </Button>
@@ -80,6 +83,12 @@ export const VaultControl: FC = () => {
             <VaultSetupModal isOpen={dialog === VaultDialogs.SETUP} onClose={onSetupClose} />
 
             <VaultUnlockModal isOpen={dialog === VaultDialogs.UNLOCK} onClose={onUnlockClose} onReset={onResetOpen} />
+
+            <VaultSettingsModal
+                isOpen={dialog === VaultDialogs.SETTINGS}
+                onClose={onSettingsClose}
+                onDisable={onDisableOpen}
+            />
 
             <VaultDisableModal isOpen={dialog === VaultDialogs.DISABLE} onClose={onDisableClose} />
 

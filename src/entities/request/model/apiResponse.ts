@@ -13,6 +13,8 @@ export interface ApiResponse {
     readonly body: string;
     /** Size of the body in bytes, after the browser decompressed it */
     readonly size: number;
+    /** The body went on past the size limit, so only its beginning was downloaded */
+    readonly isTruncated: boolean;
     /** Milliseconds from sending to the end of the body */
     readonly durationMs: number;
 }

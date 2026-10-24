@@ -4,10 +4,12 @@ import { ResponseSections, type ResponseSection } from '../../lib/requestSection
 import { useSectionChoice } from '../../lib/useSectionChoice.ts';
 
 import type { ApiResponse } from '#entities/request';
+import { API_CLIENT_CONFIG } from '#shared/config';
 import { useTranslation, type MessageKey } from '#shared/i18n';
-import { Flex, SegmentedControl, Spaces } from '#shared/ui';
+import { Flex, Notice, NoticeTones, SegmentedControl, Spaces } from '#shared/ui';
 
 import { ResponseBody } from './ResponseBody.tsx';
+import { formatSize } from './responseFormat.ts';
 import { ResponseHeaders } from './ResponseHeaders.tsx';
 import { ResponseSummary } from './ResponseSummary.tsx';
 
@@ -22,7 +24,7 @@ interface ResponseViewProps {
 }
 
 export const ResponseView: FC<ResponseViewProps> = ({ response }) => {
-    const { t } = useTranslation();
+    const { locale, t } = useTranslation();
     const { section, onSectionChange } = useSectionChoice<ResponseSection>(ResponseSections.BODY);
 
     const isBody = section === ResponseSections.BODY;
@@ -30,6 +32,12 @@ export const ResponseView: FC<ResponseViewProps> = ({ response }) => {
     return (
         <Flex direction='column' gap={Spaces.L}>
             <ResponseSummary response={response} />
+
+            {response.isTruncated && (
+                <Notice tone={NoticeTones.WARNING}>
+                    {t('apiClientResponseTruncated', formatSize(API_CLIENT_CONFIG.MAX_RESPONSE_BYTES, locale, t))}
+                </Notice>
+            )}
 
             <SegmentedControl
                 labels={RESPONSE_SECTION_LABELS}

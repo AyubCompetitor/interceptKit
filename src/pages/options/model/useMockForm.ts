@@ -1,19 +1,10 @@
 import { useState, type SubmitEvent } from 'react';
 
 import { mocksRpc, type Mock } from '#entities/mock';
+import { getErrorText } from '#shared/lib';
 import { executeRpc } from '#shared/messaging';
 
 import { buildMock, createMockDraft, type MockDraftPatch } from './mockDraft.ts';
-
-const UNKNOWN_ERROR = 'unknown error';
-
-const getErrorText = (error: unknown): string => {
-    if (error instanceof Error) {
-        return error.message;
-    }
-
-    return UNKNOWN_ERROR;
-};
 
 export const useMockForm = (mock: NotRequired<Mock>, onSaved: VoidFunction) => {
     const [draft, setDraft] = useState(() => createMockDraft(mock));

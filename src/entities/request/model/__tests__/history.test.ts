@@ -50,7 +50,15 @@ describe('historyEntryValidator', () => {
 
 describe('history entries', () => {
     it('keep the status, time and size of a response but not its body', () => {
-        const response = { status: 404, statusText: 'Not Found', headers: [], body: 'secret', size: 6, durationMs: 9 };
+        const response = {
+            status: 404,
+            statusText: 'Not Found',
+            headers: [],
+            body: 'secret',
+            size: 6,
+            isTruncated: false,
+            durationMs: 9,
+        };
 
         expect(mapResponseToSummary(response)).toEqual({ status: 404, durationMs: 9, size: 6 });
     });

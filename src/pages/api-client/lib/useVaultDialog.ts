@@ -3,6 +3,7 @@ import { useState } from 'react';
 export enum VaultDialogs {
     SETUP = 'setup',
     UNLOCK = 'unlock',
+    SETTINGS = 'settings',
     DISABLE = 'disable',
     RESET = 'reset',
 }
@@ -28,6 +29,8 @@ export const useVaultDialog = () => {
 
     const onUnlockOpen = () => setDialog(VaultDialogs.UNLOCK);
 
+    const onSettingsOpen = () => setDialog(VaultDialogs.SETTINGS);
+
     const onDisableOpen = () => setDialog(VaultDialogs.DISABLE);
 
     const onResetOpen = () => setDialog(VaultDialogs.RESET);
@@ -35,6 +38,8 @@ export const useVaultDialog = () => {
     const onSetupClose = () => closeDialog(VaultDialogs.SETUP);
 
     const onUnlockClose = () => closeDialog(VaultDialogs.UNLOCK);
+
+    const onSettingsClose = () => closeDialog(VaultDialogs.SETTINGS);
 
     const onDisableClose = () => closeDialog(VaultDialogs.DISABLE);
 
@@ -44,10 +49,12 @@ export const useVaultDialog = () => {
         dialog,
         onSetupOpen,
         onUnlockOpen,
+        onSettingsOpen,
         onDisableOpen,
         onResetOpen,
         onSetupClose,
         onUnlockClose,
+        onSettingsClose,
         onDisableClose,
         onResetClose,
     };

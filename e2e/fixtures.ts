@@ -161,6 +161,9 @@ export const callBackground = (page: Page, method: string, params: unknown) =>
 export const getDynamicRules = (serviceWorker: Worker) =>
     serviceWorker.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
 
+export const getSessionRules = (serviceWorker: Worker) =>
+    serviceWorker.evaluate(() => chrome.declarativeNetRequest.getSessionRules());
+
 /** Collects console errors and uncaught exceptions, including CSP violations. */
 export function trackErrors(page: Page): string[] {
     const errors: string[] = [];

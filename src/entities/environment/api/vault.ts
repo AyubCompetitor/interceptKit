@@ -18,6 +18,13 @@ export interface VaultPasswordParams {
     readonly password: string;
 }
 
+export interface VaultPasswordChangeParams {
+    /** The master password now */
+    readonly password: string;
+    /** The master password from now on */
+    readonly newPassword: string;
+}
+
 /** The decrypted secrets of an environment */
 export interface RevealedSecrets {
     /** Values of its switched-on encrypted variables */
@@ -29,10 +36,17 @@ export const VAULT_LOCK_ALARM = 'vault-lock';
 
 const MAX_PASSWORD_LENGTH = 1024;
 
-const vaultPassword = object({ password: string({ minLength: 1, maxLength: MAX_PASSWORD_LENGTH }) });
+const currentPassword = string({ minLength: 1, maxLength: MAX_PASSWORD_LENGTH });
 
-const newVaultPassword = object({
-    password: string({ minLength: VAULT_CONFIG.MIN_PASSWORD_LENGTH, maxLength: MAX_PASSWORD_LENGTH }),
+const newPassword = string({ minLength: VAULT_CONFIG.MIN_PASSWORD_LENGTH, maxLength: MAX_PASSWORD_LENGTH });
+
+const vaultPassword = object({ password: currentPassword });
+
+const newVaultPassword = object({ password: newPassword });
+
+const vaultPasswordChange = object({
+    password: currentPassword,
+    newPassword,
 });
 
 export const vaultItem = defineStoreItem<Vault>({
@@ -64,6 +78,7 @@ export const vaultRpc = {
     lock: defineMethod<null, void>('vault/lock', nothing),
     touch: defineMethod<null, void>('vault/touch', nothing),
     reveal: defineMethod<EnvironmentIdParams, RevealedSecrets>('vault/reveal', object({ id: identifier })),
+    changePassword: defineMethod<VaultPasswordChangeParams, boolean>('vault/changePassword', vaultPasswordChange),
     disable: defineMethod<VaultPasswordParams, boolean>('vault/disable', vaultPassword),
     reset: defineMethod<null, void>('vault/reset', nothing),
 } as const;

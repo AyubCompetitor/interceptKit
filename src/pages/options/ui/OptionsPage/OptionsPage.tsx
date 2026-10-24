@@ -13,6 +13,7 @@ import { SettingsSection } from '../SettingsSection/SettingsSection.tsx';
 import { SECTION_TITLES } from '../Sidebar/dashboardNav.ts';
 import { Sidebar } from '../Sidebar/Sidebar.tsx';
 import { SitesSection } from '../Site/SitesSection.tsx';
+import { TransferSection } from '../Transfer/TransferSection.tsx';
 
 export const OptionsPage: FC = () => {
     const { t } = useTranslation();
@@ -24,6 +25,7 @@ export const OptionsPage: FC = () => {
     const isRules = section === DashboardSections.RULES;
     const isMocks = section === DashboardSections.MOCKS;
     const isSites = section === DashboardSections.SITES;
+    const isTransfer = section === DashboardSections.TRANSFER;
     const isSettings = section === DashboardSections.SETTINGS;
 
     return (
@@ -34,6 +36,7 @@ export const OptionsPage: FC = () => {
                 {isRules && <RulesSection />}
                 {isMocks && <MocksSection />}
                 {isSites && <SitesSection />}
+                {isTransfer && <TransferSection />}
                 {isSettings && <SettingsSection />}
             </main>
         </div>

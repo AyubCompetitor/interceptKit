@@ -120,11 +120,14 @@ tab ──buildApiRequest──▶ ApiRequest ──buildOutgoingRequest──�
 ```
 
 - Each tab keeps one request as typed: the method, the URL, query parameters, headers, the body and the cookie switch. Every body format (JSON, text, form) keeps its own text, so switching formats loses nothing. The open tabs are saved a moment after every change and come back on the next visit, without their responses and with the body of the chosen format only.
-- `buildOutgoingRequest` in `entities/request` is a pure function. It adds the enabled parameters after the query of the URL as typed, sets the content type of the body format unless a header sets one, and refuses what `fetch` would throw on, such as a header name with a space or a body on GET. GET and HEAD go without a body; the editor keeps it and says so.
-- `fetch` silently drops some headers: `Cookie`, `Origin`, `Referer`, `User-Agent`, `Sec-*` and others. The editor names the dropped ones under the headers instead of letting the user think they were sent.
+- The URL holds the query as typed, and the parameters table mirrors it raw: nothing is decoded or encoded. Typing in the URL rebuilds the table; editing the table rewrites the query of the URL from the switched-on rows, and a switched-off row stays in the table only. A row without a value is written as its key alone (`?debug`). Variables fill the URL as text, so a value with `&` or `#` changes the query, as in Postman.
+- Tabs and history saved before version 2 of the database kept the parameters apart and added them at sending. Opening the database at version 2 moves them into the URL once, escaped the way they went (`upgradeRequestQuery`; a store of `defineDatabaseStore` may `upgrade` its records when the version rises).
+- `buildOutgoingRequest` in `entities/request` is a pure function. It sends the URL as typed with its query, sets the content type of the body format unless a header sets one, and refuses what `fetch` would throw on, such as a header name with a space or a body on GET. GET and HEAD go without a body; the editor keeps it and says so.
+- `fetch` silently drops some headers: `Cookie`, `Origin`, `Referer`, `User-Agent`, `Sec-*` and others. A session rule sets them instead, on that one request (see below), and the editor says so under the headers. Headers the browser builds for every request itself (`Host`, `Content-Length`, `Connection`, `Transfer-Encoding` and the like) stay with it: a rule that changes them breaks the request, so the editor names them as not sent.
 - A `fetch` from an extension page sends the site's cookies, even `SameSite=Strict` ones, unless it asks for `credentials: 'omit'`. The client sends `omit` unless the user turns cookies on in the request's settings.
 - Requests skip the browser cache (`cache: 'no-store'`) and carry no `Referer` (`referrerPolicy: 'no-referrer'`). The browser still adds `Origin: chrome-extension://<id>` to requests that need one.
 - Without host access the browser would hide the response. Send checks the granted host patterns first. If the host is not covered, it asks for `*://<host>/*` within the same click and sends once the user agrees. A refusal leaves a notice with a button that asks again.
+- A request still without its whole response after 60 seconds is given up (`API_CLIENT_CONFIG.REQUEST_TIMEOUT_MS`), and the panel says so; a cancel of the user stays a cancel. The page downloads the first 10 MB of a body (`MAX_RESPONSE_BYTES`) and cancels the rest, so a huge response never fills its memory; the panel says when the body was cut.
 - The response shows its status, time and size, the body in a read-only editor (JSON laid out, text as it came, binary content not shown) and the headers. Pages never see `Set-Cookie`.
 
 Environments:
@@ -142,6 +145,7 @@ Vault of secrets:
 - The key lives in `chrome.storage.session` (memory only, closed to content scripts) while the vault is unlocked, and only the service worker reads it. Pages get the decrypted values of the chosen environment for the requests they send (`vault/reveal`) and never the key. Pages watch `vaultStatus`, which holds only the time of the auto-lock.
 - The vault locks itself after 15 minutes without use: unlocking, opening secrets, saving them or sending a request that uses them. Each use moves an `alarms` alarm that wakes the service worker to wipe the key, even with no extension page open; every use of the key also checks the time itself, since an alarm can come late. "Lock secrets" wipes the key at once, and closing the browser clears the session store.
 - With the vault on, the service worker encrypts a typed secret value on save and refuses it while the vault is locked. The editor never shows an encrypted value: typing a new one replaces it.
+- Changing the master password asks for the current one, derives a key from the new one with a fresh salt and encrypts every secret again. The new key parameters and the environments go to storage in one `set()` call, so a stop halfway cannot leave secrets under a key nobody can derive.
 - Turning the vault off asks for the password again and writes the values back unencrypted. A forgotten password leaves only a reset: the encrypted values are deleted, their variables stay, empty.
 - What the vault does not protect against: anyone who can run code in the extension's pages or service worker while it is unlocked, and guessing a weak password from a copy of the browser profile. A strong password is the only defence against the latter.
 
@@ -156,11 +160,35 @@ cURL import:
 
 - "Import cURL" in the header takes a command, for example from the browser's "Copy as cURL (bash)", and opens it in a new tab. `parseCurl` in `entities/request`, a pure function, reads the method, the URL, query parameters, headers and the body. It follows bash quoting (`'…'`, `"…"`, `$'…'`, `\` and line breaks); cmd and PowerShell syntax is not supported.
 - What it cannot import faithfully, such as multipart forms and file uploads (`-F`, `-T`), is refused with a reason, and the dialog stays open. Options that change nothing for the API client, such as `--compressed` or `-o`, are skipped.
-- Cookies of the command (`-b` or a `Cookie` header) arrive as a header, and the cookie switch stays off. The editor names such headers among those `fetch` drops.
+- Cookies of the command (`-b` or a `Cookie` header) arrive as a header, and the cookie switch stays off. A session rule sends them, like any header `fetch` drops.
 
-Planned:
+Headers through a session rule:
 
-- Headers that `fetch` cannot set will be set by a session rule limited to requests the extension itself starts (`initiatorDomains` is the extension's id), so browsing is unaffected.
+- Before sending such a request, the page asks the service worker for a session rule (`headerRules/apply`) and releases it once the request is over (`headerRules/release`). The rule sets the headers only on requests started by the extension itself (`initiatorDomains` is its id), from the tab of that page (`tabIds`, the tab the browser reports for the sender) and to the host of the request (`requestDomains`), so browsing and other tabs are never touched. Its priority is above every rule of the user, so the typed headers win.
+- A rule cannot tell two requests of one tab to one host apart, so the page sends requests that need a rule one at a time; requests without such headers do not wait. A rule left behind by a cut-off send is replaced by the next one of that tab, and session rules are gone when the browser closes.
+- Repeated headers are joined the way HTTP joins them: values with `, `, cookies with `; `. A typed `Cookie` header replaces the site's cookies even when the cookie switch is on.
+- The browser itself checks access to the host of the request, as for any rule of the extension.
+
+## Import and export
+
+People share rules, mocks and environments as a JSON file that is easy to keep in git. The same format will carry the administrator's `presetBundle`.
+
+```json
+{
+    "format": "interceptkit",
+    "version": 1,
+    "exportedAt": "2026-10-24T12:00:00.000Z",
+    "rules": [],
+    "mocks": [],
+    "environments": []
+}
+```
+
+- Records keep the shape of storage and pass the same validators, limits and checks for unique ids. The file has no `source`: what it brings is the user's own. The schema is strict, a file of a newer version is refused, older versions will be migrated, and a file may be up to 5 MB.
+- An export carries the chosen lists without the records of the policy and without the values of secrets: a secret variable keeps its name, empty. Keys of records are sorted and the file uses Prettier's indent, so a diff in git shows only real changes. The page saves the file through a link it downloads itself, so the extension needs no `downloads` permission.
+- An import merges by id: a new id joins the end of its list, a known id replaces the record in place, a record of the policy stays as it is, and nothing is deleted. An empty secret of the file keeps the value this browser has for it. The page shows what the import will do before it writes anything.
+- The service worker parses the text again, checks the merged lists with the same limits and regex checks as a single save (`transfer/import`), and writes all three lists in one `chrome.storage.local.set()` call. A broken file changes nothing, and the reasons come with their paths, such as `$.rules[3].match.url`.
+- The code is the first shared feature beyond the interception switch: `features/transfer` holds the format and the merge, which both the dashboard and the service worker use.
 
 ## Site access
 
@@ -211,5 +239,5 @@ dist/chrome-mv3/
 - **Interception tests** (`e2e/interception.spec.ts`) check the effect of rules on real requests. A local HTTP server (`e2e/testServer.ts`, Node's `node:http` on `127.0.0.1` with a random port) serves a test page and echoes every other request back with the headers it received. The tests load a copy of the build with install-time access to `http://127.0.0.1/*`, so the shipped manifest stays unchanged. They cover a block rule on fetches and navigations, redirects to a URL, a regex substitution and a URL transform, and request and response header changes. The browser maps a second host, `foreign.test`, to the same server, but the extension has no access to it. A request from a page on that host passes even when a rule blocks its URL: a rule acts only when the extension has access to both the request URL and the page that started it.
 - **Interceptor tests** (`e2e/interceptor.spec.ts`) inject the built `content/interceptor.js` into the test page before its scripts, post a mock list the way the bridge does, and check `fetch` and XHR in the real browser. A mocked XHR is compared with a real request to the test server, so its events must match the browser's own.
 - **Mock delivery tests** (`e2e/mocks.spec.ts`) go through the real registration: they turn mocks on for the test server's granted pattern, save a mock and wait until the browser has both scripts. A page of the site then gets the mock, including a request its own script sends while the page is still parsing; a page of a site without mocks reaches the server. They also check that switching mocks off or pausing interception takes the scripts away, and that the background refuses page mocks to extension pages, mocks for sites it has not granted, and mocks that claim to come from the policy. The dashboard tests do the same through the interface: they turn mocks on in Sites, create a mock in the editor and load a page of the site.
-- **API client tests** (`e2e/apiClient.spec.ts`) send requests from the page to the test server: parameters and headers, a JSON body, cookies off and on, a host without access, where the access prompt is replaced as in the Sites tests, variables of an environment created in the editor, the vault (encrypted storage, a wrong password, lock and auto-lock through the alarm, turning off and reset), the cURL import, and the history with its limit and the open tabs after a reload. The server keeps what reached it (`getLastRequest`), and the tests check it there: the response editor draws only the lines on the screen.
+- **API client tests** (`e2e/apiClient.spec.ts`) send requests from the page to the test server: parameters and headers, a JSON body, cookies off and on, a host without access, where the access prompt is replaced as in the Sites tests, variables of an environment created in the editor, headers through a session rule, the vault (encrypted storage, a wrong password, lock and auto-lock through the alarm, a new password, turning off and reset), a response past the size limit, the query of the URL mirrored in the table and the one-time move of old parameters into the URL, the cURL import, and the history with its limit and the open tabs after a reload. The server keeps what reached it (`getLastRequest`), and the tests check it there: the response editor draws only the lines on the screen.
 - **Type checking** runs two programs. `tsconfig.json` covers the whole repository with Node typings for configs, unit tests and e2e. `tsconfig.browser.json` covers `src` without tests and without Node typings, so extension code cannot use Node APIs by accident.

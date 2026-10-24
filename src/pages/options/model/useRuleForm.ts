@@ -1,19 +1,10 @@
 import { useState, type SubmitEvent } from 'react';
 
 import { rulesRpc, type Rule } from '#entities/rule';
+import { getErrorText } from '#shared/lib';
 import { executeRpc } from '#shared/messaging';
 
 import { buildRule, createRuleDraft, type RuleDraftPatch } from './ruleDraft.ts';
-
-const UNKNOWN_ERROR = 'unknown error';
-
-const getErrorText = (error: unknown): string => {
-    if (error instanceof Error) {
-        return error.message;
-    }
-
-    return UNKNOWN_ERROR;
-};
 
 export const useRuleForm = (rule: NotRequired<Rule>, onSaved: VoidFunction) => {
     const [draft, setDraft] = useState(() => createRuleDraft(rule));
