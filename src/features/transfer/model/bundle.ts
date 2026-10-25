@@ -1,5 +1,6 @@
 import { environmentsValidator, hideSecretValues, type Environment } from '#entities/environment';
 import { mocksValidator, type Mock } from '#entities/mock';
+import { collectionsValidator, type Collection } from '#entities/request';
 import { rulesValidator, type Rule } from '#entities/rule';
 import {
     fail,
@@ -24,6 +25,7 @@ export enum BundleParts {
     RULES = 'rules',
     MOCKS = 'mocks',
     ENVIRONMENTS = 'environments',
+    COLLECTIONS = 'collections',
 }
 
 export type BundlePart = `${BundleParts}`;
@@ -38,11 +40,13 @@ export interface BundleContent {
     readonly mocks: readonly Mock[];
     /** Environments in their order */
     readonly environments: readonly Environment[];
+    /** Collections of the API client */
+    readonly collections: readonly Collection[];
 }
 
 export const BUNDLE_FORMAT = 'interceptkit';
 
-export const BUNDLE_VERSION = 1;
+export const BUNDLE_VERSION = 2;
 
 /** A bundle fits into storage.local, which holds 10 MB in all */
 export const MAX_BUNDLE_LENGTH = 5_000_000;
@@ -51,10 +55,10 @@ export const EMPTY_BUNDLE_CONTENT: BundleContent = {
     rules: [],
     mocks: [],
     environments: [],
+    collections: [],
 };
 
-/** Steps from older versions of the format; version 1 is the first */
-const BUNDLE_MIGRATIONS: readonly Migration[] = [];
+const BUNDLE_MIGRATIONS: readonly Migration[] = [{ version: 2, migrate: data => data }];
 
 const JSON_INDENT = 4;
 
@@ -107,6 +111,7 @@ const bundleFile = object({
     rules: optional(withUserSource(rulesValidator)),
     mocks: optional(withUserSource(mocksValidator)),
     environments: optional(environmentsValidator),
+    collections: optional(collectionsValidator),
 });
 
 const bundleVersion = number({ integer: true, min: 1 });
@@ -136,6 +141,7 @@ const buildBundleLists = (content: BundleContent, parts: readonly BundlePart[]):
     ...(parts.includes(BundleParts.RULES) && { rules: exportUserRecords(content.rules) }),
     ...(parts.includes(BundleParts.MOCKS) && { mocks: exportUserRecords(content.mocks) }),
     ...(parts.includes(BundleParts.ENVIRONMENTS) && { environments: content.environments.map(hideSecretValues) }),
+    ...(parts.includes(BundleParts.COLLECTIONS) && { collections: content.collections }),
 });
 
 /** Records go out with sorted keys, so a diff in git shows only real changes; the head keeps its order */
@@ -188,7 +194,7 @@ const migrateBundle = (data: StoredData): Result<StoredData> => {
     }
 
     if (outcome.status === MigrationStatuses.MIGRATED) {
-        return ok(outcome.data);
+        return ok({ ...outcome.data, version: BUNDLE_VERSION });
     }
 
     return ok(data);
@@ -225,11 +231,12 @@ export const parseBundle = (text: string): Result<BundleContent> => {
         return fileResult;
     }
 
-    const { rules = [], mocks = [], environments = [] } = fileResult.value;
+    const { rules = [], mocks = [], environments = [], collections = [] } = fileResult.value;
 
     return ok({
         rules,
         mocks,
         environments,
+        collections,
     });
 };

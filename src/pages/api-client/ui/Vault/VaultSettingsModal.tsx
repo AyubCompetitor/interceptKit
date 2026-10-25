@@ -10,11 +10,13 @@ interface VaultSettingsModalProps {
     isOpen: boolean;
     /** Called on every close, the password changed or not */
     onClose: VoidFunction;
+    /** Whether the vault may be turned off: a policy can require it */
+    isDisableAllowed: boolean;
     /** Moves on to turning the vault off */
     onDisable: VoidFunction;
 }
 
-export const VaultSettingsModal: FC<VaultSettingsModalProps> = ({ isOpen, onClose, onDisable }) => {
+export const VaultSettingsModal: FC<VaultSettingsModalProps> = ({ isOpen, onClose, isDisableAllowed, onDisable }) => {
     const formId = useId();
     const { t } = useTranslation();
 
@@ -22,9 +24,11 @@ export const VaultSettingsModal: FC<VaultSettingsModalProps> = ({ isOpen, onClos
         <Modal
             footer={
                 <>
-                    <Button variant={ButtonVariants.GHOST} onClick={onDisable}>
-                        {t('apiClientVaultDisableOpen')}
-                    </Button>
+                    {isDisableAllowed && (
+                        <Button variant={ButtonVariants.GHOST} onClick={onDisable}>
+                            {t('apiClientVaultDisableOpen')}
+                        </Button>
+                    )}
 
                     <Button onClick={onClose}>{t('apiClientVaultCancel')}</Button>
 

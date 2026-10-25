@@ -67,6 +67,7 @@ describe('selectMockDelivery', () => {
         { name: 'no mock is enabled', state: makeState({ mocks: [{ ...USERS_MOCK, enabled: false }] }) },
         { name: 'no site has mocks on', state: makeState({ sites: [{ ...MOCK_SITE, mocks: false }] }) },
         { name: 'the site is no longer granted', state: makeState({ grantedPatterns: [] }) },
+        { name: 'the policy does not allow the site', state: makeState({ policy: { allowedHosts: ['example.com'] } }) },
     ])('serves nothing when $name', ({ state }) => {
         expect(selectMockDelivery(state)).toEqual(NO_DELIVERY);
     });

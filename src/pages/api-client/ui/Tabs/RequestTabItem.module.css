@@ -45,3 +45,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.unsaved {
+    flex: none;
+    width: var(--space-s);
+    height: var(--space-s);
+    border-radius: var(--radius-pill);
+    background: currentcolor;
+}

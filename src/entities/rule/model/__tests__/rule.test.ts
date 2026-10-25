@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { validate } from '#shared/lib';
+import { Sources, validate } from '#shared/lib';
 
 import { HeaderOperations, rulesValidator, RuleTargetTypes, RuleTypes, ruleValidator } from '../rule.ts';
 
@@ -106,5 +106,13 @@ describe('rulesValidator', () => {
 
     it('rejects duplicate ids', () => {
         expect(validate(rulesValidator, [makeRule(), makeRule()]).ok).toBe(false);
+    });
+});
+
+describe('ids of the policy', () => {
+    it('belong only to records of the policy', () => {
+        expect(validate(ruleValidator, makeRule({ id: 'policy:r1', source: Sources.POLICY })).ok).toBe(true);
+
+        expect(validate(ruleValidator, makeRule({ id: 'policy:r1' })).ok).toBe(false);
     });
 });

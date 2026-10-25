@@ -1,0 +1,5 @@
+.noticeLink {
+    flex: none;
+    color: var(--color-text);
+    font-weight: 600;
+}

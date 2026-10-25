@@ -384,7 +384,7 @@
             "rules": { "no-restricted-globals": "off" }
         },
         {
-            "files": ["e2e/**", "build/**", "*.config.ts"],
+            "files": ["e2e/**", "store/**", "build/**", "*.config.ts"],
             "rules": {
                 "react-hooks/rules-of-hooks": "off",
                 "no-empty-pattern": "off",

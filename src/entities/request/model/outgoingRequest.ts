@@ -49,7 +49,7 @@ export interface OutgoingRequest {
 }
 
 /** The body of a request with the content type it is sent under */
-interface OutgoingBody {
+export interface OutgoingBody {
     /** Body text */
     readonly text: string;
     /** Content type; empty leaves the choice to the browser */
@@ -80,9 +80,9 @@ const OUTGOING_ERRORS = {
 /** A switched-off pair or a row without a key is not sent */
 const isActivePair = (pair: KeyValue): boolean => pair.enabled && pair.key.trim() !== '';
 
-const getActivePairs = (pairs: readonly KeyValue[]): KeyValue[] => pairs.filter(isActivePair);
+export const getActivePairs = (pairs: readonly KeyValue[]): KeyValue[] => pairs.filter(isActivePair);
 
-const buildBody = (body: RequestBody): NotRequired<OutgoingBody> => {
+export const buildOutgoingBody = (body: RequestBody): NotRequired<OutgoingBody> => {
     if (body.bodyType === RequestBodyTypes.NONE) {
         return;
     }
@@ -205,7 +205,7 @@ export const buildOutgoingRequest = (request: ApiRequest): Result<OutgoingReques
         return urlResult;
     }
 
-    const body = buildBody(request.body);
+    const body = buildOutgoingBody(request.body);
     const headers = buildHeaders(request, body);
     const headersError = getHeadersError(getTypedHeaders(request));
 

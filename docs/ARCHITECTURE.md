@@ -45,11 +45,17 @@ These rules are checked by `oxlint` (`.oxlintrc.json`): `no-restricted-imports` 
 | `chrome.storage.local`   | `settings`, `rules`, `mocks`, `sites`, `environments`, `environmentChoice`, `vault`, `schemaVersion` | Closed to content scripts: the service worker calls `storage.local.setAccessLevel('TRUSTED_CONTEXTS')` on every start |
 | `chrome.storage.session` | `vaultKey`, `vaultStatus` of the unlocked vault                                                      | In memory only; closed to content scripts by default; cleared when the browser closes                                 |
 | `chrome.storage.managed` | Administrator policy                                                                                 | Read-only; validated field by field, see below                                                                        |
-| IndexedDB                | API client history and open tabs (`interceptkit-api-client`)                                         | Written by the API client page itself; content scripts cannot reach the extension's IndexedDB                         |
+| IndexedDB                | API client history, open tabs and collections (`interceptkit-api-client`)                            | Written by the API client page itself; content scripts cannot reach the extension's IndexedDB                         |
 
 Every value is validated on read and on write with the dependency-free validators in `shared/lib/validation.ts`. Corrupted or foreign data degrades to defaults instead of crashing; invalid data is never written. The layout of `chrome.storage.local` is versioned (`schemaVersion`); migrations run in the service worker before any write.
 
 **Administrator policy fails closed.** If a restricting policy field is present but invalid, it is read in its most restrictive form (for example, a broken `allowedHosts` allows no hosts) and the problem is reported, so an administrator's typo never silently lifts a restriction.
+
+**Without a policy nothing is restricted.** A person who installs the extension alone is their own administrator: every feature works, and only their settings decide. Restrictions come only from a policy that is actually set.
+
+**One reading of the policy for the background and the pages.** `features/policy` decides what the policy lets apply (`isRuleAllowed`, `isMockAllowed`), so the service worker that applies rules and mocks and the dashboard that marks them never disagree. The dashboard's **Organization policy** section shows every field the policy sets, after the fail-closed reading, and its errors; the Rules and Mock API sections name what the policy turns off and mark the records it keeps from applying.
+
+**Records of the policy.** `presetBundle` carries rules and mocks in the export format. Whenever the extension starts or the policy changes, the service worker replaces the policy's records in the stored lists with the ones the bundle brings now: they stand first, so they win, and carry `source: policy` and ids of their own (`policy:<id>`), which a record of the user can never take, through the editor or an import. The background refuses to save or remove them, and the dashboard shows them as coming from the organization, without edit or delete. A broken bundle brings nothing and its errors appear in the policy section; environments are never taken from the policy.
 
 ## Messaging
 
@@ -99,7 +105,7 @@ service worker ──RPC──▶ bridge (isolated world) ──postMessage─�
 Delivery:
 
 - The service worker registers both scripts with `scripting.registerContentScripts` at `document_start` in every frame, on the host patterns of granted sites with mocks on (`sites` in storage, keyed by the pattern the browser granted). It registers nothing while interception is paused, the policy disables mocks or no mock is enabled. It re-checks this whenever mocks, sites, settings, the policy or host access change, and leaves a registration that is already current alone.
-- Revoking a site's access drops its settings, so granting it again starts with mocks off.
+- Revoking a site's access keeps its settings: mock scripts and the Sites section follow only the granted patterns, and granting the site again brings its Mocks switch back. Only a full list of sites makes room with the settings of sites without access.
 - The bridge asks the service worker for the page's mocks with `mocks/forPage`. Only content scripts may call it, and the site is the sender's origin as the browser reports it: a page of a site without mocks gets an empty list. The bridge posts after this round trip, when the interceptor listens already, whatever order the browser ran the two scripts in.
 - Mocks apply when a page loads: a page that is open already gets changes after a reload.
 
@@ -147,6 +153,8 @@ Vault of secrets:
 - With the vault on, the service worker encrypts a typed secret value on save and refuses it while the vault is locked. The editor never shows an encrypted value: typing a new one replaces it.
 - Changing the master password asks for the current one, derives a key from the new one with a fresh salt and encrypts every secret again. The new key parameters and the environments go to storage in one `set()` call, so a stop halfway cannot leave secrets under a key nobody can derive.
 - Turning the vault off asks for the password again and writes the values back unencrypted. A forgotten password leaves only a reset: the encrypted values are deleted, their variables stay, empty.
+- A policy with `requireVault` keeps secrets from living unencrypted. While the vault is off, the service worker refuses to store a typed secret value, the client refuses to send a request that uses one already stored, and the editor says why; turning the vault on encrypts those values. The vault cannot be turned off, and a reset after a forgotten password leaves it off until it is set up again.
+- A policy that turns the API client off (`disabledFeatures: apiClient`) replaces the page with a notice, takes its button out of the popup and its link out of the dashboard, and the service worker sets no header rules. The history stays in IndexedDB.
 - What the vault does not protect against: anyone who can run code in the extension's pages or service worker while it is unlocked, and guessing a weak password from a copy of the browser profile. A strong password is the only defence against the latter.
 
 History:
@@ -162,6 +170,31 @@ cURL import:
 - What it cannot import faithfully, such as multipart forms and file uploads (`-F`, `-T`), is refused with a reason, and the dialog stays open. Options that change nothing for the API client, such as `--compressed` or `-o`, are skipped.
 - Cookies of the command (`-b` or a `Cookie` header) arrive as a header, and the cookie switch stays off. A session rule sends them, like any header `fetch` drops.
 
+cURL export:
+
+- "Copy as cURL" next to Send, and on every history entry, writes the request as a bash command in the same shape the browser's developer tools use, so the import reads it back to the same request. `buildCurlCommand` in `entities/request` is a pure function: the method only where curl would not infer it, the enabled headers as typed, the type of the body unless a header names it, and the body as `--data-raw`.
+- Variables of the chosen environment are filled in, secrets only when the user ticks "Fill in secrets", and a typed secret never while the policy requires the vault. Names left without a value are listed under the command. The browser's cookies never go into the command.
+- The command is copied with `navigator.clipboard.writeText` at the user's click, which extension pages may do without the `clipboardWrite` permission.
+
+Collections:
+
+- A collection keeps requests in folders, up to 5 levels deep; there can be up to 100 collections of up to 2000 requests each. Each collection is one record of IndexedDB (a store of its own since version 3 of the database), checked by the same kind of validator as everything else.
+- A tab opened from a collection remembers which request it came from and shows its name, renamed along with it. Save (the icon next to Send, or Ctrl+S) writes the tab back to that request, and a dot on the tab marks changes not saved yet. A tab without a collection, or whose request was deleted, asks where to save: a collection or a new one, and a folder.
+- The tree in the sidebar opens and closes collections and folders; a menu on each row adds a folder or a request, renames, and deletes after a confirmation. Deleting closes no tab: the request stays open until saved elsewhere or closed.
+- The tree operations are pure functions in `entities/request`. The menu is a native popover anchored to its button, so nothing inserts styles at run time.
+
+Import of Postman and OpenAPI files:
+
+- "Import" in the Collections panel takes a Postman collection of the formats v2.0 and v2.1 or a Postman environment, or an OpenAPI 3.0 or 3.1 description, as JSON, up to 10 MB; the dialog tells the formats apart by themselves. YAML and Swagger 2.0 are refused with a hint to convert the file. A preview says what will be created and lists what cannot be carried over before anything is written.
+- The file is read as data: fields of any other type or shape are skipped, and what comes out passes the same validators as the collections and environments the user makes. Pre-request scripts and tests are counted and never taken, so no code from a file ever runs.
+- Folders, requests, headers, the query (switched-off parameters stay in the table only), raw JSON, text and URL-encoded bodies are carried over. Path variables such as `:id` take the value the file gives them. Authorization of the request, its nearest folder or the collection becomes a header: a bearer token, an API key (or a query parameter), or basic credentials without `{{variables}}` (the header holds them encoded, so a variable inside could never be filled). Multipart forms, files, GraphQL, other kinds of authorization, saved example responses and Postman's generated values such as `{{$guid}}` are listed as not carried over; folders deeper than five levels give their requests to the fifth.
+- Variables of a collection become a new environment, "<collection>: variables". Secret values follow the rules of typing them in the editor: stored as typed while the vault is off, encrypted while it is unlocked, and left empty while it is locked or while the policy requires the vault and it is off.
+- Each import makes a new collection and a new environment with ids of their own; importing a file again makes copies.
+- An OpenAPI description becomes a collection named after its title. Each operation is a request named after its summary or operationId, in the folder of its first tag (tags keep the order the description lists them; an operation without a tag stays at the top). The URL is `{{baseUrl}}` and the path with `{name}` turned into `{{name}}`; the first server, with its variables at their defaults, becomes `baseUrl` in a new environment.
+- Parameters of the path and of the operation join, the operation's winning by place and name. Required query and header parameters are switched on, optional ones wait in the table; their values come from the examples, the default or the first choice of the description, with `%`, `&`, `#` and `+` escaped, since the description means the value itself. `Accept`, `Content-Type` and `Authorization` parameters are ignored, as the specification asks.
+- A JSON body takes the example of the media type, or a value built from its schema: references inside the file are followed, `allOf` joins its parts, `oneOf` and `anyOf` take the first, schemas nest at most eight levels, a reference already being built gives null, and one example takes at most 200 values, so a description the size of GitHub or Stripe never hangs the page. URL-encoded forms and text are carried over too; multipart and binary bodies are listed as not carried over.
+- Security of the operation, or of the description, becomes a header or a query parameter with `{{token}}`: a bearer token for bearer, OAuth 2.0 and OpenID Connect, `Basic {{token}}` for basic credentials (the token then holds `user:password` in Base64), and the key for an API key. With several schemes each token is named after its scheme. The tokens wait in the environment as empty secrets, and the preview asks to fill them in. API keys in cookies, cookie parameters, other HTTP schemes, mutual TLS, references to other files, TRACE operations, servers of a single path or operation and a server address that is not a full URL are listed. Keys of `paths` that are extensions (`x-…`) are skipped.
+
 Headers through a session rule:
 
 - Before sending such a request, the page asks the service worker for a session rule (`headerRules/apply`) and releases it once the request is over (`headerRules/release`). The rule sets the headers only on requests started by the extension itself (`initiatorDomains` is its id), from the tab of that page (`tabIds`, the tab the browser reports for the sender) and to the host of the request (`requestDomains`), so browsing and other tabs are never touched. Its priority is above every rule of the user, so the typed headers win.
@@ -171,23 +204,24 @@ Headers through a session rule:
 
 ## Import and export
 
-People share rules, mocks and environments as a JSON file that is easy to keep in git. The same format will carry the administrator's `presetBundle`.
+People share rules, mocks, environments and collections as a JSON file that is easy to keep in git. The same format carries the administrator's `presetBundle`, which brings rules and mocks only.
 
 ```json
 {
     "format": "interceptkit",
-    "version": 1,
-    "exportedAt": "2026-10-24T12:00:00.000Z",
+    "version": 2,
+    "exportedAt": "2026-10-25T12:00:00.000Z",
     "rules": [],
     "mocks": [],
-    "environments": []
+    "environments": [],
+    "collections": []
 }
 ```
 
-- Records keep the shape of storage and pass the same validators, limits and checks for unique ids. The file has no `source`: what it brings is the user's own. The schema is strict, a file of a newer version is refused, older versions will be migrated, and a file may be up to 5 MB.
+- Records keep the shape of storage and pass the same validators, limits and checks for unique ids. The file has no `source`: what it brings is the user's own. The schema is strict, a file of a newer version is refused, a file of version 1 (without collections) is read as it is, and a file may be up to 5 MB.
 - An export carries the chosen lists without the records of the policy and without the values of secrets: a secret variable keeps its name, empty. Keys of records are sorted and the file uses Prettier's indent, so a diff in git shows only real changes. The page saves the file through a link it downloads itself, so the extension needs no `downloads` permission.
 - An import merges by id: a new id joins the end of its list, a known id replaces the record in place, a record of the policy stays as it is, and nothing is deleted. An empty secret of the file keeps the value this browser has for it. The page shows what the import will do before it writes anything.
-- The service worker parses the text again, checks the merged lists with the same limits and regex checks as a single save (`transfer/import`), and writes all three lists in one `chrome.storage.local.set()` call. A broken file changes nothing, and the reasons come with their paths, such as `$.rules[3].match.url`.
+- The service worker parses the text again, checks the merged lists with the same limits and regex checks as a single save (`transfer/import`), and writes rules, mocks and environments in one `chrome.storage.local.set()` call, then the collections to IndexedDB in one transaction. The two writes are not atomic together; a stop between them leaves the collections out, and importing the file again adds them. A broken file changes nothing, and the reasons come with their paths, such as `$.rules[3].match.url`.
 - The code is the first shared feature beyond the interception switch: `features/transfer` holds the format and the merge, which both the dashboard and the service worker use.
 
 ## Site access
@@ -197,6 +231,7 @@ Host access is the user's decision, made one site at a time:
 - The dashboard's Sites section asks the browser for `*://<domain>/*`, or for `*://*.<domain>/*` with subdomains, which also covers the domain itself. Both cover any port. The browser shows its own prompt, and only inside the user's click.
 - The list shows what the browser has actually granted (`permissions.getAll`) and reloads on `permissions.onAdded` and `onRemoved`. There is no copy in storage that could drift from it.
 - Removing a site revokes the permission, and rules stop working there at once.
+- A policy with `allowedHosts` narrows this choice. `example.com` allows the host alone and `*.example.com` allows it with every subdomain; the scheme and the port never matter, and an empty list allows no host. The Sites section, a rule's **Allow** button and the API client never ask for a host outside the list, and the API client does not send there. The service worker takes away access outside the list whenever the policy changes, the extension starts or access is granted, including through the browser's own menu, and it registers no mock scripts and sets no header rules for such hosts.
 
 ## Localization
 
@@ -239,5 +274,6 @@ dist/chrome-mv3/
 - **Interception tests** (`e2e/interception.spec.ts`) check the effect of rules on real requests. A local HTTP server (`e2e/testServer.ts`, Node's `node:http` on `127.0.0.1` with a random port) serves a test page and echoes every other request back with the headers it received. The tests load a copy of the build with install-time access to `http://127.0.0.1/*`, so the shipped manifest stays unchanged. They cover a block rule on fetches and navigations, redirects to a URL, a regex substitution and a URL transform, and request and response header changes. The browser maps a second host, `foreign.test`, to the same server, but the extension has no access to it. A request from a page on that host passes even when a rule blocks its URL: a rule acts only when the extension has access to both the request URL and the page that started it.
 - **Interceptor tests** (`e2e/interceptor.spec.ts`) inject the built `content/interceptor.js` into the test page before its scripts, post a mock list the way the bridge does, and check `fetch` and XHR in the real browser. A mocked XHR is compared with a real request to the test server, so its events must match the browser's own.
 - **Mock delivery tests** (`e2e/mocks.spec.ts`) go through the real registration: they turn mocks on for the test server's granted pattern, save a mock and wait until the browser has both scripts. A page of the site then gets the mock, including a request its own script sends while the page is still parsing; a page of a site without mocks reaches the server. They also check that switching mocks off or pausing interception takes the scripts away, and that the background refuses page mocks to extension pages, mocks for sites it has not granted, and mocks that claim to come from the policy. The dashboard tests do the same through the interface: they turn mocks on in Sites, create a mock in the editor and load a page of the site.
-- **API client tests** (`e2e/apiClient.spec.ts`) send requests from the page to the test server: parameters and headers, a JSON body, cookies off and on, a host without access, where the access prompt is replaced as in the Sites tests, variables of an environment created in the editor, headers through a session rule, the vault (encrypted storage, a wrong password, lock and auto-lock through the alarm, a new password, turning off and reset), a response past the size limit, the query of the URL mirrored in the table and the one-time move of old parameters into the URL, the cURL import, and the history with its limit and the open tabs after a reload. The server keeps what reached it (`getLastRequest`), and the tests check it there: the response editor draws only the lines on the screen.
+- **Policy tests** (`e2e/policy.spec.ts`) cannot set a real policy: only the operating system fills `chrome.storage.managed`. Their copy of the build runs a stand-in first, at the top of the service worker and in every page, that reads the policy from `storage.session` and reports its changes as changes of the managed area. The tests check the policy section and its errors, the marks in the Rules and Mock API sections, the background's rules following a change of the policy, and the records of a policy bundle: first in their lists, applied by the browser, out of reach of the user, gone with the policy or with a broken bundle. The stand-in skips the browser's own check against the schema, so the tests use only values that pass it.
+- **API client tests** (`e2e/apiClient.spec.ts`) send requests from the page to the test server: parameters and headers, a JSON body, cookies off and on, a host without access, where the access prompt is replaced as in the Sites tests, variables of an environment created in the editor, headers through a session rule, the vault (encrypted storage, a wrong password, lock and auto-lock through the alarm, a new password, turning off and reset), a response past the size limit, the query of the URL mirrored in the table and the one-time move of old parameters into the URL, the cURL import, the cURL export with and without secrets read back by the import, and the history with its limit and the open tabs after a reload. The server keeps what reached it (`getLastRequest`), and the tests check it there: the response editor draws only the lines on the screen.
 - **Type checking** runs two programs. `tsconfig.json` covers the whole repository with Node typings for configs, unit tests and e2e. `tsconfig.browser.json` covers `src` without tests and without Node typings, so extension code cannot use Node APIs by accident.

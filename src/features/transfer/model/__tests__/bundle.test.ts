@@ -4,7 +4,7 @@ import { Sources } from '#shared/lib';
 
 import { BUNDLE_PARTS, BundleParts, buildBundleFileName, buildBundleText, parseBundle } from '../bundle.ts';
 
-import { EXPORTED_AT, makeContent, makeEnvironment, makeMock, makeRule } from './mocks.ts';
+import { EXPORTED_AT, makeCollection, makeContent, makeEnvironment, makeMock, makeRule } from './mocks.ts';
 
 const CONTENT = makeContent({
     rules: [makeRule('r1'), makeRule('r2', Sources.POLICY)],
@@ -77,6 +77,13 @@ describe('parseBundle', () => {
         });
     });
 
+    it('carries the collections and reads them back', () => {
+        const content = makeContent({ collections: [makeCollection('c1')] });
+        const text = buildBundleText(content, [BundleParts.COLLECTIONS], EXPORTED_AT);
+
+        expect(parseBundle(text)).toEqual({ ok: true, value: content });
+    });
+
     it('reads a file with some lists only', () => {
         const text = JSON.stringify({ format: 'interceptkit', version: 1 });
 
@@ -86,7 +93,7 @@ describe('parseBundle', () => {
     it.each([
         { name: 'text that is not JSON', text: '{', error: 'not JSON' },
         { name: 'JSON of something else', text: '{"rules":[]}', error: 'not an InterceptKit export' },
-        { name: 'a newer version', text: '{"format":"interceptkit","version":2}', error: 'newer version' },
+        { name: 'a newer version', text: '{"format":"interceptkit","version":3}', error: 'newer version' },
         { name: 'an unknown field', text: '{"format":"interceptkit","version":1,"extra":1}', error: '$.extra' },
         {
             name: 'a broken record, with its path',

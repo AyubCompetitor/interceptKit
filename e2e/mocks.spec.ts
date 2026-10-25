@@ -149,6 +149,23 @@ networkTest(
     },
 );
 
+networkTest(
+    'keeps the settings of a site without access and gives it no scripts',
+    async ({ optionsPage, serviceWorker }) => {
+        const goneSite = { pattern: '*://*.gone.test/*', mocks: true };
+
+        await optionsPage.evaluate(site => chrome.storage.local.set({ sites: [site] }), goneSite);
+
+        await enableMock(optionsPage, serviceWorker, USERS_MOCK);
+
+        expect(await getRegisteredScripts(serviceWorker)).toMatchObject(REGISTERED_SCRIPTS);
+
+        const stored = await optionsPage.evaluate(() => chrome.storage.local.get('sites'));
+
+        expect(stored.sites).toEqual([goneSite, { pattern: TEST_SITE_PATTERN, mocks: true }]);
+    },
+);
+
 networkTest('the interception switch takes the scripts away', async ({ optionsPage, serviceWorker }) => {
     await enableMock(optionsPage, serviceWorker, USERS_MOCK);
 

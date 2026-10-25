@@ -4,9 +4,7 @@ import type { MockDraft, MockDraftChange } from '../model/mockDraft.ts';
 import type { SyntaxType } from '../model/ruleDraft.ts';
 
 import type { MockBodyType } from '#entities/mock';
-import type { HttpMethod, KeyValueRow } from '#shared/lib';
-
-import { toggleValue } from './toggleValue.ts';
+import { toggleValue, type HttpMethod, type KeyValueRow } from '#shared/lib';
 
 export const useMockDraftFields = (draft: MockDraft, onDraftChange: MockDraftChange) => {
     const onNameChange = (event: ChangeEvent<HTMLInputElement>) => {

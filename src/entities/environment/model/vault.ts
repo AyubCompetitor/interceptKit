@@ -228,6 +228,23 @@ export const dropEncryptedValues = (environment: Environment): Environment => ({
     variables: environment.variables.map(dropEncryptedValue),
 });
 
+const isTypedSecret = (variable: EnvVariable): boolean =>
+    variable.secret && !isEncryptedValue(variable.value) && variable.value !== '';
+
+export const getTypedSecretNames = (environment: NotRequired<Environment>): string[] => {
+    const names: string[] = [];
+
+    for (const variable of environment?.variables ?? []) {
+        if (!isTypedSecret(variable)) {
+            continue;
+        }
+
+        names.push(variable.key);
+    }
+
+    return names;
+};
+
 const isUsableSecret = (variable: EnvVariable): variable is EncryptedVariable =>
     variable.enabled && isEncryptedValue(variable.value);
 

@@ -13,15 +13,19 @@ interface RequestTabItemProps {
     tab: RequestTab;
     /** Whether the tab is on the screen */
     isActive: boolean;
+    /** Whether the request differs from the one its collection keeps */
+    isUnsaved: boolean;
+    /** Name of its request in a collection; none shows the URL */
+    name: NotRequired<string>;
     /** Called with the id of the tab to show */
     onSelect: (tabId: string) => void;
     /** Called with the id of the tab to close */
     onClose: (tabId: string) => void;
 }
 
-export const RequestTabItem: FC<RequestTabItemProps> = ({ tab, isActive, onSelect, onClose }) => {
+export const RequestTabItem: FC<RequestTabItemProps> = ({ tab, isActive, isUnsaved, name, onSelect, onClose }) => {
     const { t } = useTranslation();
-    const title = getRequestTabTitle(tab.draft) ?? t('apiClientNewTab');
+    const title = name ?? getRequestTabTitle(tab.draft) ?? t('apiClientNewTab');
 
     const onTabSelect = () => onSelect(tab.draft.id);
     const onTabClose = () => onClose(tab.draft.id);
@@ -31,6 +35,8 @@ export const RequestTabItem: FC<RequestTabItemProps> = ({ tab, isActive, onSelec
             <button aria-current={isActive} className={styles.select} type='button' onClick={onTabSelect}>
                 <span className={styles.method}>{tab.draft.method}</span>
                 <span className={styles.title}>{title}</span>
+
+                {isUnsaved && <span aria-label={t('apiClientTabUnsaved')} className={styles.unsaved} role='img' />}
             </button>
 
             <Button

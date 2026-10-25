@@ -1,5 +1,5 @@
 import { test as base, chromium, expect, type BrowserContext, type Page, type Worker } from '@playwright/test';
-import { cpSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,6 +45,14 @@ const NETWORK_HOST_PERMISSIONS = [`http://${LOOPBACK_HOST}/*`];
 
 const NETWORK_EXTENSION_FOLDER = 'chrome-mv3-host-access';
 
+const POLICY_EXTENSION_FOLDER = 'chrome-mv3-policy';
+
+const POLICY_STUB_FILE = 'e2e-policy.js';
+
+const PAGE_FILE_RGX = /\.html$/;
+
+const POLICY_STUB_KEY = 'e2e:policy';
+
 const getLaunchPersistCtx = (extensionPath: string) => ({
     channel: 'chromium',
     locale: 'en-US',
@@ -55,18 +63,107 @@ const getLaunchPersistCtx = (extensionPath: string) => ({
     ],
 });
 
-/** Copies the build with install-time host access: tests cannot answer the browser's permission prompt */
-const copyExtensionWithHostAccess = (outputDir: string): string => {
-    const extensionPath = join(outputDir, NETWORK_EXTENSION_FOLDER);
+export const copyExtensionWithHostAccess = (
+    outputDir: string,
+    folder: string,
+    hostPermissions: readonly string[] = NETWORK_HOST_PERMISSIONS,
+): string => {
+    const extensionPath = join(outputDir, folder);
     const manifestPath = join(extensionPath, 'manifest.json');
 
     cpSync(EXTENSION_PATH, extensionPath, { recursive: true });
 
     const manifest: chrome.runtime.ManifestV3 = JSON.parse(readFileSync(manifestPath, 'utf8'));
 
-    writeFileSync(manifestPath, JSON.stringify({ ...manifest, host_permissions: NETWORK_HOST_PERMISSIONS }));
+    writeFileSync(manifestPath, JSON.stringify({ ...manifest, host_permissions: hostPermissions }));
 
     return extensionPath;
+};
+
+const stubManagedStorage = (stubKey: string) => {
+    type ChangeListener = (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => void;
+    type PolicyData = Record<string, unknown>;
+
+    const { managed, onChanged, session } = chrome.storage;
+    const wrappers = new Map<ChangeListener, ChangeListener>();
+    const addListener = onChanged.addListener.bind(onChanged);
+    const removeListener = onChanged.removeListener.bind(onChanged);
+
+    const readPolicy = async (): Promise<PolicyData> => {
+        const stored = await session.get(stubKey);
+
+        return Object.fromEntries(Object.entries(stored[stubKey] ?? {}));
+    };
+
+    Object.defineProperty(managed, 'get', {
+        value: async (keys?: Nullable<string | string[]>) => {
+            const policy = await readPolicy();
+
+            if (keys === null || keys === undefined) {
+                return policy;
+            }
+
+            const names = typeof keys === 'string' ? [keys] : keys;
+
+            return Object.fromEntries(
+                names.filter(name => Object.hasOwn(policy, name)).map(name => [name, policy[name]]),
+            );
+        },
+    });
+
+    Object.defineProperty(onChanged, 'addListener', {
+        value: (listener: ChangeListener) => {
+            const wrapper: ChangeListener = (changes, areaName) => {
+                listener(changes, areaName);
+
+                const change = changes[stubKey];
+
+                if (areaName !== 'session' || !change) {
+                    return;
+                }
+
+                const oldPolicy = new Map(Object.entries(change.oldValue ?? {}));
+                const newPolicy = new Map(Object.entries(change.newValue ?? {}));
+                const keys = new Set([...oldPolicy.keys(), ...newPolicy.keys()]);
+
+                const managedChanges = Object.fromEntries(
+                    Array.from(keys, key => [key, { oldValue: oldPolicy.get(key), newValue: newPolicy.get(key) }]),
+                );
+
+                listener(managedChanges, 'managed');
+            };
+
+            wrappers.set(listener, wrapper);
+            addListener(wrapper);
+        },
+    });
+
+    Object.defineProperty(onChanged, 'removeListener', {
+        value: (listener: ChangeListener) => {
+            removeListener(wrappers.get(listener) ?? listener);
+            wrappers.delete(listener);
+        },
+    });
+};
+
+export const addPolicyStub = (extensionPath: string) => {
+    const stubScript = `(${stubManagedStorage.toString()})(${JSON.stringify(POLICY_STUB_KEY)});\n`;
+    const workerPath = join(extensionPath, 'background', 'background.js');
+    const pagesPath = join(extensionPath, 'pages');
+
+    writeFileSync(join(extensionPath, POLICY_STUB_FILE), stubScript);
+    writeFileSync(workerPath, stubScript + readFileSync(workerPath, 'utf8'));
+
+    for (const fileName of readdirSync(pagesPath)) {
+        if (!PAGE_FILE_RGX.test(fileName)) {
+            continue;
+        }
+
+        const pagePath = join(pagesPath, fileName);
+        const html = readFileSync(pagePath, 'utf8');
+
+        writeFileSync(pagePath, html.replace('<head>', `<head><script src="/${POLICY_STUB_FILE}"></script>`));
+    }
 };
 
 /**
@@ -112,7 +209,7 @@ export const test = base.extend<ExtensionFixtures, ExtensionWorkerFixtures>({
 export const networkTest = test.extend<{}, NetworkWorkerFixtures>({
     extensionPath: [
         async ({}, use, workerInfo) => {
-            await use(copyExtensionWithHostAccess(workerInfo.project.outputDir));
+            await use(copyExtensionWithHostAccess(workerInfo.project.outputDir, NETWORK_EXTENSION_FOLDER));
         },
         { scope: 'worker' },
     ],
@@ -128,7 +225,23 @@ export const networkTest = test.extend<{}, NetworkWorkerFixtures>({
     ],
 });
 
+export const policyTest = networkTest.extend({
+    extensionPath: [
+        async ({}, use, workerInfo) => {
+            const extensionPath = copyExtensionWithHostAccess(workerInfo.project.outputDir, POLICY_EXTENSION_FOLDER);
+
+            addPolicyStub(extensionPath);
+
+            await use(extensionPath);
+        },
+        { scope: 'worker' },
+    ],
+});
+
 export { expect } from '@playwright/test';
+
+export const setPolicy = (page: Page, policy: object) =>
+    page.evaluate(([key, value]) => chrome.storage.session.set({ [key]: value }), [POLICY_STUB_KEY, policy] as const);
 
 /** Attribute of <body> where the stubbed prompt leaves the origins it was asked for */
 export const REQUESTED_ORIGINS = 'data-requested-origins';

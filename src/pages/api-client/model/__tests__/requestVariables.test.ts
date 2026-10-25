@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@rstest/core';
 
 import { buildApiRequest } from '../requestDraft.ts';
-import { resolveRequestVariables } from '../requestVariables.ts';
+import { getBlockedSecretNames, resolveRequestVariables } from '../requestVariables.ts';
 import { NO_SECRETS } from '../vaultSecrets.ts';
 
 import type { Environment } from '#entities/environment';
@@ -81,5 +81,18 @@ describe('resolveRequestVariables', () => {
 
             expect(resolveRequestVariables(plainRequest, ENCRYPTED_STAGING, SECRETS).secretNames).toEqual([]);
         });
+    });
+});
+
+describe('getBlockedSecretNames', () => {
+    it('names the typed secrets the request uses when the policy requires the vault', () => {
+        expect(getBlockedSecretNames(REQUEST, STAGING, true)).toEqual(['token']);
+    });
+
+    it.each([
+        { name: 'the policy does not require the vault', environment: STAGING, isVaultRequired: false },
+        { name: 'the secrets are encrypted', environment: ENCRYPTED_STAGING, isVaultRequired: true },
+    ])('names none when $name', ({ environment, isVaultRequired }) => {
+        expect(getBlockedSecretNames(REQUEST, environment, isVaultRequired)).toEqual([]);
     });
 });

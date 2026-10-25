@@ -4,7 +4,15 @@ Intercept, mock and redirect HTTP requests, plus a lightweight API client, in on
 
 Local-first by design: no backend, no accounts, no telemetry. Everything you create stays in your browser.
 
-> **Status:** early development. The project skeleton, data model and storage are in place; redirects, headers and blocking come next. Not usable yet.
+> **Status:** version 0.1, before its first release in the Chrome Web Store and Edge Add-ons.
+
+## Features
+
+- **Rules:** redirect requests, change request and response headers, block requests. The browser applies them itself through `declarativeNetRequest`, only on sites you allow.
+- **Mock API:** answer a page's `fetch` and XHR requests with your own status, headers, body and delay.
+- **API client:** requests in tabs, collections with folders, environments with `{{variables}}`, history, import from cURL, Postman and OpenAPI, export to cURL, and secrets encrypted with a master password.
+- **Import and export:** rules, mocks, environments and collections as a JSON file that is easy to keep in git.
+- **Organization policy:** administrators can limit sites and features, require encryption and hand out rules ([docs/ENTERPRISE.md](docs/ENTERPRISE.md)).
 
 ## Principles
 
@@ -40,3 +48,20 @@ To load the extension, open `chrome://extensions`, turn on **Developer mode**, c
 Chrome and Edge 140 or newer are required.
 
 How the code is organized: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Releasing
+
+| Command                  | What it does                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `pnpm release`           | Production build plus `dist/interceptkit-<version>.zip` with the licenses, and its SHA-256 |
+| `pnpm store:screenshots` | Production build plus the store screenshots in `store/screenshots`, in English and Russian |
+| `pnpm icons`             | Draws the extension icons and the Edge logo from the brand glyph                           |
+
+The archive has fixed dates and a fixed file order, so two builds of the same commit with the same tools give the same bytes. The texts and answers for the store dashboards are in [store/LISTING.md](store/LISTING.md), the privacy policy in [PRIVACY.md](PRIVACY.md).
+
+## Security and administration
+
+- [SECURITY.md](SECURITY.md) — how to report a vulnerability and how the extension protects you.
+- [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) — what is protected, from whom, and what is left.
+- [docs/PERMISSIONS.md](docs/PERMISSIONS.md) — every permission and why it is needed.
+- [docs/ENTERPRISE.md](docs/ENTERPRISE.md) — installing for an organization and the administrator's policy.

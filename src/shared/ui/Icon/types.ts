@@ -15,6 +15,10 @@ export enum IconNames {
     API_CLIENT = 'apiClient',
     LOCK = 'lock',
     UNLOCK = 'unlock',
+    COPY = 'copy',
+    SAVE = 'save',
+    MORE = 'more',
+    FOLDER = 'folder',
 }
 
 export type IconName = `${IconNames}`;

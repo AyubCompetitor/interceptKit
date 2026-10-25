@@ -51,6 +51,14 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
         );
     }
 
+    if (sendState.stateType === SendStateTypes.NOT_ALLOWED) {
+        return (
+            <Typography color={TypographyColors.DANGER} role='alert'>
+                {t('apiClientHostNotAllowed', sendState.host)}
+            </Typography>
+        );
+    }
+
     if (sendState.stateType === SendStateTypes.MISSING_VARIABLES) {
         return (
             <Typography color={TypographyColors.DANGER} role='alert'>
@@ -63,6 +71,14 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
         return (
             <Typography color={TypographyColors.DANGER} role='alert'>
                 {t('apiClientSecretsLocked', sendState.names.join(NAME_SEPARATOR))}
+            </Typography>
+        );
+    }
+
+    if (sendState.stateType === SendStateTypes.VAULT_REQUIRED) {
+        return (
+            <Typography color={TypographyColors.DANGER} role='alert'>
+                {t('apiClientVaultRequired', sendState.names.join(NAME_SEPARATOR))}
             </Typography>
         );
     }

@@ -16,16 +16,19 @@ import {
     type VaultPasswordChangeParams,
     type VaultPasswordParams,
 } from '#entities/environment';
+import { isVaultRequired } from '#features/policy';
 import { VAULT_CONFIG } from '#shared/config';
 import type { TaskQueue } from '#shared/lib';
 import { RpcError, RpcErrorCodes, type Router } from '#shared/messaging';
 import { prepareWrite, readItem, writeItem, writeItems } from '#shared/platform';
 
+import { readManagedPolicy } from './managedPolicy.ts';
 import { lockVault, readKeyParams, readVaultKey, takeVaultKey, unlockVault } from './vaultKey.ts';
 
 const VAULT_ERRORS = {
     ALREADY_ON: 'the vault is on already',
     UNKNOWN_ENVIRONMENT: 'there is no environment with this id',
+    REQUIRED: 'the policy requires the vault',
 } as const;
 
 const NO_VAULT: Vault = {};
@@ -133,6 +136,12 @@ const disableVaultHandler = async (
     storageReady: Promise<void>,
 ): Promise<boolean> => {
     await storageReady;
+
+    const policy = await readManagedPolicy();
+
+    if (isVaultRequired(policy)) {
+        throw new RpcError(RpcErrorCodes.FORBIDDEN, VAULT_ERRORS.REQUIRED);
+    }
 
     const keyParams = await readKeyParams();
     const keyBytes = await openVaultKey(password, keyParams);

@@ -4,6 +4,7 @@ import { useVaultDialog, VaultDialogs } from '../../lib/useVaultDialog.ts';
 import { useVault } from '../../model/useVault.ts';
 
 import { VaultStates } from '#entities/environment';
+import { isVaultRequired, usePolicy } from '#features/policy';
 import { useTranslation } from '#shared/i18n';
 import { Button, ButtonVariants, Icon, IconNames, Typography, TypographyColors } from '#shared/ui';
 
@@ -16,6 +17,7 @@ import { VaultUnlockModal } from './VaultUnlockModal.tsx';
 export const VaultControl: FC = () => {
     const { t } = useTranslation();
     const { vaultState, isLoading, isActionFailed, onVaultLock, onVaultReset } = useVault();
+    const { policy } = usePolicy();
     const {
         dialog,
         onSetupOpen,
@@ -85,6 +87,7 @@ export const VaultControl: FC = () => {
             <VaultUnlockModal isOpen={dialog === VaultDialogs.UNLOCK} onClose={onUnlockClose} onReset={onResetOpen} />
 
             <VaultSettingsModal
+                isDisableAllowed={!isVaultRequired(policy)}
                 isOpen={dialog === VaultDialogs.SETTINGS}
                 onClose={onSettingsClose}
                 onDisable={onDisableOpen}

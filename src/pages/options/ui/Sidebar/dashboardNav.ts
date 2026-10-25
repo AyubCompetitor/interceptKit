@@ -13,20 +13,13 @@ interface NavItem {
     readonly icon: IconName;
 }
 
-/** A section that arrives in a later version */
-interface UpcomingItem {
-    /** Message key of the section name */
-    readonly label: MessageKey;
-    /** Icon before the name */
-    readonly icon: IconName;
-}
-
 /** Heading of each section, also used in the tab title */
 export const SECTION_TITLES: Record<DashboardSection, MessageKey> = {
     [DashboardSections.RULES]: 'rulesTitle',
     [DashboardSections.MOCKS]: 'mocksTitle',
     [DashboardSections.SITES]: 'sitesTitle',
     [DashboardSections.TRANSFER]: 'transferTitle',
+    [DashboardSections.POLICY]: 'policyTitle',
     [DashboardSections.SETTINGS]: 'settingsTitle',
 };
 
@@ -35,7 +28,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
     { section: DashboardSections.MOCKS, label: SECTION_TITLES.mocks, icon: IconNames.MOCKS },
     { section: DashboardSections.SITES, label: SECTION_TITLES.sites, icon: IconNames.SITES },
     { section: DashboardSections.TRANSFER, label: SECTION_TITLES.transfer, icon: IconNames.TRANSFER },
+    { section: DashboardSections.POLICY, label: SECTION_TITLES.policy, icon: IconNames.POLICY },
     { section: DashboardSections.SETTINGS, label: SECTION_TITLES.settings, icon: IconNames.SETTINGS },
 ];
-
-export const UPCOMING_ITEMS: readonly UpcomingItem[] = [{ label: 'policyTitle', icon: IconNames.POLICY }];

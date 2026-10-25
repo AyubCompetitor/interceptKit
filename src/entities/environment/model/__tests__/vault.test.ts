@@ -6,6 +6,7 @@ import {
     decryptEnvironment,
     dropEncryptedValues,
     getEncryptedNames,
+    getTypedSecretNames,
     getVaultState,
     isEnvironmentSealed,
     openVaultKey,
@@ -168,6 +169,26 @@ describe('getEncryptedNames', () => {
 
     it('names none without an environment', () => {
         expect(getEncryptedNames(undefined)).toEqual([]);
+    });
+});
+
+describe('getTypedSecretNames', () => {
+    it('names the secrets stored as typed', () => {
+        expect(getTypedSecretNames(PLAIN_ENVIRONMENT)).toEqual(['token']);
+    });
+
+    it.each([
+        { name: 'encrypted secrets', environment: SEALED_ENVIRONMENT },
+        {
+            name: 'an empty secret',
+            environment: {
+                ...PLAIN_ENVIRONMENT,
+                variables: [{ key: 'token', value: '', enabled: true, secret: true }],
+            },
+        },
+        { name: 'no environment', environment: undefined },
+    ])('names none for $name', ({ environment }) => {
+        expect(getTypedSecretNames(environment)).toEqual([]);
     });
 });
 

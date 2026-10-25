@@ -1,7 +1,14 @@
-import { OPEN_REQUESTS_KEY, type OpenRequests } from '#entities/request';
+import {
+    OPEN_REQUESTS_KEY,
+    type ApiRequest,
+    type CollectionLink,
+    type OpenRequestLink,
+    type OpenRequests,
+} from '#entities/request';
 
 import {
     buildApiRequest,
+    copyRequestToDraft,
     createRequestDraft,
     mapRequestToDraft,
     type RequestDraft,
@@ -15,6 +22,8 @@ export interface RequestTab {
     readonly draft: RequestDraft;
     /** Where its sending stands */
     readonly sendState: SendState;
+    /** Where the request is kept, for a tab opened from a collection or saved to one */
+    readonly link?: CollectionLink;
 }
 
 /** The open requests of the page; there is always at least one */
@@ -29,10 +38,19 @@ const TABS_ERRORS = {
     NO_ACTIVE_TAB: 'the active request tab is missing',
 } as const;
 
-const createRequestTab = (draft: RequestDraft): RequestTab => ({
+const createRequestTab = (draft: RequestDraft, link?: CollectionLink): RequestTab => ({
     draft,
     sendState: IDLE_STATE,
+    ...(link && { link }),
 });
+
+const mapOpenLinkToLink = ({ collectionId, requestId }: OpenRequestLink): CollectionLink => ({
+    collectionId,
+    requestId,
+});
+
+const isSameLink = (first: NotRequired<CollectionLink>, second: CollectionLink): boolean =>
+    first?.collectionId === second.collectionId && first.requestId === second.requestId;
 
 export const createRequestTabs = (): RequestTabs => {
     const tab = createRequestTab(createRequestDraft());
@@ -49,17 +67,34 @@ export const restoreRequestTabs = (openRequests: NotRequired<OpenRequests>): Req
         return createRequestTabs();
     }
 
+    const links = new Map(openRequests.links?.map(link => [link.tabId, mapOpenLinkToLink(link)]));
+
     return {
-        tabs: openRequests.requests.map(request => createRequestTab(mapRequestToDraft(request))),
+        tabs: openRequests.requests.map(request => createRequestTab(mapRequestToDraft(request), links.get(request.id))),
         activeId: openRequests.activeId,
     };
 };
 
-/** What is kept of the tabs between visits: their requests as typed */
+const getOpenLinks = (tabs: readonly RequestTab[]): OpenRequestLink[] => {
+    const links: OpenRequestLink[] = [];
+
+    for (const tab of tabs) {
+        if (!tab.link) {
+            continue;
+        }
+
+        links.push({ tabId: tab.draft.id, ...tab.link });
+    }
+
+    return links;
+};
+
+/** What is kept of the tabs between visits: their requests as typed and where they came from */
 export const mapTabsToOpenRequests = (state: RequestTabs): OpenRequests => ({
     id: OPEN_REQUESTS_KEY,
     requests: state.tabs.map(tab => buildApiRequest(tab.draft)),
     activeId: state.activeId,
+    links: getOpenLinks(state.tabs),
 });
 
 export const getActiveTab = (state: RequestTabs): RequestTab => {
@@ -73,13 +108,31 @@ export const getActiveTab = (state: RequestTabs): RequestTab => {
 };
 
 /** Shows a new tab at the end: an empty request unless one is given */
-export const openRequestTab = (state: RequestTabs, draft: RequestDraft = createRequestDraft()): RequestTabs => {
-    const tab = createRequestTab(draft);
+export const openRequestTab = (
+    state: RequestTabs,
+    draft: RequestDraft = createRequestDraft(),
+    link?: CollectionLink,
+): RequestTabs => {
+    const tab = createRequestTab(draft, link);
 
     return {
         tabs: [...state.tabs, tab],
         activeId: tab.draft.id,
     };
+};
+
+/** A request of a collection opens once: its tab comes to the front when it is open already */
+export const openLinkedTab = (state: RequestTabs, link: CollectionLink, request: ApiRequest): RequestTabs => {
+    const openTab = state.tabs.find(tab => isSameLink(tab.link, link));
+
+    if (openTab) {
+        return {
+            ...state,
+            activeId: openTab.draft.id,
+        };
+    }
+
+    return openRequestTab(state, copyRequestToDraft(request), link);
 };
 
 export const selectRequestTab = (state: RequestTabs, tabId: string): RequestTabs => {
@@ -149,3 +202,6 @@ export const updateTabDraft = (state: RequestTabs, tabId: string, patch: Request
 
 export const updateTabSendState = (state: RequestTabs, tabId: string, sendState: SendState): RequestTabs =>
     patchRequestTab(state, tabId, { sendState });
+
+export const linkRequestTab = (state: RequestTabs, tabId: string, link: CollectionLink): RequestTabs =>
+    patchRequestTab(state, tabId, { link });

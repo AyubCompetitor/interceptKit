@@ -16,6 +16,36 @@ const ANSI_C_HEX_RGX = /^(x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})/;
 
 const DOUBLE_QUOTE_ESCAPES = new Set(['"', '\\', '$', '`']);
 
+/** A quote, a backslash or a control character: single quotes cannot hold them, $'…' can */
+// oxlint-disable-next-line no-control-regex -- control characters are what $'…' escapes
+const ANSI_C_NEEDED_RGX = /['\\\u0000-\u001f\u007f]/;
+
+const ANSI_C_SPECIAL_RGX = new RegExp(ANSI_C_NEEDED_RGX.source, 'g');
+
+const ANSI_C_QUOTES: Readonly<Record<string, string>> = {
+    "'": "\\'",
+    '\\': '\\\\',
+    '\n': '\\n',
+    '\r': '\\r',
+    '\t': '\\t',
+};
+
+const HEX_BASE = 16;
+
+const HEX_DIGITS = 2;
+
+const escapeAnsiCChar = (char: string): string =>
+    ANSI_C_QUOTES[char] ?? `\\x${(char.codePointAt(0) ?? 0).toString(HEX_BASE).padStart(HEX_DIGITS, '0')}`;
+
+/** Quotes a word for bash the way Chrome's "Copy as cURL (bash)" does, so splitShellWords reads it back */
+export const quoteShellWord = (word: string): string => {
+    if (!ANSI_C_NEEDED_RGX.test(word)) {
+        return `'${word}'`;
+    }
+
+    return `$'${word.replace(ANSI_C_SPECIAL_RGX, escapeAnsiCChar)}'`;
+};
+
 interface Reader {
     /** The command being split */
     readonly text: string;

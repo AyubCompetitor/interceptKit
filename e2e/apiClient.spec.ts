@@ -3,11 +3,15 @@ import type { Page } from '@playwright/test';
 import { VAULT_LOCK_ALARM, type Environment } from '#entities/environment';
 import {
     apiClientDatabase,
+    CollectionItemTypes,
+    createRequestItem,
     historyStore,
     openRequestsStore,
     OPEN_REQUESTS_KEY,
     RequestBodyTypes,
+    type Collection,
 } from '#entities/request';
+import { BundleParts, buildBundleText } from '#features/transfer';
 import { API_CLIENT_CONFIG } from '#shared/config';
 import { HttpMethods } from '#shared/lib';
 import { RpcErrorCodes } from '#shared/messaging';
@@ -43,6 +47,10 @@ const PATHS = {
     VAULT_OPENED: '/api-client/vault-opened',
     VAULT_CHANGED: '/api-client/vault-changed',
     CURL: '/api-client/curl',
+    CURL_EXPORT: '/api-client/curl-export',
+    COLLECTION: '/api-client/collection',
+    POSTMAN: '/api-client/postman',
+    OPENAPI: '/api-client/openapi',
     RULE_HEADERS: '/api-client/rule-headers',
     QUERY: '/api-client/query',
     LEGACY: '/api-client/legacy',
@@ -812,6 +820,523 @@ apiClientTest.describe('cURL import', () => {
         await expect(dialog.getByRole('alert')).toContainText('-F is not supported');
 
         await expect(dialog).toBeVisible();
+    });
+});
+
+const stubClipboard = () => {
+    Object.defineProperty(navigator.clipboard, 'writeText', {
+        value: async (text: string) => {
+            document.body.dataset.clipboard = text;
+        },
+    });
+};
+
+const getCopiedText = (page: Page) => page.evaluate(() => document.body.dataset.clipboard ?? '');
+
+const getExportDialog = (page: Page) => page.getByRole('dialog', { name: 'Copy as cURL' });
+
+const getCommandField = (page: Page) =>
+    getExportDialog(page).getByRole('textbox', { name: 'Command for bash', exact: true });
+
+apiClientTest.describe('cURL export', () => {
+    apiClientTest('writes the request as a command the import reads back', async ({ apiClientPage, testServer }) => {
+        const url = testServer.origin + PATHS.CURL_EXPORT;
+        const environment: Environment = {
+            id: 'local',
+            name: 'Local',
+            variables: [
+                { key: 'baseUrl', value: testServer.origin, enabled: true, secret: false },
+                { key: 'token', value: 'abc', enabled: true, secret: true },
+            ],
+        };
+
+        await callBackground(apiClientPage, 'environments/save', environment);
+        await callBackground(apiClientPage, 'environments/choose', { activeId: environment.id });
+        await getUrlField(apiClientPage).fill(`{{baseUrl}}${PATHS.CURL_EXPORT}`);
+        await openSection(apiClientPage, 'Headers');
+        await addRow(apiClientPage, 'Add header', 'Header', 'Authorization', 'Bearer {{token}}');
+        await apiClientPage.getByRole('main').getByRole('button', { name: 'Copy as cURL', exact: true }).click();
+
+        const dialog = getExportDialog(apiClientPage);
+
+        await expect(getCommandField(apiClientPage)).toHaveValue(
+            `curl '${url}' \\\n  -H 'Authorization: Bearer {{token}}'`,
+        );
+
+        await expect(dialog.getByText('These variables have no value and stay as typed: token.')).toBeVisible();
+
+        await dialog.getByRole('checkbox', { name: 'Fill in secrets', exact: true }).click();
+
+        await expect(getCommandField(apiClientPage)).toHaveValue(`curl '${url}' \\\n  -H 'Authorization: Bearer abc'`);
+
+        await apiClientPage.evaluate(stubClipboard);
+        await dialog.getByRole('button', { name: 'Copy', exact: true }).click();
+
+        await expect(dialog.getByRole('status')).toHaveText('Copied to the clipboard.');
+
+        const copied = await getCopiedText(apiClientPage);
+
+        expect(copied).toBe(`curl '${url}' \\\n  -H 'Authorization: Bearer abc'`);
+
+        await apiClientPage.keyboard.press('Escape');
+
+        await expect(dialog).toBeHidden();
+
+        await importCurl(apiClientPage, copied);
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
+
+        await getReceived(testServer, PATHS.CURL_EXPORT).toMatchObject({
+            method: HttpMethods.GET,
+            headers: { authorization: 'Bearer abc' },
+        });
+    });
+
+    apiClientTest('copies a request of the history as it was typed', async ({ apiClientPage, testServer }) => {
+        const url = `${testServer.origin}${PATHS.CURL_EXPORT}?from=history`;
+
+        await sendRequest(apiClientPage, url);
+        await getHistoryPanel(apiClientPage).getByRole('button', { name: 'Copy as cURL', exact: true }).click();
+
+        await expect(getCommandField(apiClientPage)).toHaveValue(`curl '${url}'`);
+    });
+});
+
+const makeShopCollection = (url: string): Collection => ({
+    id: 'shop',
+    name: 'Shop API',
+    createdAt: 1,
+    items: [
+        {
+            itemType: CollectionItemTypes.FOLDER,
+            id: 'users',
+            name: 'Users',
+            items: [
+                createRequestItem({
+                    id: 'list-users',
+                    name: 'List users',
+                    method: HttpMethods.GET,
+                    url,
+                    query: [{ key: 'from', value: 'collection', enabled: true }],
+                    headers: [],
+                    body: { bodyType: RequestBodyTypes.NONE },
+                    sendCookies: false,
+                }),
+            ],
+        },
+    ],
+});
+
+const getCollectionPanel = (page: Page) => page.getByRole('region', { name: 'Collections' });
+
+const getUnsavedMark = (page: Page) => getTabBar(page).getByRole('img', { name: 'Unsaved changes' });
+
+const getSaveDialog = (page: Page) => page.getByRole('dialog', { name: 'Save to a collection' });
+
+const chooseRowAction = async (page: Page, rowName: string, action: string) => {
+    const label = `Actions for ${rowName}`;
+    const panel = getCollectionPanel(page);
+
+    await panel.getByRole('button', { name: label, exact: true }).click();
+
+    await panel.getByRole('group', { name: label }).getByRole('button', { name: action, exact: true }).click();
+};
+
+const submitName = async (page: Page, dialogName: string, name: string, submitLabel: string) => {
+    const dialog = page.getByRole('dialog', { name: dialogName });
+
+    await dialog.getByRole('textbox', { name: 'Name', exact: true }).fill(name);
+
+    await dialog.getByRole('button', { name: submitLabel, exact: true }).click();
+
+    await expect(dialog).toBeHidden();
+};
+
+apiClientTest.describe('collections', () => {
+    apiClientTest('save a tab into a new collection and keep it linked', async ({ apiClientPage, testServer }) => {
+        const url = testServer.origin + PATHS.COLLECTION;
+        const changedUrl = `${url}?page=2`;
+        const dialog = getSaveDialog(apiClientPage);
+
+        await getUrlField(apiClientPage).fill(url);
+
+        await apiClientPage.getByRole('button', { name: 'Save to a collection', exact: true }).click();
+
+        await dialog.getByRole('textbox', { name: 'Name of the request', exact: true }).fill('List users');
+
+        await dialog.getByRole('textbox', { name: 'Name of the new collection', exact: true }).fill('Shop API');
+
+        await dialog.getByRole('button', { name: 'Save', exact: true }).click();
+
+        await expect(dialog).toBeHidden();
+
+        await openSection(apiClientPage, 'Collections');
+
+        await expect(
+            getCollectionPanel(apiClientPage).getByRole('button', { name: 'GET List users', exact: true }),
+        ).toBeVisible();
+
+        await expect(getUnsavedMark(apiClientPage)).toBeHidden();
+
+        await expect(
+            getTabBar(apiClientPage).getByRole('button', { name: 'Close List users', exact: true }),
+        ).toBeVisible();
+
+        await getUrlField(apiClientPage).fill(changedUrl);
+
+        await expect(getUnsavedMark(apiClientPage)).toBeVisible();
+
+        await apiClientPage.keyboard.press('Control+s');
+
+        await expect(getUnsavedMark(apiClientPage)).toBeHidden();
+
+        await expect.poll(() => readSavedUrls(apiClientPage)).toEqual([changedUrl]);
+
+        await apiClientPage.reload();
+
+        await getUrlField(apiClientPage).fill(url);
+
+        await expect(getUnsavedMark(apiClientPage)).toBeVisible();
+
+        await getUrlField(apiClientPage).fill(changedUrl);
+
+        await expect(getUnsavedMark(apiClientPage)).toBeHidden();
+    });
+
+    apiClientTest('open a request in one tab, ready to send', async ({ apiClientPage, testServer }) => {
+        const path = `${PATHS.COLLECTION}?from=collection`;
+        const url = testServer.origin + path;
+        const text = buildBundleText(
+            { rules: [], mocks: [], environments: [], collections: [makeShopCollection(url)] },
+            [BundleParts.COLLECTIONS],
+            new Date().toISOString(),
+        );
+        const panel = getCollectionPanel(apiClientPage);
+        const folder = panel.getByRole('button', { name: 'Users', exact: true });
+        const request = panel.getByRole('button', { name: 'GET List users', exact: true });
+        const tabs = getTabBar(apiClientPage).getByRole('listitem');
+
+        await callBackground(apiClientPage, 'transfer/import', { text });
+
+        await openSection(apiClientPage, 'Collections');
+
+        await folder.click();
+
+        await expect(request).toBeHidden();
+
+        await folder.click();
+
+        await request.click();
+
+        await expect(getUrlField(apiClientPage)).toHaveValue(url);
+
+        await tabs.first().getByRole('button').first().click();
+
+        await expect(getUrlField(apiClientPage)).toHaveValue('');
+
+        await request.click();
+
+        await expect(tabs).toHaveCount(2);
+
+        await expect(getUrlField(apiClientPage)).toHaveValue(url);
+
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
+
+        await getReceived(testServer, path).toMatchObject({ method: HttpMethods.GET });
+    });
+
+    apiClientTest('add, rename and delete through the menu of a row', async ({ apiClientPage }) => {
+        const panel = getCollectionPanel(apiClientPage);
+
+        await openSection(apiClientPage, 'Collections');
+
+        await panel.getByRole('button', { name: 'New collection', exact: true }).click();
+
+        await submitName(apiClientPage, 'New collection', 'Shop API', 'Create');
+
+        await chooseRowAction(apiClientPage, 'Shop API', 'New folder');
+
+        await submitName(apiClientPage, 'New folder', 'Users', 'Create');
+
+        await chooseRowAction(apiClientPage, 'Users', 'New request');
+
+        await submitName(apiClientPage, 'New request', 'List users', 'Create');
+
+        await expect(panel.getByRole('button', { name: 'GET List users', exact: true })).toBeVisible();
+
+        await expect(getTabBar(apiClientPage).getByRole('listitem')).toHaveCount(2);
+
+        await chooseRowAction(apiClientPage, 'List users', 'Rename');
+
+        await expect(
+            apiClientPage.getByRole('dialog', { name: 'Rename' }).getByRole('textbox', { name: 'Name', exact: true }),
+        ).toHaveValue('List users');
+
+        await submitName(apiClientPage, 'Rename', 'All users', 'Save');
+
+        await expect(panel.getByRole('button', { name: 'GET All users', exact: true })).toBeVisible();
+
+        await expect(
+            getTabBar(apiClientPage).getByRole('button', { name: 'Close All users', exact: true }),
+        ).toBeVisible();
+
+        await chooseRowAction(apiClientPage, 'Users', 'Delete');
+
+        await apiClientPage
+            .getByRole('dialog', { name: 'Delete from the collections?' })
+            .getByRole('button', { name: 'Delete', exact: true })
+            .click();
+
+        await expect(panel.getByRole('button', { name: 'Users', exact: true })).toBeHidden();
+
+        await expect(panel.getByRole('button', { name: 'Shop API', exact: true })).toBeVisible();
+
+        await expect(getTabBar(apiClientPage).getByRole('listitem')).toHaveCount(2);
+
+        await apiClientPage.keyboard.press('Control+s');
+
+        await expect(getSaveDialog(apiClientPage)).toBeVisible();
+    });
+});
+
+const POSTMAN_SCHEMA = 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json';
+
+const makePostmanCollection = (baseUrl: string) => ({
+    info: { name: 'Shop API', schema: POSTMAN_SCHEMA },
+    auth: { type: 'bearer', bearer: [{ key: 'token', value: '{{token}}', type: 'string' }] },
+    variable: [
+        { key: 'baseUrl', value: baseUrl },
+        { key: 'token', value: 'abc', type: 'secret' },
+    ],
+    item: [
+        {
+            name: 'Users',
+            item: [
+                {
+                    name: 'List users',
+                    event: [{ listen: 'test', script: { exec: ['pm.test("ok", () => {});'] } }],
+                    request: {
+                        method: HttpMethods.GET,
+                        header: [{ key: 'X-Source', value: 'postman' }],
+                        url: `{{baseUrl}}${PATHS.POSTMAN}?page=2`,
+                    },
+                },
+            ],
+        },
+        {
+            name: 'Upload avatar',
+            request: {
+                method: HttpMethods.POST,
+                url: '{{baseUrl}}/avatar',
+                body: { mode: 'formdata', formdata: [{ key: 'file', type: 'file', src: '/tmp/a.png' }] },
+            },
+        },
+    ],
+});
+
+const POSTMAN_ENVIRONMENT = {
+    name: 'Staging',
+    values: [
+        { key: 'baseUrl', value: 'https://staging.example.com', type: 'default', enabled: true },
+        { key: 'token', value: 'abc', type: 'secret', enabled: true },
+    ],
+    _postman_variable_scope: 'environment',
+};
+
+const getImportDialog = (page: Page) => page.getByRole('dialog', { name: 'Import a collection' });
+
+const getImportPreview = (page: Page) => getImportDialog(page).getByRole('region', { name: 'What the import will do' });
+
+const openFileImport = async (page: Page) => {
+    await openSection(page, 'Collections');
+
+    await getCollectionPanel(page).getByRole('button', { name: 'Import', exact: true }).click();
+};
+
+const pasteImportFile = async (page: Page, file: object) => {
+    await getImportDialog(page)
+        .getByRole('textbox', { name: 'Or paste the text of a file', exact: true })
+        .fill(JSON.stringify(file));
+};
+
+const confirmImport = async (page: Page) => {
+    await getImportDialog(page).getByRole('button', { name: 'Import', exact: true }).click();
+
+    await expect(getImportDialog(page)).toBeHidden();
+};
+
+apiClientTest.describe('Postman import', () => {
+    apiClientTest('brings a collection and its variables, ready to send', async ({ apiClientPage, testServer }) => {
+        const preview = getImportPreview(apiClientPage);
+        const panel = getCollectionPanel(apiClientPage);
+
+        await openFileImport(apiClientPage);
+
+        await pasteImportFile(apiClientPage, makePostmanCollection(testServer.origin));
+
+        await expect(preview).toContainText('A new collection “Shop API”: requests: 2, folders: 1.');
+
+        await expect(preview).toContainText('A new environment “Shop API: variables”: variables: 2.');
+
+        await expect(preview).toContainText('Secret values will be stored unencrypted');
+
+        await expect(preview).toContainText('Scripts and tests (scripts: 1)');
+
+        await expect(preview).toContainText('Bodies of the kinds formdata (requests: 1)');
+
+        await confirmImport(apiClientPage);
+
+        await expect(panel.getByRole('button', { name: 'Users', exact: true })).toBeVisible();
+
+        await getEnvironmentSelect(apiClientPage).selectOption({ label: 'Shop API: variables' });
+
+        await panel.getByRole('button', { name: 'GET List users', exact: true }).click();
+
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
+
+        await getReceived(testServer, `${PATHS.POSTMAN}?page=2`).toMatchObject({
+            method: HttpMethods.GET,
+            headers: { authorization: 'Bearer abc', 'x-source': 'postman' },
+        });
+    });
+
+    apiClientTest(
+        'reads an environment from a file and leaves secrets empty while locked',
+        async ({ apiClientPage }) => {
+            await createVault(apiClientPage);
+
+            await lockVault(apiClientPage);
+
+            await openFileImport(apiClientPage);
+
+            await getImportDialog(apiClientPage)
+                .getByLabel('File', { exact: true })
+                .setInputFiles({
+                    name: 'staging.postman_environment.json',
+                    mimeType: 'application/json',
+                    buffer: Buffer.from(JSON.stringify(POSTMAN_ENVIRONMENT)),
+                });
+
+            await expect(getImportPreview(apiClientPage)).toContainText(
+                'The vault is locked, so secret values will be left empty.',
+            );
+
+            await confirmImport(apiClientPage);
+
+            await expect.poll(() => readStoredValues(apiClientPage)).toEqual(['https://staging.example.com', '']);
+
+            await expect(getEnvironmentSelect(apiClientPage).getByRole('option', { name: 'Staging' })).toBeAttached();
+        },
+    );
+
+    apiClientTest('names what is wrong with a file and imports nothing', async ({ apiClientPage }) => {
+        const dialog = getImportDialog(apiClientPage);
+
+        await openFileImport(apiClientPage);
+
+        await pasteImportFile(apiClientPage, { name: 'Old', requests: [] });
+
+        await expect(dialog.getByRole('alert')).toContainText('collections of Postman v1 cannot be imported');
+
+        await expect(dialog.getByRole('button', { name: 'Import', exact: true })).toBeDisabled();
+    });
+});
+
+/** A description the way an API publishes it: a server, a tag, a path parameter and a bearer token */
+const makeOpenApiDescription = (serverUrl: string) => ({
+    openapi: '3.1.0',
+    info: { title: 'Pet Store', version: '1.0.0' },
+    servers: [{ url: serverUrl }],
+    tags: [{ name: 'pets' }],
+    paths: {
+        '/pets/{petId}': {
+            get: {
+                tags: ['pets'],
+                summary: 'Get a pet',
+                parameters: [
+                    { name: 'petId', in: 'path', required: true, schema: { type: 'integer' } },
+                    { name: 'fields', in: 'query', required: true, example: 'name' },
+                ],
+            },
+        },
+        '/pets': {
+            post: {
+                tags: ['pets'],
+                summary: 'Add a pet',
+                requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/Pet' } } } },
+            },
+        },
+    },
+    components: {
+        schemas: { Pet: { type: 'object', properties: { name: { type: 'string', example: 'Rex' } } } },
+        securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } },
+    },
+    security: [{ bearerAuth: [] }],
+});
+
+/** The secret the import leaves empty and the path parameter go into the imported environment */
+const fillImportedEnvironment = async (page: Page) => {
+    const { environments } = await page.evaluate(() =>
+        chrome.storage.local.get<{ environments: Environment[] }>('environments'),
+    );
+    const [imported] = environments;
+
+    if (!imported) {
+        throw new Error('expected the imported environment');
+    }
+
+    const variables = [
+        ...imported.variables.map(variable => (variable.key === 'token' ? { ...variable, value: 'abc' } : variable)),
+        { key: 'petId', value: '7', enabled: true, secret: false },
+    ];
+
+    await callBackground(page, 'environments/save', { ...imported, variables });
+
+    await callBackground(page, 'environments/choose', { activeId: imported.id });
+};
+
+apiClientTest.describe('OpenAPI import', () => {
+    apiClientTest('turns operations into requests that reach the API', async ({ apiClientPage, testServer }) => {
+        const preview = getImportPreview(apiClientPage);
+        const panel = getCollectionPanel(apiClientPage);
+
+        await openFileImport(apiClientPage);
+
+        await pasteImportFile(apiClientPage, makeOpenApiDescription(testServer.origin + PATHS.OPENAPI));
+
+        await expect(preview).toContainText('A new collection “Pet Store”: requests: 2, folders: 1.');
+
+        await expect(preview).toContainText('A new environment “Pet Store: variables”: variables: 2.');
+
+        await expect(preview).toContainText('Fill in these secrets in the environment before sending: token.');
+
+        await confirmImport(apiClientPage);
+
+        await fillImportedEnvironment(apiClientPage);
+
+        await panel.getByRole('button', { name: 'GET Get a pet', exact: true }).click();
+
+        await expect(getUrlField(apiClientPage)).toHaveValue('{{baseUrl}}/pets/{{petId}}?fields=name');
+
+        await apiClientPage.getByRole('button', { name: 'Send', exact: true }).click();
+
+        await getReceived(testServer, `${PATHS.OPENAPI}/pets/7?fields=name`).toMatchObject({
+            method: HttpMethods.GET,
+            headers: { authorization: 'Bearer abc' },
+        });
+    });
+
+    apiClientTest('asks for JSON when the description is YAML', async ({ apiClientPage }) => {
+        const dialog = getImportDialog(apiClientPage);
+
+        await openFileImport(apiClientPage);
+
+        await dialog
+            .getByRole('textbox', { name: 'Or paste the text of a file', exact: true })
+            .fill('openapi: 3.1.0\ninfo:\n  title: Pet Store\n');
+
+        await expect(dialog.getByRole('alert')).toContainText('convert the file to JSON');
+
+        await expect(dialog.getByRole('button', { name: 'Import', exact: true })).toBeDisabled();
     });
 });
 

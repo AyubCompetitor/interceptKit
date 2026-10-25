@@ -5,4 +5,5 @@ export const BUNDLE_PART_LABELS: Readonly<Record<BundlePart, MessageKey>> = {
     [BundleParts.RULES]: 'transferPartRules',
     [BundleParts.MOCKS]: 'transferPartMocks',
     [BundleParts.ENVIRONMENTS]: 'transferPartEnvironments',
+    [BundleParts.COLLECTIONS]: 'transferPartCollections',
 };

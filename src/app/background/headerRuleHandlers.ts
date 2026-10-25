@@ -1,12 +1,17 @@
+import { Features, isFeatureEnabled } from '#entities/config';
 import { headerRulesRpc, type HeaderRuleIdParams, type HeaderRuleParams } from '#entities/request';
+import { isHostAllowed } from '#features/policy';
 import type { TaskQueue } from '#shared/lib';
 import { RpcError, RpcErrorCodes, type HandlerContext, type Router } from '#shared/messaging';
 import { getDynamicRuleLimit, getSessionRules, updateSessionRules } from '#shared/platform';
 
 import { buildHeaderRule, getNextRuleId, getTabRuleIds } from './headerRules.ts';
+import { readManagedPolicy } from './managedPolicy.ts';
 
 const HEADER_RULE_ERRORS = {
     NO_TAB: 'only a page in a tab can send requests with such headers',
+    API_CLIENT_OFF: 'the policy turns the API client off',
+    NOT_ALLOWED: 'the policy does not allow this host',
 } as const;
 
 const applyHeaderRuleHandler = async (
@@ -15,6 +20,16 @@ const applyHeaderRuleHandler = async (
 ): Promise<HeaderRuleIdParams> => {
     if (tabId === undefined) {
         throw new RpcError(RpcErrorCodes.BAD_REQUEST, HEADER_RULE_ERRORS.NO_TAB);
+    }
+
+    const policy = await readManagedPolicy();
+
+    if (!isFeatureEnabled(policy, Features.API_CLIENT)) {
+        throw new RpcError(RpcErrorCodes.FORBIDDEN, HEADER_RULE_ERRORS.API_CLIENT_OFF);
+    }
+
+    if (!isHostAllowed(params.host, policy)) {
+        throw new RpcError(RpcErrorCodes.FORBIDDEN, HEADER_RULE_ERRORS.NOT_ALLOWED);
     }
 
     const sessionRules = await getSessionRules();

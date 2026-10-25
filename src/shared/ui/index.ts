@@ -13,6 +13,7 @@ export * from './Field/index.ts';
 export * from './Flex/index.ts';
 export * from './Icon/index.ts';
 export * from './KeyValueTable/index.ts';
+export * from './Menu/index.ts';
 export * from './Modal/index.ts';
 export * from './Notice/index.ts';
 export * from './SegmentedControl/index.ts';

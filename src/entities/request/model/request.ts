@@ -7,6 +7,7 @@ import {
     identifier,
     keyValue,
     literal,
+    MAX_DISPLAY_NAME_LENGTH,
     object,
     oneOf,
     optional,
@@ -122,7 +123,7 @@ const requestBody: Validator<RequestBody> = discriminatedUnion('bodyType', {
 export const apiRequestValidator: Validator<ApiRequest> = refine(
     object({
         id: identifier,
-        name: optional(string({ maxLength: 200 })),
+        name: optional(string({ maxLength: MAX_DISPLAY_NAME_LENGTH })),
         method: sendableMethod,
         url: string({ maxLength: 8192 }),
         query: fields,

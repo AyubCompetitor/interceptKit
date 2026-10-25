@@ -37,12 +37,18 @@ export const MAX_ENVIRONMENTS = 100;
 
 const VARIABLE_KEY_RGX = /^[A-Za-z_][A-Za-z0-9_.-]*$/;
 
+const MAX_VARIABLE_KEY_LENGTH = 100;
+
 const ENV_ERRORS = {
     INVALID_VALUE: 'expected a string or an encrypted value',
     PLAIN_ENCRYPTED: 'only secret variables can be encrypted',
     DUPLICATE_KEY: 'duplicate variable name',
     DUPLICATE_ID: 'duplicate environment id',
 } as const;
+
+/** A name that {{name}} templates can use */
+export const isVariableKey = (key: string): boolean =>
+    key.length <= MAX_VARIABLE_KEY_LENGTH && VARIABLE_KEY_RGX.test(key);
 
 export const isEncryptedValue = (value: string | EncryptedValue): value is EncryptedValue => typeof value !== 'string';
 
@@ -84,7 +90,7 @@ const variable: Validator<EnvVariable> = refine(
     object({
         key: string({
             minLength: 1,
-            maxLength: 100,
+            maxLength: MAX_VARIABLE_KEY_LENGTH,
             pattern: VARIABLE_KEY_RGX,
         }),
         enabled: boolean(),

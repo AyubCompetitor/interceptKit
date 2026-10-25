@@ -11,6 +11,8 @@ interface SegmentedControlProps<T extends string> {
     legend: string;
     /** Keeps the name for assistive technology only, when a heading nearby already says it */
     isLegendHidden?: boolean;
+    /** Less room around each label, for a narrow place */
+    isCompact?: boolean;
     /** Selected choice */
     value: T;
     /** Every choice with the message key of its label, in display order */
@@ -22,6 +24,7 @@ interface SegmentedControlProps<T extends string> {
 export const SegmentedControl = <T extends string>({
     legend,
     isLegendHidden = false,
+    isCompact = false,
     value,
     labels,
     onChange,
@@ -46,7 +49,7 @@ export const SegmentedControl = <T extends string>({
 
             <div className={styles.track}>
                 {choices.map(choice => (
-                    <label key={choice} className={styles.segment}>
+                    <label key={choice} className={joinClassNames(styles.segment, isCompact && styles.isCompact)}>
                         <input
                             checked={choice === value}
                             className={styles.input}

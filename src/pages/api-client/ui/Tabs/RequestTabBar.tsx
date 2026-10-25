@@ -13,6 +13,10 @@ interface RequestTabBarProps {
     tabs: readonly RequestTab[];
     /** Id of the tab on the screen */
     activeId: string;
+    /** Tabs of a collection whose request differs from the one kept there */
+    unsavedIds: readonly string[];
+    /** Names of the requests that tabs of collections show, by the id of the tab */
+    names: ReadonlyMap<string, string>;
     /** Opens a new empty request */
     onOpen: VoidFunction;
     /** Called with the id of the tab to show */
@@ -21,7 +25,15 @@ interface RequestTabBarProps {
     onClose: (tabId: string) => void;
 }
 
-export const RequestTabBar: FC<RequestTabBarProps> = ({ tabs, activeId, onOpen, onSelect, onClose }) => {
+export const RequestTabBar: FC<RequestTabBarProps> = ({
+    tabs,
+    activeId,
+    unsavedIds,
+    names,
+    onOpen,
+    onSelect,
+    onClose,
+}) => {
     const { t } = useTranslation();
 
     return (
@@ -31,6 +43,8 @@ export const RequestTabBar: FC<RequestTabBarProps> = ({ tabs, activeId, onOpen, 
                     <RequestTabItem
                         key={tab.draft.id}
                         isActive={tab.draft.id === activeId}
+                        isUnsaved={unsavedIds.includes(tab.draft.id)}
+                        name={names.get(tab.draft.id)}
                         tab={tab}
                         onClose={onClose}
                         onSelect={onSelect}

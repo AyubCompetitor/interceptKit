@@ -3,11 +3,12 @@ import { useId, type FC } from 'react';
 import { buildSectionHash, DashboardSections } from '../../lib/dashboard.ts';
 import { useRuleDeletion } from '../../lib/useRuleDeletion.ts';
 import { useRuleEditor } from '../../lib/useRuleEditor.ts';
-import { getMissingAccessHost } from '../../model/siteAccess.ts';
+import { getMissingAccess } from '../../model/siteAccess.ts';
 import { useRuleList } from '../../model/useRuleList.ts';
 import { useSiteAccess } from '../../model/useSiteAccess.ts';
 
 import { useInterceptionSwitch } from '#features/interception-switch';
+import { getDisabledRuleFeatures, isPolicyOnly, isRuleAllowed, usePolicy } from '#features/policy';
 import { useTranslation } from '#shared/i18n';
 import {
     Button,
@@ -25,6 +26,7 @@ import {
 } from '#shared/ui';
 
 import { DeleteRuleModal } from './DeleteRuleModal.tsx';
+import { formatFeatures } from '../Policy/policySummary.ts';
 import { RuleEditor } from './RuleEditor.tsx';
 import { RuleRow } from './RuleRow.tsx';
 import styles from './RulesSection.module.css';
@@ -32,12 +34,15 @@ import { SectionHeader } from '../SectionHeader/SectionHeader.tsx';
 
 const SITES_HASH = buildSectionHash(DashboardSections.SITES);
 
+const POLICY_HASH = buildSectionHash(DashboardSections.POLICY);
+
 export const RulesSection: FC = () => {
     const titleId = useId();
 
     const { t } = useTranslation();
     const { rules, isActionFailed, onRuleToggle, onRuleDelete } = useRuleList();
     const { patterns, isRequestFailed, onAccessRequest } = useSiteAccess();
+    const { policy, isLoading: isPolicyLoading } = usePolicy();
     const { isEnabled, isSaveFailed, onInterceptionEnable } = useInterceptionSwitch();
     const { ruleToDelete, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useRuleDeletion(onRuleDelete);
     const { editedRule, isEditorOpen, onRuleCreate, onRuleEdit, onEditorClose } = useRuleEditor();
@@ -49,9 +54,17 @@ export const RulesSection: FC = () => {
         </Button>
     );
 
-    if (!rules || !patterns) {
+    if (!rules || !patterns || isPolicyLoading) {
         return null;
     }
+
+    const disabledRuleFeatures = getDisabledRuleFeatures(policy);
+
+    const policyLink = (
+        <a className={styles.noticeLink} href={POLICY_HASH}>
+            {t('policyOpen')}
+        </a>
+    );
 
     return (
         <Flex aria-labelledby={titleId} as='section' direction='column' gap={Spaces.XL}>
@@ -75,6 +88,18 @@ export const RulesSection: FC = () => {
                 </Notice>
             )}
 
+            {isPolicyOnly(policy) && (
+                <Notice action={policyLink} tone={NoticeTones.WARNING}>
+                    {t('rulesPolicyOnly')}
+                </Notice>
+            )}
+
+            {!!disabledRuleFeatures.length && (
+                <Notice action={policyLink} tone={NoticeTones.WARNING}>
+                    {t('rulesFeaturesOff', formatFeatures(disabledRuleFeatures, t))}
+                </Notice>
+            )}
+
             {!patterns.length && (
                 <Notice
                     action={
@@ -92,7 +117,8 @@ export const RulesSection: FC = () => {
                     {rules.map(rule => (
                         <RuleRow
                             key={rule.id}
-                            missingHost={getMissingAccessHost(rule, patterns)}
+                            isBlockedByPolicy={!isRuleAllowed(rule, policy)}
+                            missingAccess={getMissingAccess(rule, patterns, policy)}
                             rule={rule}
                             onAccessRequest={onAccessRequest}
                             onDelete={onDeleteRequest}

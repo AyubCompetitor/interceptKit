@@ -20,10 +20,6 @@
         "message": "Dashboard sections",
         "description": "Accessible name of the sidebar navigation."
     },
-    "navSoon": {
-        "message": "Coming soon",
-        "description": "Title of the sidebar group with sections from later versions."
-    },
     "rulesTitle": {
         "message": "Rules"
     },
@@ -38,6 +34,88 @@
     },
     "policyTitle": {
         "message": "Organization policy"
+    },
+    "policyDescription": {
+        "message": "Settings that your organization's administrator sets through the browser's policy. They take precedence over yours, and you can't change them here."
+    },
+    "policyEmptyTitle": {
+        "message": "No policy is set"
+    },
+    "policyEmptyText": {
+        "message": "Every feature is available, and only you decide how InterceptKit works."
+    },
+    "policyValuesTitle": {
+        "message": "What the policy sets"
+    },
+    "policyIssues": {
+        "message": "The policy has errors. A broken restriction is read in its strictest form, and other broken values are ignored."
+    },
+    "policyDisabledFeatures": {
+        "message": "Turned-off features"
+    },
+    "policyAllowedHosts": {
+        "message": "Allowed sites"
+    },
+    "policyAllowUserRules": {
+        "message": "Your own rules and mocks"
+    },
+    "policyRequireVault": {
+        "message": "Encryption of secrets"
+    },
+    "policyPresetBundle": {
+        "message": "Rules and mocks of the organization"
+    },
+    "policyNotSet": {
+        "message": "Not set"
+    },
+    "policyNoFeaturesOff": {
+        "message": "None"
+    },
+    "policyNoHosts": {
+        "message": "None: InterceptKit can't get access to any site"
+    },
+    "policyUserRulesAllowed": {
+        "message": "Allowed"
+    },
+    "policyUserRulesForbidden": {
+        "message": "Don't apply: only those of the organization do"
+    },
+    "policyVaultRequired": {
+        "message": "Required"
+    },
+    "policyVaultOptional": {
+        "message": "Not required"
+    },
+    "policyPresetCounts": {
+        "message": "Rules: $1, mocks: $2",
+        "description": "$1 and $2 are numbers."
+    },
+    "policyPresetBroken": {
+        "message": "Don't apply: the bundle has errors"
+    },
+    "policyFeatureRedirect": {
+        "message": "Redirects"
+    },
+    "policyFeatureHeaders": {
+        "message": "Header changes"
+    },
+    "policyFeatureBlock": {
+        "message": "Blocking"
+    },
+    "policyFeatureMocks": {
+        "message": "Mock API"
+    },
+    "policyFeatureApiClient": {
+        "message": "API client"
+    },
+    "policyOpen": {
+        "message": "Open the policy"
+    },
+    "policyBlockedBadge": {
+        "message": "Off by policy"
+    },
+    "policySourceBadge": {
+        "message": "From the organization"
     },
     "transferTitle": {
         "message": "Import and export"
@@ -59,6 +137,9 @@
     },
     "transferPartEnvironments": {
         "message": "Environments"
+    },
+    "transferPartCollections": {
+        "message": "Collections"
     },
     "transferExportHint": {
         "message": "Records of the organization policy and the values of secrets never go into the file: secret variables keep their names, empty."
@@ -131,6 +212,13 @@
     "rulesOpenSites": {
         "message": "Allow a site"
     },
+    "rulesPolicyOnly": {
+        "message": "Your organization allows only its own rules, so the rules you add don't apply."
+    },
+    "rulesFeaturesOff": {
+        "message": "Your organization turned off: $1. Rules of these types don't apply.",
+        "description": "$1 is a list of features, such as Redirects, Blocking."
+    },
     "rulesEmptyTitle": {
         "message": "No rules yet"
     },
@@ -148,6 +236,10 @@
     },
     "ruleNoAccess": {
         "message": "InterceptKit has no access to $1, so the rule doesn't work there yet.",
+        "description": "$1 is a host name, such as api.example.com."
+    },
+    "ruleHostNotAllowed": {
+        "message": "Your organization doesn't allow access to $1, so the rule doesn't work there.",
         "description": "$1 is a host name, such as api.example.com."
     },
     "ruleAllowAccess": {
@@ -462,6 +554,19 @@
     "sitesNotGranted": {
         "message": "Access wasn't granted."
     },
+    "sitesNotAllowed": {
+        "message": "Your organization doesn't allow access to this site."
+    },
+    "sitesSubdomainsNotAllowed": {
+        "message": "Your organization allows this site without its subdomains: turn off Include subdomains."
+    },
+    "sitesAllowedHosts": {
+        "message": "Your organization allows access only to these sites: $1.",
+        "description": "$1 is a list of hosts, such as example.com, *.example.org."
+    },
+    "sitesNoHostsAllowed": {
+        "message": "Your organization doesn't allow access to any site."
+    },
     "sitesRequestFailed": {
         "message": "Couldn't request access. Try again."
     },
@@ -492,6 +597,12 @@
     },
     "mocksOpenSites": {
         "message": "Turn on for a site"
+    },
+    "mocksPolicyOnly": {
+        "message": "Your organization allows only its own mocks, so the mocks you add don't apply."
+    },
+    "mocksFeatureOff": {
+        "message": "Your organization turned off the Mock API, so no mock applies."
     },
     "mocksSecretsWarning": {
         "message": "Scripts of the page can read its mocks, so don't put tokens, passwords or other secrets into them."
@@ -636,6 +747,12 @@
     },
     "apiClientTitle": {
         "message": "API client"
+    },
+    "apiClientDisabledTitle": {
+        "message": "Your organization turned the API client off"
+    },
+    "apiClientDisabledText": {
+        "message": "Your organization's administrator turned it off through the browser's policy. The history of requests stays where it was."
     },
     "apiClientTabs": {
         "message": "Open requests"
@@ -838,6 +955,10 @@
         "message": "InterceptKit has no access to $1, and without it the browser would hide the response.",
         "description": "$1 is a host name."
     },
+    "apiClientHostNotAllowed": {
+        "message": "Your organization doesn't allow requests to $1.",
+        "description": "$1 is a host name."
+    },
     "apiClientAllowAccess": {
         "message": "Allow and send"
     },
@@ -970,12 +1091,19 @@
     "apiClientSecretsWarning": {
         "message": "Secret values are hidden on the screen, but this browser's profile keeps them unencrypted. To encrypt them with a master password, use the button at the top of the page."
     },
+    "apiClientVaultRequiredWarning": {
+        "message": "Your organization requires secrets to be encrypted: values of variables marked Secret aren't saved until you turn on encryption."
+    },
     "apiClientSecretsEncrypted": {
         "message": "Secret values are encrypted with the master password. The editor never shows them: type a new value to replace one."
     },
     "apiClientSecretsLocked": {
         "message": "The vault is locked, so these encrypted variables have no value: $1. Unlock it at the top of the page.",
         "description": "$1 is a comma-separated list of variable names."
+    },
+    "apiClientVaultRequired": {
+        "message": "Your organization requires secrets to be encrypted: turn on encryption to use $1.",
+        "description": "$1 is a list of variable names."
     },
     "apiClientVaultSetupOpen": {
         "message": "Encrypt secrets"
@@ -1078,6 +1206,9 @@
     "apiClientVaultLockedSave": {
         "message": "The vault is locked: unlock it at the top of the page to save secret values."
     },
+    "apiClientVaultRequiredSave": {
+        "message": "Your organization requires secrets to be encrypted. Turn on encryption, then save again."
+    },
     "apiClientCurlImportOpen": {
         "message": "Import cURL"
     },
@@ -1100,6 +1231,258 @@
     },
     "apiClientCurlImportSubmit": {
         "message": "Import"
+    },
+    "apiClientCurlExportOpen": {
+        "message": "Copy as cURL"
+    },
+    "apiClientCurlExportTitle": {
+        "message": "Copy as cURL"
+    },
+    "apiClientCurlExportCommand": {
+        "message": "Command for bash"
+    },
+    "apiClientCurlExportSecrets": {
+        "message": "Fill in secrets"
+    },
+    "apiClientCurlExportSecretsHint": {
+        "message": "Without it, secrets stay as {{name}}, so a token doesn't end up in the clipboard."
+    },
+    "apiClientCurlExportMissing": {
+        "message": "These variables have no value and stay as typed: $1.",
+        "description": "$1 is a comma-separated list of variable names."
+    },
+    "apiClientCurlExportCookies": {
+        "message": "The browser's cookies for the site are not in the command: add a Cookie header if the server needs them."
+    },
+    "apiClientCurlExportCopy": {
+        "message": "Copy"
+    },
+    "apiClientCurlExportCopied": {
+        "message": "Copied to the clipboard."
+    },
+    "apiClientCurlExportCopyFailed": {
+        "message": "Couldn't copy: select the command and copy it yourself."
+    },
+    "apiClientCollections": {
+        "message": "Collections"
+    },
+    "apiClientCollectionsEmpty": {
+        "message": "Keep requests in collections and folders. Save the request of a tab with Ctrl+S."
+    },
+    "apiClientCollectionAdd": {
+        "message": "New collection"
+    },
+    "apiClientCollectionsLimit": {
+        "message": "There can be at most $1 collections.",
+        "description": "$1 is a number."
+    },
+    "apiClientCollectionsFailed": {
+        "message": "Couldn't change the collection."
+    },
+    "apiClientCollectionMenu": {
+        "message": "Actions for $1",
+        "description": "$1 is the name of a collection, a folder or a request."
+    },
+    "apiClientCollectionNewRequest": {
+        "message": "New request"
+    },
+    "apiClientCollectionNewFolder": {
+        "message": "New folder"
+    },
+    "apiClientCollectionRename": {
+        "message": "Rename"
+    },
+    "apiClientCollectionDelete": {
+        "message": "Delete"
+    },
+    "apiClientCollectionCreateTitle": {
+        "message": "New collection"
+    },
+    "apiClientCollectionFolderTitle": {
+        "message": "New folder"
+    },
+    "apiClientCollectionRequestTitle": {
+        "message": "New request"
+    },
+    "apiClientCollectionRenameTitle": {
+        "message": "Rename"
+    },
+    "apiClientCollectionName": {
+        "message": "Name"
+    },
+    "apiClientCollectionCreate": {
+        "message": "Create"
+    },
+    "apiClientCollectionSave": {
+        "message": "Save"
+    },
+    "apiClientCollectionCancel": {
+        "message": "Cancel"
+    },
+    "apiClientCollectionDeleteTitle": {
+        "message": "Delete from the collections?"
+    },
+    "apiClientCollectionDeleteText": {
+        "message": "“$1” will be deleted, with everything inside if it is a folder or a collection. Open tabs keep their requests.",
+        "description": "$1 is the name of a collection, a folder or a request."
+    },
+    "apiClientSave": {
+        "message": "Save to a collection"
+    },
+    "apiClientSaveHint": {
+        "message": "Save to a collection (Ctrl+S)"
+    },
+    "apiClientSaveTitle": {
+        "message": "Save to a collection"
+    },
+    "apiClientSaveName": {
+        "message": "Name of the request"
+    },
+    "apiClientSaveCollection": {
+        "message": "Collection"
+    },
+    "apiClientSaveCollectionName": {
+        "message": "Name of the new collection"
+    },
+    "apiClientSaveFolder": {
+        "message": "Folder"
+    },
+    "apiClientSaveTop": {
+        "message": "Top of the collection"
+    },
+    "apiClientSaveFailed": {
+        "message": "Couldn't save the request."
+    },
+    "apiClientTabUnsaved": {
+        "message": "Unsaved changes"
+    },
+    "apiClientImportOpen": {
+        "message": "Import"
+    },
+    "apiClientImportTitle": {
+        "message": "Import a collection"
+    },
+    "apiClientImportHint": {
+        "message": "A Postman collection (v2.0 or v2.1) or environment, or an OpenAPI 3.0 or 3.1 description, as JSON. Up to 10 MB."
+    },
+    "apiClientImportFile": {
+        "message": "File"
+    },
+    "apiClientImportText": {
+        "message": "Or paste the text of a file"
+    },
+    "apiClientImportFileUnreadable": {
+        "message": "The file could not be read."
+    },
+    "apiClientImportInvalid": {
+        "message": "The file cannot be imported:"
+    },
+    "apiClientImportPreview": {
+        "message": "What the import will do"
+    },
+    "apiClientImportCollection": {
+        "message": "A new collection “$1”: requests: $2, folders: $3.",
+        "description": "$1 is a name, $2 and $3 are numbers."
+    },
+    "apiClientImportEnvironment": {
+        "message": "A new environment “$1”: variables: $2. Choose it at the top of the page to use them.",
+        "description": "$1 is a name, $2 is a number."
+    },
+    "apiClientImportSecretsPlain": {
+        "message": "Secret values will be stored unencrypted, as if typed in the editor. To encrypt them, turn on encryption at the top of the page before the import."
+    },
+    "apiClientImportSecretsEncrypted": {
+        "message": "Secret values will be encrypted with the master password."
+    },
+    "apiClientImportSecretsLocked": {
+        "message": "The vault is locked, so secret values will be left empty. To import them, unlock the vault at the top of the page and import the file again."
+    },
+    "apiClientImportSecretsRequired": {
+        "message": "Your organization requires secrets to be encrypted, so secret values will be left empty. To import them, turn on encryption and import the file again."
+    },
+    "apiClientImportEnvironmentsLimit": {
+        "message": "There can be at most $1 environments.",
+        "description": "$1 is a number."
+    },
+    "apiClientImportGaps": {
+        "message": "Not carried over:"
+    },
+    "apiClientImportGapScripts": {
+        "message": "Scripts and tests (scripts: $2): code from a file never runs here",
+        "description": "$2 is a number."
+    },
+    "apiClientImportGapExamples": {
+        "message": "Saved example responses (examples: $2)",
+        "description": "$2 is a number."
+    },
+    "apiClientImportGapBodies": {
+        "message": "Bodies of the kinds $1 (requests: $2): the client sends JSON, text and URL-encoded forms only",
+        "description": "$1 is a list of body modes, $2 is a number."
+    },
+    "apiClientImportGapBodiesOfBodyless": {
+        "message": "Bodies of $1 requests (requests: $2): requests with these methods go without a body",
+        "description": "$1 is a list of methods, $2 is a number."
+    },
+    "apiClientImportGapAuths": {
+        "message": "Authorization of the types $1 (requests: $2)",
+        "description": "$1 is a list of authorization types, $2 is a number."
+    },
+    "apiClientImportGapBasicWithVariables": {
+        "message": "Basic authorization with {{variables}} (requests: $2): the header holds the credentials encoded, so a variable inside cannot be filled",
+        "description": "$2 is a number."
+    },
+    "apiClientImportGapMethods": {
+        "message": "Requests with the methods $1 (requests: $2): the client does not send them",
+        "description": "$1 is a list of methods, $2 is a number."
+    },
+    "apiClientImportGapDynamicVariables": {
+        "message": "Generated values $1 (requests: $2): they stay as typed, the client does not make them up",
+        "description": "$1 is a list of templates, $2 is a number."
+    },
+    "apiClientImportGapDeepFolders": {
+        "message": "Folders deeper than five levels (folders: $2): their requests go to the folder of the fifth level",
+        "description": "$2 is a number."
+    },
+    "apiClientImportGapVariableNames": {
+        "message": "Variables with names that {{templates}} cannot use: $1",
+        "description": "$1 is a list of names."
+    },
+    "apiClientImportEmptySecrets": {
+        "message": "Fill in these secrets in the environment before sending: $1.",
+        "description": "$1 is a list of names."
+    },
+    "apiClientImportGapRelativeServer": {
+        "message": "The server address $1 is not a full URL: put the address of the API into baseUrl of the environment",
+        "description": "$1 is an address."
+    },
+    "apiClientImportGapExternalRefs": {
+        "message": "References to other files $1 (references: $2): only references inside the file are followed",
+        "description": "$1 is a list of references, $2 is a number."
+    },
+    "apiClientImportGapCookieParameters": {
+        "message": "Cookie parameters $1 (parameters: $2)",
+        "description": "$1 is a list of names, $2 is a number."
+    },
+    "apiClientImportGapOwnServers": {
+        "message": "Operations with servers of their own (requests: $2): they go to baseUrl like the others",
+        "description": "$2 is a number."
+    },
+    "apiClientImportSubmit": {
+        "message": "Import"
+    },
+    "apiClientImportCancel": {
+        "message": "Cancel"
+    },
+    "apiClientImportFailed": {
+        "message": "Could not import the file: $1",
+        "description": "$1 is the reason."
+    },
+    "apiClientImportUnnamed": {
+        "message": "Untitled"
+    },
+    "apiClientImportVariablesSuffix": {
+        "message": ": variables",
+        "description": "Ends the name of the environment made of the variables of a collection."
     },
     "apiClientCurlCancel": {
         "message": "Cancel"

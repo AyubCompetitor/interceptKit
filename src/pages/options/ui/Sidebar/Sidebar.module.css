@@ -55,30 +55,6 @@
     }
 }
 
-.group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-}
-
-.groupTitle {
-    padding: 0 var(--space-m);
-    color: var(--color-text-subtle);
-    font-size: var(--font-size-xs);
-    font-weight: 600;
-    letter-spacing: var(--letter-spacing-caps);
-    text-transform: uppercase;
-}
-
-.upcoming {
-    display: flex;
-    align-items: center;
-    gap: var(--space-m);
-    min-height: var(--control-height-m);
-    padding: 0 var(--space-m);
-    color: var(--color-text-subtle);
-}
-
 @media (width < 840px) {
     .sidebar {
         position: static;

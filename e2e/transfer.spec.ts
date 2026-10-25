@@ -4,8 +4,10 @@ import type { Page } from '@playwright/test';
 
 import type { Environment } from '#entities/environment';
 import { MockBodyTypes, type Mock } from '#entities/mock';
+import { createRequestItem, RequestBodyTypes, type Collection } from '#entities/request';
 import { RuleTypes, type Rule } from '#entities/rule';
-import { Sources, SyntaxTypes } from '#shared/lib';
+import { BUNDLE_VERSION, BundleParts, buildBundleText } from '#features/transfer';
+import { HttpMethods, Sources, SyntaxTypes } from '#shared/lib';
 
 import { callBackground, expect, openSection, test } from './fixtures.ts';
 
@@ -50,6 +52,26 @@ const IMPORTED_TEXT = JSON.stringify({
     ],
 });
 
+const EXPORTED_AT = '2026-10-25T12:00:00.000Z';
+
+const SHOP_COLLECTION: Collection = {
+    id: 'shop',
+    name: 'Shop API',
+    createdAt: 1,
+    items: [
+        createRequestItem({
+            id: 'users',
+            name: 'List users',
+            method: HttpMethods.GET,
+            url: 'https://api.example.com/users',
+            query: [],
+            headers: [],
+            body: { bodyType: RequestBodyTypes.NONE },
+            sendCookies: false,
+        }),
+    ],
+};
+
 const readStoredLists = (page: Page) =>
     page.evaluate(() =>
         chrome.storage.local.get<{ rules: Rule[]; environments: Environment[] }>(['rules', 'environments']),
@@ -81,7 +103,12 @@ test.describe('export', () => {
 
         const file = JSON.parse(readFileSync(await download.path(), 'utf8'));
 
-        expect(file).toMatchObject({ format: 'interceptkit', version: 1, rules: [{ id: RULE.id, name: RULE.name }] });
+        expect(file).toMatchObject({
+            format: 'interceptkit',
+            version: BUNDLE_VERSION,
+            rules: [{ id: RULE.id, name: RULE.name }],
+            collections: [],
+        });
 
         expect(file).not.toHaveProperty('mocks');
 
@@ -149,5 +176,43 @@ test.describe('import', () => {
         const answer = await callBackground(optionsPage, 'transfer/import', { text: '{"rules":[]}' });
 
         expect(answer).toMatchObject({ ok: false, error: { message: expect.stringContaining('not an InterceptKit') } });
+    });
+
+    test('brings collections into the API client and back into an export', async ({
+        context,
+        extensionId,
+        optionsPage,
+    }) => {
+        const text = buildBundleText(
+            { rules: [], mocks: [], environments: [], collections: [SHOP_COLLECTION] },
+            [BundleParts.COLLECTIONS],
+            EXPORTED_AT,
+        );
+
+        expect(await callBackground(optionsPage, 'transfer/import', { text })).toMatchObject({
+            ok: true,
+            result: { counts: { collections: { added: 1 } } },
+        });
+
+        const apiClient = await context.newPage();
+
+        await apiClient.goto(`chrome-extension://${extensionId}/pages/api-client.html`);
+        await apiClient.getByRole('radio', { name: 'Collections', exact: true }).click();
+
+        const panel = apiClient.getByRole('region', { name: 'Collections' });
+
+        await expect(panel.getByRole('button', { name: SHOP_COLLECTION.name, exact: true })).toBeVisible();
+
+        await expect(panel.getByRole('button', { name: 'GET List users', exact: true })).toBeVisible();
+
+        await openSection(optionsPage, 'Import and export');
+
+        const downloading = optionsPage.waitForEvent('download');
+
+        await optionsPage.getByRole('button', { name: 'Download JSON', exact: true }).click();
+
+        const file = JSON.parse(readFileSync(await (await downloading).path(), 'utf8'));
+
+        expect(file.collections).toEqual([SHOP_COLLECTION]);
     });
 });

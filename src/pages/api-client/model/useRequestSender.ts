@@ -3,13 +3,14 @@ import { useRef } from 'react';
 import { vaultRpc, type Environment, type VariableValues } from '#entities/environment';
 import { buildOutgoingRequest, type ApiRequest, type ApiResponse, type OutgoingRequest } from '#entities/request';
 import { buildHostPattern, isHostCovered } from '#entities/site';
+import { isHostAllowed, isVaultRequired, usePolicy } from '#features/policy';
 import { formatIssues, getErrorText, noop } from '#shared/lib';
 import { executeRpc } from '#shared/messaging';
 import { requestHostAccess, useHostPatterns } from '#shared/platform';
 
 import { addHistoryEntry, buildHistoryEntry } from './historyEntries.ts';
 import { buildApiRequest, type RequestDraft } from './requestDraft.ts';
-import { resolveRequestVariables } from './requestVariables.ts';
+import { getBlockedSecretNames, resolveRequestVariables } from './requestVariables.ts';
 import { sendWithRuleHeaders } from './ruleHeaders.ts';
 import { IDLE_STATE, SENDING_STATE, SendStateTypes, TIMED_OUT_STATE, type SendState } from './sendState.ts';
 
@@ -52,6 +53,7 @@ const extendVaultUnlock = () => {
 
 export const useRequestSender = (onSendStateChange: (tabId: string, sendState: SendState) => void) => {
     const patterns = useHostPatterns();
+    const { policy } = usePolicy();
     const controllers = useRef(new Map<string, AbortController>());
 
     const sendOutgoing = (tabId: string, outgoing: OutgoingRequest, typedRequest: ApiRequest) => {
@@ -84,6 +86,14 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
         const tabId = draft.id;
         const typedRequest = buildApiRequest(draft);
 
+        const blockedNames = getBlockedSecretNames(typedRequest, environment, isVaultRequired(policy));
+
+        if (blockedNames.length > 0) {
+            onSendStateChange(tabId, { stateType: SendStateTypes.VAULT_REQUIRED, names: blockedNames });
+
+            return;
+        }
+
         const { request, missingNames, secretNames } = resolveRequestVariables(typedRequest, environment, secrets);
         const lockedNames = missingNames.filter(name => secretNames.includes(name));
 
@@ -113,6 +123,12 @@ export const useRequestSender = (onSendStateChange: (tabId: string, sendState: S
 
         const outgoing = result.value;
         const { hostname } = new URL(outgoing.url);
+
+        if (!isHostAllowed(hostname, policy)) {
+            onSendStateChange(tabId, { stateType: SendStateTypes.NOT_ALLOWED, host: hostname });
+
+            return;
+        }
 
         const isCovered = patterns !== undefined && isHostCovered(hostname, patterns);
 

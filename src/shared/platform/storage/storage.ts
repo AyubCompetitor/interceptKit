@@ -136,6 +136,34 @@ export const watchStoreChanges = (name: Store, listener: VoidFunction): VoidFunc
     return () => chrome.storage.onChanged.removeListener(onChanged);
 };
 
+/** Calls listener with everything in the area now and after each change, until stopped */
+export const subscribeStoreData = (name: Store, listener: (data: StoredData) => void): VoidFunction => {
+    let isSubscribed = true;
+
+    const updateData = (data: StoredData) => {
+        if (!isSubscribed) {
+            return;
+        }
+
+        listener(data);
+    };
+
+    const readData = () => {
+        readStoreData(name)
+            .then(updateData)
+            .catch(() => updateData({}));
+    };
+
+    const stopWatching = watchStoreChanges(name, readData);
+
+    readData();
+
+    return () => {
+        isSubscribed = false;
+        stopWatching();
+    };
+};
+
 const getRemovedStoreKeys = (currentData: Record<string, unknown>, storedData: StoredData): string[] =>
     Object.keys(currentData).filter(key => !Object.hasOwn(storedData, key));
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { splitShellWords } from '../shellWords.ts';
+import { quoteShellWord, splitShellWords } from '../shellWords.ts';
 
 describe('splitShellWords', () => {
     it.each([
@@ -33,4 +33,27 @@ describe('splitShellWords', () => {
     ])('gives nothing for an open $name quote', ({ command }) => {
         expect(splitShellWords(command)).toBeUndefined();
     });
+});
+
+describe('quoteShellWord', () => {
+    it.each([
+        {
+            name: 'a plain word',
+            word: 'https://api.example.com/users?page=2',
+            quoted: "'https://api.example.com/users?page=2'",
+        },
+        { name: 'a quote', word: "it's", quoted: String.raw`$'it\'s'` },
+        { name: 'a line break', word: '{\n}', quoted: String.raw`$'{\n}'` },
+        { name: 'a backslash', word: String.raw`a\b`, quoted: String.raw`$'a\\b'` },
+        { name: 'a control character', word: 'a\u0001b', quoted: String.raw`$'a\x01b'` },
+    ])('quotes $name', ({ word, quoted }) => {
+        expect(quoteShellWord(word)).toBe(quoted);
+    });
+
+    it.each(["it's", '{\n  "a": "b"\n}', 'tab\there', 'dollar $HOME and `cmd`', String.raw`back\slash`, 'bell\u0007'])(
+        'is read back as it was: %j',
+        word => {
+            expect(splitShellWords(quoteShellWord(word))).toEqual([word]);
+        },
+    );
 });

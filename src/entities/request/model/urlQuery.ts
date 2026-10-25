@@ -137,5 +137,12 @@ const encodeQueryText = (text: string): string => text.replace(QUERY_SPECIAL_RGX
 const encodeQueryKey = (key: string): string =>
     encodeQueryText(key).replaceAll(URL_MARKS.VALUE_SEPARATOR, encodeURIComponent(URL_MARKS.VALUE_SEPARATOR));
 
+/** A pair of another tool, which means the value as it is: what would split the query is escaped */
+export const escapeQueryPair = (pair: KeyValue): KeyValue => ({
+    ...pair,
+    key: encodeQueryKey(pair.key),
+    value: encodeQueryText(pair.value),
+});
+
 export const encodeQueryPair = (pair: KeyValue): string =>
     `${encodeQueryKey(pair.key)}${URL_MARKS.VALUE_SEPARATOR}${encodeQueryText(pair.value)}`;

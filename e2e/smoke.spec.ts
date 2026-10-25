@@ -27,6 +27,22 @@ test('manifest requests only the reviewed permissions', async ({ serviceWorker }
     expect(manifest.content_security_policy).toEqual({ extension_pages: PAGES_CSP });
 });
 
+test('the icons the manifest names ship in the package', async ({ serviceWorker }) => {
+    const icons = await serviceWorker.evaluate(async () => {
+        const { icons: paths = {} } = chrome.runtime.getManifest();
+        const responses = await Promise.all(Object.values(paths).map(path => fetch(chrome.runtime.getURL(path))));
+
+        return {
+            sizes: Object.keys(paths),
+            types: responses.map(response => response.ok && response.headers.get('content-type')),
+        };
+    });
+
+    expect(icons.sizes).toEqual(['16', '32', '48', '128']);
+
+    expect(icons.types).toEqual(Array(4).fill('image/png'));
+});
+
 test('storage.local can be closed to content scripts', async ({ serviceWorker }) => {
     const restricted = serviceWorker.evaluate(() =>
         chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }),

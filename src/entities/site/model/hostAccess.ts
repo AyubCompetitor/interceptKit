@@ -86,8 +86,12 @@ export const parseHostPattern = (pattern: string): NotRequired<HostGrant> => {
     };
 };
 
+/** Host of a match pattern without its port: *, *.example.com or example.com; none for <all_urls> */
+export const parsePatternHost = (pattern: string): NotRequired<string> =>
+    HOST_ACCESS_RGXS.PATTERN_HOST.exec(pattern)?.[1];
+
 const isHostInPattern = (host: string, pattern: string): boolean => {
-    const patternHost = HOST_ACCESS_RGXS.PATTERN_HOST.exec(pattern)?.[1];
+    const patternHost = parsePatternHost(pattern);
 
     if (patternHost === undefined) {
         return false;

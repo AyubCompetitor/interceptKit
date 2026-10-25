@@ -1,70 +1,29 @@
 import type { FC } from 'react';
 
-import { useApiClient } from '../../model/useApiClient.ts';
-
+import { Features, isFeatureEnabled } from '#entities/config';
+import { usePolicy } from '#features/policy';
 import { useTranslation } from '#shared/i18n';
-import { Brand, createDocumentTitle, useDocumentTitle } from '#shared/ui';
+import { createDocumentTitle, useDocumentTitle } from '#shared/ui';
 
-import styles from './ApiClientPage.module.css';
-import { CurlImportControl } from '../Curl/CurlImportControl.tsx';
-import { EnvironmentSelect } from '../Environment/EnvironmentSelect.tsx';
-import { RequestWorkspace } from '../Request/RequestWorkspace.tsx';
-import { ApiClientSidebar } from '../Sidebar/ApiClientSidebar.tsx';
-import { VaultControl } from '../Vault/VaultControl.tsx';
+import { ApiClientDisabled } from './ApiClientDisabled.tsx';
+import { ApiClientMain } from './ApiClientMain.tsx';
 
-/** The tabs live here: the history in the sidebar and the cURL import in the header open requests in them */
+/** Nothing of the client starts before the policy is read: it may turn the client off */
 export const ApiClientPage: FC = () => {
     const { t } = useTranslation();
-
-    const {
-        tabs,
-        activeTab,
-        isSending,
-        onTabOpen,
-        onRequestOpen,
-        onCurlImport,
-        onTabSelect,
-        onRequestTabClose,
-        onDraftChange,
-        onActiveRequestSend,
-        onActiveRequestCancel,
-    } = useApiClient();
+    const { policy, isLoading } = usePolicy();
 
     const title = createDocumentTitle('apiClientTitle', 'extName', t);
 
     useDocumentTitle(title);
 
-    return (
-        <div className={styles.page}>
-            <header className={styles.header}>
-                <Brand />
-                <h1 className={styles.title}>{t('apiClientTitle')}</h1>
-                <div className={styles.tools}>
-                    <CurlImportControl onImport={onCurlImport} />
+    if (isLoading) {
+        return null;
+    }
 
-                    <VaultControl />
+    if (!isFeatureEnabled(policy, Features.API_CLIENT)) {
+        return <ApiClientDisabled />;
+    }
 
-                    <EnvironmentSelect />
-                </div>
-            </header>
-
-            <div className={styles.layout}>
-                <ApiClientSidebar onRequestOpen={onRequestOpen} />
-
-                {activeTab && (
-                    <RequestWorkspace
-                        activeTab={activeTab}
-                        isSending={isSending}
-                        tabs={tabs}
-                        onCancel={onActiveRequestCancel}
-                        onDraftChange={onDraftChange}
-                        onSend={onActiveRequestSend}
-                        onTabClose={onRequestTabClose}
-                        onTabOpen={onTabOpen}
-                        onTabSelect={onTabSelect}
-                    />
-                )}
-            </div>
-        </div>
-    );
+    return <ApiClientMain />;
 };

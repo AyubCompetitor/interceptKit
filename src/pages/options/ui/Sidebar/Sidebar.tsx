@@ -1,13 +1,15 @@
-import { useId, type FC } from 'react';
+import type { FC } from 'react';
 
 import { buildSectionHash, type DashboardSection } from '../../lib/dashboard.ts';
 
+import { Features, isFeatureEnabled } from '#entities/config';
 import { InterceptionSwitch } from '#features/interception-switch';
+import { usePolicy } from '#features/policy';
 import { useTranslation } from '#shared/i18n';
 import { EXTENSION_PAGES } from '#shared/platform';
 import { Brand, Icon, IconNames } from '#shared/ui';
 
-import { NAV_ITEMS, UPCOMING_ITEMS } from './dashboardNav.ts';
+import { NAV_ITEMS } from './dashboardNav.ts';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -18,9 +20,8 @@ interface SidebarProps {
 const API_CLIENT_URL = `/${EXTENSION_PAGES.API_CLIENT}`;
 
 export const Sidebar: FC<SidebarProps> = ({ section }) => {
-    const upcomingId = useId();
-
     const { t } = useTranslation();
+    const { policy } = usePolicy();
 
     return (
         <aside className={styles.sidebar}>
@@ -45,26 +46,14 @@ export const Sidebar: FC<SidebarProps> = ({ section }) => {
                         </li>
                     ))}
                 </ul>
-
-                <div className={styles.group}>
-                    <span className={styles.groupTitle} id={upcomingId}>
-                        {t('navSoon')}
-                    </span>
-                    <ul aria-labelledby={upcomingId} className={styles.list}>
-                        {UPCOMING_ITEMS.map(item => (
-                            <li key={item.label} className={styles.upcoming}>
-                                <Icon name={item.icon} />
-                                {t(item.label)}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
             </nav>
 
-            <a className={styles.link} href={API_CLIENT_URL} rel='noreferrer' target='_blank'>
-                <Icon name={IconNames.API_CLIENT} />
-                {t('apiClientTitle')}
-            </a>
+            {isFeatureEnabled(policy, Features.API_CLIENT) && (
+                <a className={styles.link} href={API_CLIENT_URL} rel='noreferrer' target='_blank'>
+                    <Icon name={IconNames.API_CLIENT} />
+                    {t('apiClientTitle')}
+                </a>
+            )}
         </aside>
     );
 };

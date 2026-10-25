@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { getGrantedSites, getMockPatterns, upsertSite } from '../siteList.ts';
+import { MAX_SITES } from '../site.ts';
+import { getGrantedSites, getMockPatterns, setSiteMocks, upsertSite } from '../siteList.ts';
 
 import { EXAMPLE_PATTERN, makeSite, OTHER_PATTERN } from './mocks.ts';
 
@@ -17,6 +18,18 @@ describe('upsertSite', () => {
         const switchedOff = makeSite({ mocks: false });
 
         expect(upsertSite([EXAMPLE_SITE, OTHER_SITE], switchedOff)).toEqual([switchedOff, OTHER_SITE]);
+    });
+});
+
+describe('setSiteMocks', () => {
+    it('keeps the settings of sites the browser no longer grants', () => {
+        expect(setSiteMocks([EXAMPLE_SITE], OTHER_SITE, [OTHER_PATTERN])).toEqual([EXAMPLE_SITE, OTHER_SITE]);
+    });
+
+    it('makes room in a full list with the settings of sites without access', () => {
+        const oldSites = Array.from({ length: MAX_SITES }, (_, idx) => makeSite({ pattern: `*://old-${idx}.test/*` }));
+
+        expect(setSiteMocks(oldSites, OTHER_SITE, [OTHER_PATTERN])).toEqual([OTHER_SITE]);
     });
 });
 

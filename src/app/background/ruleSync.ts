@@ -1,38 +1,12 @@
-import {
-    Features,
-    isFeatureEnabled,
-    readPolicy,
-    settingsItem,
-    type Feature,
-    type ManagedPolicy,
-    type Settings,
-} from '#entities/config';
+import { settingsItem, type ManagedPolicy, type Settings } from '#entities/config';
 import { compileRules, rulesItem, type Rule } from '#entities/rule';
-import { Sources, Stores, type TaskQueue } from '#shared/lib';
-import {
-    readStoreData,
-    readItem,
-    replaceDynamicRules,
-    watchStoreChanges,
-    watchExtensionStart,
-    watchItem,
-} from '#shared/platform';
+import { isRuleAllowed } from '#features/policy';
+import { Stores, type TaskQueue } from '#shared/lib';
+import { readItem, replaceDynamicRules, watchStoreChanges, watchExtensionStart, watchItem } from '#shared/platform';
 
-const RULE_FEATURES: Record<Rule['type'], Feature> = {
-    redirect: Features.REDIRECT,
-    headers: Features.HEADERS,
-    block: Features.BLOCK,
-};
+import { readManagedPolicy } from './managedPolicy.ts';
 
-const isRuleActive = (rule: Rule, policy: ManagedPolicy): boolean => {
-    const isForbiddenUserRule = rule.source === Sources.USER && policy.allowUserRules === false;
-
-    if (!rule.enabled || isForbiddenUserRule) {
-        return false;
-    }
-
-    return isFeatureEnabled(policy, RULE_FEATURES[rule.type]);
-};
+const isRuleActive = (rule: Rule, policy: ManagedPolicy): boolean => rule.enabled && isRuleAllowed(rule, policy);
 
 export const selectActiveRules = (rules: readonly Rule[], settings: Settings, policy: ManagedPolicy): Rule[] => {
     if (!settings.enabled) {
@@ -47,9 +21,7 @@ export const selectActiveRules = (rules: readonly Rule[], settings: Settings, po
 export const syncRules = async (): Promise<void> => {
     const rules = await readItem(rulesItem);
     const settings = await readItem(settingsItem);
-    const managedData = await readStoreData(Stores.MANAGED);
-
-    const { policy } = readPolicy(managedData);
+    const policy = await readManagedPolicy();
 
     const activeRules = selectActiveRules(rules, settings, policy);
     const compiledRules = compileRules(activeRules);

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { downloadJsonFile } from '../lib/downloadFile.ts';
-import { toggleValue } from '../lib/toggleValue.ts';
 
 import {
     BUNDLE_PARTS,
@@ -10,6 +9,7 @@ import {
     type BundleContent,
     type BundlePart,
 } from '#features/transfer';
+import { toggleValue } from '#shared/lib';
 
 export const useBundleExport = (content: BundleContent) => {
     const [parts, setParts] = useState<readonly BundlePart[]>(BUNDLE_PARTS);

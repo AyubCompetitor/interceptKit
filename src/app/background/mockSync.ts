@@ -1,25 +1,19 @@
-import {
-    Features,
-    isFeatureEnabled,
-    readPolicy,
-    settingsItem,
-    type ManagedPolicy,
-    type Settings,
-} from '#entities/config';
+import { Features, isFeatureEnabled, settingsItem, type ManagedPolicy, type Settings } from '#entities/config';
 import { mapMockToPageMock, MOCK_SCRIPTS, mocksItem, type Mock, type PageMock } from '#entities/mock';
-import { getGrantedSites, getMockPatterns, sitesItem, type Site } from '#entities/site';
-import { Sources, Stores, type TaskQueue } from '#shared/lib';
+import { getMockPatterns, sitesItem, type Site } from '#entities/site';
+import { isMockAllowed, isPatternAllowed } from '#features/policy';
+import { Stores, type TaskQueue } from '#shared/lib';
 import {
     getHostPermissions,
     readItem,
-    readStoreData,
     syncContentScripts,
     watchExtensionStart,
     watchHostAccess,
     watchItem,
     watchStoreChanges,
-    writeItem,
 } from '#shared/platform';
+
+import { readManagedPolicy } from './managedPolicy.ts';
 
 /** Everything that decides which pages get which mocks */
 export interface MockState {
@@ -48,14 +42,9 @@ const NO_DELIVERY: MockDelivery = {
     mocks: [],
 };
 
-const isMockActive = (mock: Mock, policy: ManagedPolicy): boolean => {
-    /** Only an explicit false forbids user mocks: without a policy the field is absent */
-    const isForbiddenUserMock = mock.source === Sources.USER && policy.allowUserRules === false;
+const isMockActive = (mock: Mock, policy: ManagedPolicy): boolean => mock.enabled && isMockAllowed(mock, policy);
 
-    return mock.enabled && !isForbiddenUserMock;
-};
-
-/** Mocks need interception on, the feature allowed, an active mock and a granted site with mocks on */
+/** Mocks need interception on, the feature allowed, an active mock and a granted site with mocks on that the policy allows */
 export const selectMockDelivery = (state: MockState): MockDelivery => {
     const isAllowed = state.settings.enabled && isFeatureEnabled(state.policy, Features.MOCKS);
 
@@ -64,7 +53,8 @@ export const selectMockDelivery = (state: MockState): MockDelivery => {
     }
 
     const activeMocks = state.mocks.filter(mock => isMockActive(mock, state.policy));
-    const patterns = getMockPatterns(state.sites, state.grantedPatterns);
+    const mockPatterns = getMockPatterns(state.sites, state.grantedPatterns);
+    const patterns = mockPatterns.filter(pattern => isPatternAllowed(pattern, state.policy));
 
     const hasNothingToServe = activeMocks.length === 0 || patterns.length === 0;
 
@@ -82,10 +72,8 @@ export const readMockState = async (): Promise<MockState> => {
     const mocks = await readItem(mocksItem);
     const sites = await readItem(sitesItem);
     const settings = await readItem(settingsItem);
-    const managedData = await readStoreData(Stores.MANAGED);
+    const policy = await readManagedPolicy();
     const grantedPatterns = await getHostPermissions();
-
-    const { policy } = readPolicy(managedData);
 
     return {
         mocks,
@@ -96,25 +84,8 @@ export const readMockState = async (): Promise<MockState> => {
     };
 };
 
-/** Settings of a site go with its access, so granting the site again starts with mocks off */
-const pruneRevokedSites = async (state: MockState): Promise<void> => {
-    const grantedSites = getGrantedSites(state.sites, state.grantedPatterns);
-
-    const isEveryGranted = grantedSites.length === state.sites.length;
-
-    if (isEveryGranted) {
-        return;
-    }
-
-    await writeItem(sitesItem, grantedSites);
-};
-
 export const syncMockScripts = async (): Promise<void> => {
-    const state = await readMockState();
-
-    await pruneRevokedSites(state);
-
-    const { patterns } = selectMockDelivery(state);
+    const { patterns } = selectMockDelivery(await readMockState());
 
     await syncContentScripts(MOCK_SCRIPTS, patterns);
 };

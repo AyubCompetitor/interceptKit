@@ -3,9 +3,7 @@ import type { ChangeEvent } from 'react';
 import type { HeaderOpDraft, RuleDraft, RuleDraftChange, SchemeChoice, SyntaxType } from '../model/ruleDraft.ts';
 
 import type { ResourceType, RuleTargetType, RuleType } from '#entities/rule';
-import type { HttpMethod } from '#shared/lib';
-
-import { toggleValue } from './toggleValue.ts';
+import { toggleValue, type HttpMethod } from '#shared/lib';
 
 export const useRuleDraftFields = (draft: RuleDraft, onDraftChange: RuleDraftChange) => {
     const onNameChange = (event: ChangeEvent<HTMLInputElement>) => {

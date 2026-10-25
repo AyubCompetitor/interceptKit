@@ -4,8 +4,10 @@ import { restrictLocalStore } from '#shared/platform';
 
 import { registerEnvironmentHandlers } from './environmentHandlers.ts';
 import { registerHeaderRuleHandlers } from './headerRuleHandlers.ts';
+import { startHostAccessSync } from './hostAccessSync.ts';
 import { registerMockHandlers } from './mockHandlers.ts';
 import { startMockSync } from './mockSync.ts';
+import { startPresetSync } from './presetSync.ts';
 import { registerRuleHandlers } from './ruleHandlers.ts';
 import { startRuleSync } from './ruleSync.ts';
 import { registerSettingsHandlers } from './settingsHandlers.ts';
@@ -42,6 +44,8 @@ export const startListenBackground: VoidFunction = () => {
     registerHeaderRuleHandlers(router, enqueue);
     registerTransferHandlers(router, storageReady, enqueue);
 
+    startHostAccessSync(enqueue);
+    startPresetSync(storageReady, enqueue);
     startRuleSync(storageReady, enqueue);
     startMockSync(storageReady, enqueue);
     startVaultLock(enqueue);

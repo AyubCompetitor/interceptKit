@@ -4,6 +4,7 @@ import {
     discriminatedUnion,
     displayName,
     domainName,
+    getRecordIdError,
     isDuplicateValues,
     headerName,
     headerValue,
@@ -313,7 +314,7 @@ const headerRule = refine(
 
 const blockRule = object({ ...ruleBase, type: literal(RuleTypes.BLOCK) });
 
-export const ruleValidator: Validator<Rule> = refine(
+const ruleShape = refine(
     discriminatedUnion('type', {
         redirect: redirectRule,
         headers: headerRule,
@@ -322,6 +323,8 @@ export const ruleValidator: Validator<Rule> = refine(
 
     getSubstitutionError,
 );
+
+export const ruleValidator: Validator<Rule> = refine(ruleShape, getRecordIdError);
 
 export const rulesValidator: Validator<Rule[]> = refine(
     array(ruleValidator, { maxLength: MAX_RULES }),

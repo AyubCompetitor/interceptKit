@@ -17,9 +17,6 @@
     "navLabel": {
         "message": "Разделы панели"
     },
-    "navSoon": {
-        "message": "Скоро"
-    },
     "rulesTitle": {
         "message": "Правила"
     },
@@ -34,6 +31,87 @@
     },
     "policyTitle": {
         "message": "Политика организации"
+    },
+    "policyDescription": {
+        "message": "Эти настройки задаёт администратор вашей организации через политику браузера. Они важнее ваших, и изменить их здесь нельзя."
+    },
+    "policyEmptyTitle": {
+        "message": "Политика не задана"
+    },
+    "policyEmptyText": {
+        "message": "Все функции доступны, и как работает InterceptKit, решаете только вы."
+    },
+    "policyValuesTitle": {
+        "message": "Что задаёт политика"
+    },
+    "policyIssues": {
+        "message": "В политике есть ошибки. Неверное ограничение читается в самом строгом виде, остальные неверные значения не применяются."
+    },
+    "policyDisabledFeatures": {
+        "message": "Отключённые функции"
+    },
+    "policyAllowedHosts": {
+        "message": "Разрешённые сайты"
+    },
+    "policyAllowUserRules": {
+        "message": "Свои правила и моки"
+    },
+    "policyRequireVault": {
+        "message": "Шифрование секретов"
+    },
+    "policyPresetBundle": {
+        "message": "Правила и моки организации"
+    },
+    "policyNotSet": {
+        "message": "Не задано"
+    },
+    "policyNoFeaturesOff": {
+        "message": "Нет"
+    },
+    "policyNoHosts": {
+        "message": "Ни одного: доступ к сайтам закрыт"
+    },
+    "policyUserRulesAllowed": {
+        "message": "Разрешены"
+    },
+    "policyUserRulesForbidden": {
+        "message": "Не применяются, действуют только правила организации"
+    },
+    "policyVaultRequired": {
+        "message": "Обязательно"
+    },
+    "policyVaultOptional": {
+        "message": "Не обязательно"
+    },
+    "policyPresetCounts": {
+        "message": "Правила: $1, моки: $2"
+    },
+    "policyPresetBroken": {
+        "message": "Не применяются: в наборе есть ошибки"
+    },
+    "policyFeatureRedirect": {
+        "message": "Редиректы"
+    },
+    "policyFeatureHeaders": {
+        "message": "Изменение заголовков"
+    },
+    "policyFeatureBlock": {
+        "message": "Блокировка"
+    },
+    "policyFeatureMocks": {
+        "message": "Моки API"
+    },
+    "policyFeatureApiClient": {
+        "message": "API-клиент"
+    },
+    "policyOpen": {
+        "message": "Открыть политику"
+    },
+    "policyBlockedBadge": {
+        "message": "Отключено политикой"
+    },
+    "policySourceBadge": {
+        "message": "От организации"
     },
     "transferTitle": {
         "message": "Импорт и экспорт"
@@ -55,6 +133,9 @@
     },
     "transferPartEnvironments": {
         "message": "Окружения"
+    },
+    "transferPartCollections": {
+        "message": "Коллекции"
     },
     "transferExportHint": {
         "message": "Записи из политики организации и значения секретов в файл не попадают: у секретных переменных остаются только имена."
@@ -125,6 +206,12 @@
     "rulesOpenSites": {
         "message": "Разрешить сайт"
     },
+    "rulesPolicyOnly": {
+        "message": "Организация разрешает только свои правила, поэтому добавленные вами правила не применяются."
+    },
+    "rulesFeaturesOff": {
+        "message": "Организация отключила: $1. Правила этих типов не применяются."
+    },
     "rulesEmptyTitle": {
         "message": "Правил пока нет"
     },
@@ -142,6 +229,9 @@
     },
     "ruleNoAccess": {
         "message": "У InterceptKit нет доступа к $1, поэтому там правило пока не работает."
+    },
+    "ruleHostNotAllowed": {
+        "message": "Организация не разрешает доступ к $1, поэтому там правило не работает."
     },
     "ruleAllowAccess": {
         "message": "Разрешить"
@@ -434,6 +524,18 @@
     "sitesNotGranted": {
         "message": "Доступ не предоставлен."
     },
+    "sitesNotAllowed": {
+        "message": "Организация не разрешает доступ к этому сайту."
+    },
+    "sitesSubdomainsNotAllowed": {
+        "message": "Организация разрешает этот сайт без поддоменов: снимите флажок «Вместе с поддоменами»."
+    },
+    "sitesAllowedHosts": {
+        "message": "Организация разрешает доступ только к этим сайтам: $1."
+    },
+    "sitesNoHostsAllowed": {
+        "message": "Организация не разрешает доступ ни к одному сайту."
+    },
     "sitesRequestFailed": {
         "message": "Не удалось запросить доступ. Попробуйте ещё раз."
     },
@@ -463,6 +565,12 @@
     },
     "mocksOpenSites": {
         "message": "Включить для сайта"
+    },
+    "mocksPolicyOnly": {
+        "message": "Организация разрешает только свои моки, поэтому добавленные вами моки не применяются."
+    },
+    "mocksFeatureOff": {
+        "message": "Организация отключила моки API, поэтому ни один мок не применяется."
     },
     "mocksSecretsWarning": {
         "message": "Скрипты страницы могут прочитать её моки, поэтому не кладите в них токены, пароли и другие секреты."
@@ -601,6 +709,12 @@
     },
     "apiClientTitle": {
         "message": "API-клиент"
+    },
+    "apiClientDisabledTitle": {
+        "message": "Организация отключила API-клиент"
+    },
+    "apiClientDisabledText": {
+        "message": "Его выключил администратор вашей организации через политику браузера. История запросов сохранена."
     },
     "apiClientTabs": {
         "message": "Открытые запросы"
@@ -791,6 +905,9 @@
     "apiClientNoAccess": {
         "message": "У InterceptKit нет доступа к $1, а без него браузер скроет ответ."
     },
+    "apiClientHostNotAllowed": {
+        "message": "Организация не разрешает запросы к $1."
+    },
     "apiClientAllowAccess": {
         "message": "Разрешить и отправить"
     },
@@ -917,11 +1034,17 @@
     "apiClientSecretsWarning": {
         "message": "Значения секретов скрыты на экране, но в профиле браузера хранятся без шифрования. Зашифровать их мастер-паролем можно кнопкой в шапке страницы."
     },
+    "apiClientVaultRequiredWarning": {
+        "message": "Организация требует шифровать секреты: значения переменных с флажком «Секрет» не сохранятся, пока вы не включите шифрование."
+    },
     "apiClientSecretsEncrypted": {
         "message": "Значения секретов зашифрованы мастер-паролем. Редактор их не показывает: чтобы заменить значение, введите новое."
     },
     "apiClientSecretsLocked": {
         "message": "Хранилище заблокировано, и у этих зашифрованных переменных нет значений: $1. Разблокируйте его кнопкой в шапке страницы."
+    },
+    "apiClientVaultRequired": {
+        "message": "Организация требует шифровать секреты: включите шифрование, чтобы использовать $1."
     },
     "apiClientVaultSetupOpen": {
         "message": "Зашифровать секреты"
@@ -1022,6 +1145,9 @@
     "apiClientVaultLockedSave": {
         "message": "Хранилище заблокировано: чтобы сохранить значения секретов, разблокируйте его кнопкой в шапке страницы."
     },
+    "apiClientVaultRequiredSave": {
+        "message": "Организация требует шифровать секреты. Включите шифрование и сохраните ещё раз."
+    },
     "apiClientCurlImportOpen": {
         "message": "Импорт cURL"
     },
@@ -1042,6 +1168,234 @@
     },
     "apiClientCurlImportSubmit": {
         "message": "Импортировать"
+    },
+    "apiClientCurlExportOpen": {
+        "message": "Скопировать как cURL"
+    },
+    "apiClientCurlExportTitle": {
+        "message": "Скопировать как cURL"
+    },
+    "apiClientCurlExportCommand": {
+        "message": "Команда для bash"
+    },
+    "apiClientCurlExportSecrets": {
+        "message": "Подставить секреты"
+    },
+    "apiClientCurlExportSecretsHint": {
+        "message": "Без флажка секреты остаются в виде {{name}}, и токен не попадёт в буфер обмена."
+    },
+    "apiClientCurlExportMissing": {
+        "message": "У этих переменных нет значения, они остались как есть: $1."
+    },
+    "apiClientCurlExportCookies": {
+        "message": "Куки браузера для сайта в команду не попадают: если они нужны серверу, добавьте заголовок Cookie."
+    },
+    "apiClientCurlExportCopy": {
+        "message": "Скопировать"
+    },
+    "apiClientCurlExportCopied": {
+        "message": "Скопировано в буфер обмена."
+    },
+    "apiClientCurlExportCopyFailed": {
+        "message": "Не удалось скопировать: выделите команду и скопируйте её сами."
+    },
+    "apiClientCollections": {
+        "message": "Коллекции"
+    },
+    "apiClientCollectionsEmpty": {
+        "message": "Храните запросы в коллекциях и папках. Запрос вкладки сохраняется по Ctrl+S."
+    },
+    "apiClientCollectionAdd": {
+        "message": "Новая коллекция"
+    },
+    "apiClientCollectionsLimit": {
+        "message": "Коллекций может быть не больше $1."
+    },
+    "apiClientCollectionsFailed": {
+        "message": "Не удалось изменить коллекцию."
+    },
+    "apiClientCollectionMenu": {
+        "message": "Действия: $1"
+    },
+    "apiClientCollectionNewRequest": {
+        "message": "Новый запрос"
+    },
+    "apiClientCollectionNewFolder": {
+        "message": "Новая папка"
+    },
+    "apiClientCollectionRename": {
+        "message": "Переименовать"
+    },
+    "apiClientCollectionDelete": {
+        "message": "Удалить"
+    },
+    "apiClientCollectionCreateTitle": {
+        "message": "Новая коллекция"
+    },
+    "apiClientCollectionFolderTitle": {
+        "message": "Новая папка"
+    },
+    "apiClientCollectionRequestTitle": {
+        "message": "Новый запрос"
+    },
+    "apiClientCollectionRenameTitle": {
+        "message": "Переименовать"
+    },
+    "apiClientCollectionName": {
+        "message": "Название"
+    },
+    "apiClientCollectionCreate": {
+        "message": "Создать"
+    },
+    "apiClientCollectionSave": {
+        "message": "Сохранить"
+    },
+    "apiClientCollectionCancel": {
+        "message": "Отмена"
+    },
+    "apiClientCollectionDeleteTitle": {
+        "message": "Удалить из коллекций?"
+    },
+    "apiClientCollectionDeleteText": {
+        "message": "«$1» удалится — вместе со всем содержимым, если это папка или коллекция. Открытые вкладки сохранят свои запросы."
+    },
+    "apiClientSave": {
+        "message": "Сохранить в коллекцию"
+    },
+    "apiClientSaveHint": {
+        "message": "Сохранить в коллекцию (Ctrl+S)"
+    },
+    "apiClientSaveTitle": {
+        "message": "Сохранить в коллекцию"
+    },
+    "apiClientSaveName": {
+        "message": "Название запроса"
+    },
+    "apiClientSaveCollection": {
+        "message": "Коллекция"
+    },
+    "apiClientSaveCollectionName": {
+        "message": "Название новой коллекции"
+    },
+    "apiClientSaveFolder": {
+        "message": "Папка"
+    },
+    "apiClientSaveTop": {
+        "message": "В корне коллекции"
+    },
+    "apiClientSaveFailed": {
+        "message": "Не удалось сохранить запрос."
+    },
+    "apiClientTabUnsaved": {
+        "message": "Есть несохранённые изменения"
+    },
+    "apiClientImportOpen": {
+        "message": "Импорт"
+    },
+    "apiClientImportTitle": {
+        "message": "Импорт коллекции"
+    },
+    "apiClientImportHint": {
+        "message": "Коллекция (v2.0 или v2.1) или окружение Postman либо описание OpenAPI 3.0 или 3.1 в JSON. До 10 МБ."
+    },
+    "apiClientImportFile": {
+        "message": "Файл"
+    },
+    "apiClientImportText": {
+        "message": "Или вставьте текст файла"
+    },
+    "apiClientImportFileUnreadable": {
+        "message": "Не удалось прочитать файл."
+    },
+    "apiClientImportInvalid": {
+        "message": "Этот файл нельзя импортировать:"
+    },
+    "apiClientImportPreview": {
+        "message": "Что сделает импорт"
+    },
+    "apiClientImportCollection": {
+        "message": "Новая коллекция «$1»: запросов — $2, папок — $3."
+    },
+    "apiClientImportEnvironment": {
+        "message": "Новое окружение «$1»: переменных — $2. Чтобы они подставлялись, выберите его в шапке страницы."
+    },
+    "apiClientImportSecretsPlain": {
+        "message": "Значения секретов сохранятся без шифрования, как при вводе в редакторе. Чтобы зашифровать их, до импорта включите шифрование в шапке страницы."
+    },
+    "apiClientImportSecretsEncrypted": {
+        "message": "Значения секретов будут зашифрованы мастер-паролем."
+    },
+    "apiClientImportSecretsLocked": {
+        "message": "Хранилище заблокировано, поэтому значения секретов останутся пустыми. Чтобы перенести их, разблокируйте хранилище в шапке страницы и импортируйте файл ещё раз."
+    },
+    "apiClientImportSecretsRequired": {
+        "message": "Организация требует шифровать секреты, поэтому их значения останутся пустыми. Чтобы перенести их, включите шифрование и импортируйте файл ещё раз."
+    },
+    "apiClientImportEnvironmentsLimit": {
+        "message": "Окружений может быть не больше $1."
+    },
+    "apiClientImportGaps": {
+        "message": "Не переносится:"
+    },
+    "apiClientImportGapScripts": {
+        "message": "Скрипты и тесты (скриптов: $2): код из файла здесь никогда не выполняется"
+    },
+    "apiClientImportGapExamples": {
+        "message": "Сохранённые примеры ответов (примеров: $2)"
+    },
+    "apiClientImportGapBodies": {
+        "message": "Тела вида $1 (запросов: $2): клиент отправляет только JSON, текст и формы URL-encoded"
+    },
+    "apiClientImportGapBodiesOfBodyless": {
+        "message": "Тела запросов $1 (запросов: $2): с такими методами запрос уходит без тела"
+    },
+    "apiClientImportGapAuths": {
+        "message": "Авторизация видов $1 (запросов: $2)"
+    },
+    "apiClientImportGapBasicWithVariables": {
+        "message": "Базовая авторизация с {{переменными}} (запросов: $2): в заголовке логин и пароль закодированы, и переменную внутри не подставить"
+    },
+    "apiClientImportGapMethods": {
+        "message": "Запросы с методами $1 (запросов: $2): клиент такие не отправляет"
+    },
+    "apiClientImportGapDynamicVariables": {
+        "message": "Генерируемые значения $1 (запросов: $2): остаются как есть, клиент их не создаёт"
+    },
+    "apiClientImportGapDeepFolders": {
+        "message": "Папки глубже пяти уровней (папок: $2): их запросы перенесены в папку пятого уровня"
+    },
+    "apiClientImportGapVariableNames": {
+        "message": "Переменные с именами, которые нельзя подставить через {{шаблон}}: $1"
+    },
+    "apiClientImportEmptySecrets": {
+        "message": "Перед отправкой заполните в окружении эти секреты: $1."
+    },
+    "apiClientImportGapRelativeServer": {
+        "message": "Адрес сервера $1 неполный: впишите адрес API в baseUrl окружения"
+    },
+    "apiClientImportGapExternalRefs": {
+        "message": "Ссылки на другие файлы $1 (ссылок: $2): читаются только ссылки внутри файла"
+    },
+    "apiClientImportGapCookieParameters": {
+        "message": "Параметры в куках $1 (параметров: $2)"
+    },
+    "apiClientImportGapOwnServers": {
+        "message": "Операции со своими серверами (запросов: $2): они уходят на baseUrl, как остальные"
+    },
+    "apiClientImportSubmit": {
+        "message": "Импортировать"
+    },
+    "apiClientImportCancel": {
+        "message": "Отмена"
+    },
+    "apiClientImportFailed": {
+        "message": "Не удалось импортировать файл: $1"
+    },
+    "apiClientImportUnnamed": {
+        "message": "Без названия"
+    },
+    "apiClientImportVariablesSuffix": {
+        "message": ": переменные"
     },
     "apiClientCurlCancel": {
         "message": "Отмена"

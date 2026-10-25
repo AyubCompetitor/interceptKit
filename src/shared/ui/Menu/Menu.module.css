@@ -1,0 +1,42 @@
+.menu {
+    display: inline-flex;
+    flex: none;
+}
+
+.trigger {
+    anchor-name: var(--menu-anchor);
+}
+
+.popover {
+    position-anchor: var(--menu-anchor);
+    position-area: bottom span-left;
+    position-try-fallbacks: flip-block;
+    inset: auto;
+    min-width: max-content;
+    margin: var(--space-xs) 0 0;
+    padding: var(--space-xs);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-m);
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-raised);
+    color: var(--color-text);
+
+    &:popover-open {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.action {
+    padding: var(--space-s) var(--space-m);
+    border: none;
+    border-radius: var(--radius-s);
+    background: none;
+    text-align: start;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--color-surface-hover);
+    }
+}

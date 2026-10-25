@@ -66,6 +66,10 @@
     }
 }
 
+.isCompact {
+    padding: 0 var(--space-s);
+}
+
 .input {
     position: absolute;
     inset: 0;

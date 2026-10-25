@@ -1,7 +1,8 @@
 import type { Environment } from '#entities/environment';
 import { MockBodyTypes, type Mock } from '#entities/mock';
+import { createRequestItem, RequestBodyTypes, type Collection } from '#entities/request';
 import { RuleTypes, type Rule } from '#entities/rule';
-import { Sources, SyntaxTypes, type Source } from '#shared/lib';
+import { HttpMethods, Sources, SyntaxTypes, type Source } from '#shared/lib';
 
 import type { BundleContent } from '../bundle.ts';
 
@@ -34,9 +35,28 @@ export const makeEnvironment = (id: string, token = 'abc'): Environment => ({
     ],
 });
 
+export const makeCollection = (id: string): Collection => ({
+    id,
+    name: 'Shop API',
+    createdAt: 1,
+    items: [
+        createRequestItem({
+            id: 'users',
+            name: 'Users',
+            method: HttpMethods.GET,
+            url: '{{baseUrl}}/users',
+            query: [],
+            headers: [],
+            body: { bodyType: RequestBodyTypes.NONE },
+            sendCookies: false,
+        }),
+    ],
+});
+
 export const makeContent = (overrides: Partial<BundleContent> = {}): BundleContent => ({
     rules: [],
     mocks: [],
     environments: [],
+    collections: [],
     ...overrides,
 });

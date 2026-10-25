@@ -1,5 +1,6 @@
 import { environmentsItem, environmentsValidator } from '#entities/environment';
 import { mocksItem, mocksValidator } from '#entities/mock';
+import { apiClientDatabase, collectionsStore, collectionsValidator } from '#entities/request';
 import { rulesItem, rulesValidator } from '#entities/rule';
 import {
     mergeBundle,
@@ -11,7 +12,7 @@ import {
 } from '#features/transfer';
 import { formatIssues, type Issue, type TaskQueue, type Validator } from '#shared/lib';
 import { RpcError, RpcErrorCodes, type Router } from '#shared/messaging';
-import { prepareWrite, readItem, writeItems } from '#shared/platform';
+import { prepareWrite, readItem, readRecords, writeItems, writeRecords } from '#shared/platform';
 
 import { getRegexError } from './ruleHandlers.ts';
 import { prepareEnvironment } from './vaultKey.ts';
@@ -20,6 +21,7 @@ const readStoredContent = async (): Promise<BundleContent> => ({
     rules: await readItem(rulesItem),
     mocks: await readItem(mocksItem),
     environments: await readItem(environmentsItem),
+    collections: await readRecords(apiClientDatabase, collectionsStore),
 });
 
 const getListIssues = <T>(validator: Validator<T>, list: unknown, path: string): readonly Issue[] => {
@@ -37,6 +39,7 @@ const getContentIssues = (content: BundleContent): Issue[] => [
     ...getListIssues(rulesValidator, content.rules, '$.rules'),
     ...getListIssues(mocksValidator, content.mocks, '$.mocks'),
     ...getListIssues(environmentsValidator, content.environments, '$.environments'),
+    ...getListIssues(collectionsValidator, content.collections, '$.collections'),
 ];
 
 /** The page has shown a preview of the same text; the background checks it again and writes every list in one step */
@@ -72,6 +75,8 @@ const importBundleHandler = async (
         prepareWrite(mocksItem, content.mocks),
         prepareWrite(environmentsItem, environments),
     ]);
+
+    await writeRecords(apiClientDatabase, collectionsStore, content.collections);
 
     return {
         counts,

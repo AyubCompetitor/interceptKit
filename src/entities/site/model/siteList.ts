@@ -1,4 +1,4 @@
-import type { Site } from './site.ts';
+import { MAX_SITES, type Site } from './site.ts';
 
 export const upsertSite = (sites: readonly Site[], site: Site): Site[] => {
     const index = sites.findIndex(current => current.pattern === site.pattern);
@@ -12,6 +12,16 @@ export const upsertSite = (sites: readonly Site[], site: Site): Site[] => {
 
 export const getGrantedSites = (sites: readonly Site[], grantedPatterns: readonly string[]): Site[] => {
     return sites.filter(site => grantedPatterns.includes(site.pattern));
+};
+
+export const setSiteMocks = (sites: readonly Site[], site: Site, grantedPatterns: readonly string[]): Site[] => {
+    const nextSites = upsertSite(sites, site);
+
+    if (nextSites.length <= MAX_SITES) {
+        return nextSites;
+    }
+
+    return getGrantedSites(nextSites, grantedPatterns);
 };
 
 export const getMockPatterns = (sites: readonly Site[], grantedPatterns: readonly string[]): string[] => {

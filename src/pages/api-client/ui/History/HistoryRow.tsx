@@ -17,12 +17,14 @@ interface HistoryRowProps {
     entry: HistoryEntry;
     /** Opens a copy of the request in a new tab */
     onOpen: (request: ApiRequest) => void;
+    /** Opens the request as a cURL command */
+    onCurlExport: (request: ApiRequest) => void;
     /** Deletes the entry */
     onDelete: (entry: HistoryEntry) => void;
 }
 
 /** The whole row opens the request; the status is red for errors and for a request that got no response */
-export const HistoryRow: FC<HistoryRowProps> = ({ entry, onOpen, onDelete }) => {
+export const HistoryRow: FC<HistoryRowProps> = ({ entry, onOpen, onCurlExport, onDelete }) => {
     const { request, response } = entry;
 
     const { locale, t } = useTranslation();
@@ -43,6 +45,17 @@ export const HistoryRow: FC<HistoryRowProps> = ({ entry, onOpen, onDelete }) => 
                     <span>{formatSentAt(entry.sentAt, locale)}</span>
                 </span>
             </button>
+
+            <Button
+                aria-label={t('apiClientCurlExportOpen')}
+                size={ButtonSizes.SMALL}
+                title={t('apiClientCurlExportOpen')}
+                variant={ButtonVariants.GHOST}
+                isIconOnly
+                onClick={() => onCurlExport(request)}
+            >
+                <Icon name={IconNames.COPY} />
+            </Button>
 
             <Button
                 aria-label={t('apiClientHistoryDelete')}

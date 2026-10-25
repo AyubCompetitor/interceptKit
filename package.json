@@ -19,6 +19,9 @@
     "scripts": {
         "dev": "rsbuild dev",
         "build": "rsbuild build",
+        "release": "rsbuild build && node build/release.ts",
+        "icons": "node build/icons.ts",
+        "store:screenshots": "rsbuild build && playwright test -c playwright.store.config.ts",
         "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.browser.json",
         "lint": "oxlint --type-aware --deny-warnings",
         "lint:fix": "oxlint --type-aware --deny-warnings --fix && prettier --write .",

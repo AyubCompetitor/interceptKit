@@ -2,6 +2,7 @@ import {
     fillVariables,
     getEncryptedNames,
     getMissingVariables,
+    getTypedSecretNames,
     getUsedVariables,
     getVariableValues,
     type Environment,
@@ -18,6 +19,21 @@ export interface ResolvedRequest {
     /** Encrypted variables the request uses: only the unlocked vault gives their values */
     readonly secretNames: readonly string[];
 }
+
+/** Secrets stored as typed that the request uses: a policy that requires the vault keeps them out */
+export const getBlockedSecretNames = (
+    request: ApiRequest,
+    environment: NotRequired<Environment>,
+    isVaultRequired: boolean,
+): string[] => {
+    if (!isVaultRequired) {
+        return [];
+    }
+
+    const typedSecretNames = getTypedSecretNames(environment);
+
+    return getUsedVariables(getRequestTexts(request)).filter(name => typedSecretNames.includes(name));
+};
 
 export const resolveRequestVariables = (
     request: ApiRequest,

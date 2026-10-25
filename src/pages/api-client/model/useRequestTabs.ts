@@ -5,6 +5,7 @@ import {
     OPEN_REQUESTS_KEY,
     openRequestsStore,
     type ApiRequest,
+    type CollectionLink,
     type CurlImport,
 } from '#entities/request';
 import { API_CLIENT_CONFIG } from '#shared/config';
@@ -16,7 +17,9 @@ import {
     closeRequestTab,
     createRequestTabs,
     getActiveTab,
+    linkRequestTab,
     mapTabsToOpenRequests,
+    openLinkedTab,
     openRequestTab,
     restoreRequestTabs,
     selectRequestTab,
@@ -74,6 +77,14 @@ export const useRequestTabs = () => {
         updateState(current => openRequestTab(current, mapCurlToDraft(imported)));
     };
 
+    const onCollectionRequestOpen = (link: CollectionLink, request: ApiRequest) => {
+        updateState(current => openLinkedTab(current, link, request));
+    };
+
+    const onTabLink = (tabId: string, link: CollectionLink) => {
+        updateState(current => linkRequestTab(current, tabId, link));
+    };
+
     const onTabSelect = (tabId: string) => {
         updateState(current => selectRequestTab(current, tabId));
     };
@@ -99,6 +110,8 @@ export const useRequestTabs = () => {
         onTabOpen,
         onRequestOpen,
         onCurlImport,
+        onCollectionRequestOpen,
+        onTabLink,
         onTabSelect,
         onTabClose,
         onDraftChange,

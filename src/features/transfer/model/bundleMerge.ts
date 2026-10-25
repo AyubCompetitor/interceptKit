@@ -1,5 +1,6 @@
 import { mergeImportedEnvironment, type Environment } from '#entities/environment';
 import type { Mock } from '#entities/mock';
+import type { Collection } from '#entities/request';
 import type { Rule } from '#entities/rule';
 import { ok, Sources, type Result } from '#shared/lib';
 
@@ -98,21 +99,29 @@ const ENVIRONMENT_RULES: MergeRules<Environment> = {
     combine: mergeImportedEnvironment,
 };
 
+const COLLECTION_RULES: MergeRules<Collection> = {
+    isLocked: () => false,
+    combine: takeImported,
+};
+
 export const mergeBundle = (stored: BundleContent, imported: BundleContent): BundleMerge => {
     const rules = mergeById<Rule>(stored.rules, imported.rules, RECORD_RULES);
     const mocks = mergeById<Mock>(stored.mocks, imported.mocks, RECORD_RULES);
     const environments = mergeById(stored.environments, imported.environments, ENVIRONMENT_RULES);
+    const collections = mergeById(stored.collections, imported.collections, COLLECTION_RULES);
 
     return {
         content: {
             rules: rules.items,
             mocks: mocks.items,
             environments: environments.items,
+            collections: collections.items,
         },
         counts: {
             [BundleParts.RULES]: rules.counts,
             [BundleParts.MOCKS]: mocks.counts,
             [BundleParts.ENVIRONMENTS]: environments.counts,
+            [BundleParts.COLLECTIONS]: collections.counts,
         },
     };
 };

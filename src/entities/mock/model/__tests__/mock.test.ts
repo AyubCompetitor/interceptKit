@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 
-import { validate } from '#shared/lib';
+import { Sources, validate } from '#shared/lib';
 
 import { MockBodyTypes, mocksValidator, mockValidator } from '../mock.ts';
 
@@ -33,5 +33,15 @@ describe('mockValidator', () => {
 describe('mocksValidator', () => {
     it('rejects duplicate ids', () => {
         expect(validate(mocksValidator, [makeMock(), makeMock()]).ok).toBe(false);
+    });
+});
+
+describe('ids of the policy', () => {
+    it('belong only to records of the policy', () => {
+        const userMock = { ...makeMock(), id: 'policy:m1' };
+
+        expect(validate(mockValidator, { ...userMock, source: Sources.POLICY }).ok).toBe(true);
+
+        expect(validate(mockValidator, userMock).ok).toBe(false);
     });
 });

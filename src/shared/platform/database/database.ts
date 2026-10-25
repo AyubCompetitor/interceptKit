@@ -163,23 +163,39 @@ export const readRecord = async <T>(
     return parseRecord(store, record);
 };
 
-/** Refuses to store anything the validator of the store rejects */
-export const writeRecord = async <T>(database: Database, store: DatabaseStore<T>, record: T): Promise<void> => {
+const prepareRecord = <T>(store: DatabaseStore<T>, record: T): T => {
     const result = validate(store.validator, record);
 
     if (!result.ok) {
         throw new Error(`Invalid record of ${store.name}: ${formatIssues(result.issues)}`);
     }
 
+    return result.value;
+};
+
+/** Writes every record in one transaction, or none when the validator of the store rejects one */
+export const writeRecords = async <T>(
+    database: Database,
+    store: DatabaseStore<T>,
+    records: readonly T[],
+): Promise<void> => {
+    const prepared = records.map(record => prepareRecord(store, record));
     const connection = await getConnection(database);
     const transaction = connection.transaction(store.name, READ_WRITE);
+    const objectStore = transaction.objectStore(store.name);
 
-    transaction.objectStore(store.name).put(result.value);
+    for (const record of prepared) {
+        objectStore.put(record);
+    }
 
     await waitForTransaction(transaction);
 
     sendChangesNotify(database, store);
 };
+
+/** Refuses to store anything the validator of the store rejects */
+export const writeRecord = <T>(database: Database, store: DatabaseStore<T>, record: T): Promise<void> =>
+    writeRecords(database, store, [record]);
 
 export const deleteRecord = async (database: Database, store: DatabaseStore<unknown>, key: string): Promise<void> => {
     const connection = await getConnection(database);

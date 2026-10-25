@@ -1,0 +1,11 @@
+.text {
+    width: 100%;
+    font-family: var(--font-mono);
+    resize: vertical;
+}
+
+.issues {
+    padding-inline-start: var(--space-l);
+    font-family: var(--font-mono);
+    list-style: disc;
+}

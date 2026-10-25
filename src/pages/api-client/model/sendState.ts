@@ -14,12 +14,16 @@ export enum SendStateTypes {
     MISSING_VARIABLES = 'missingVariables',
     /** The request uses encrypted variables while the vault is locked */
     SECRETS_LOCKED = 'secretsLocked',
+    /** The request uses secrets stored as typed, and the policy requires the vault */
+    VAULT_REQUIRED = 'vaultRequired',
     /** The request went, but no response came back */
     FAILED = 'failed',
     /** The whole response did not come back in time */
     TIMED_OUT = 'timedOut',
     /** The user refused access to the host */
     NO_ACCESS = 'noAccess',
+    /** The administrator's policy does not allow the host */
+    NOT_ALLOWED = 'notAllowed',
 }
 
 export type SendStateType = `${SendStateTypes}`;
@@ -62,6 +66,13 @@ interface SecretsLockedState {
     readonly names: readonly string[];
 }
 
+interface VaultRequiredState {
+    /** The request uses secrets stored as typed, and the policy requires the vault */
+    readonly stateType: SendStateTypes.VAULT_REQUIRED;
+    /** Names of those variables */
+    readonly names: readonly string[];
+}
+
 interface TimedOutState {
     /** The whole response did not come back in time */
     readonly stateType: SendStateTypes.TIMED_OUT;
@@ -81,6 +92,13 @@ interface NoAccessState {
     readonly host: string;
 }
 
+interface NotAllowedState {
+    /** The administrator's policy does not allow the host */
+    readonly stateType: SendStateTypes.NOT_ALLOWED;
+    /** Host the request goes to */
+    readonly host: string;
+}
+
 export type SendState =
     | IdleState
     | SendingState
@@ -88,9 +106,11 @@ export type SendState =
     | InvalidState
     | MissingVariablesState
     | SecretsLockedState
+    | VaultRequiredState
     | TimedOutState
     | FailedState
-    | NoAccessState;
+    | NoAccessState
+    | NotAllowedState;
 
 export const IDLE_STATE: SendState = { stateType: SendStateTypes.IDLE };
 

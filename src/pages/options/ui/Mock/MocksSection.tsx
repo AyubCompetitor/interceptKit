@@ -5,7 +5,9 @@ import { useMockDeletion } from '../../lib/useMockDeletion.ts';
 import { useMockEditor } from '../../lib/useMockEditor.ts';
 import { useMockList } from '../../model/useMockList.ts';
 
+import { Features, isFeatureEnabled } from '#entities/config';
 import { useInterceptionSwitch } from '#features/interception-switch';
+import { isMockAllowed, isPolicyOnly, usePolicy } from '#features/policy';
 import { useTranslation } from '#shared/i18n';
 import {
     Button,
@@ -30,18 +32,27 @@ import { SectionHeader } from '../SectionHeader/SectionHeader.tsx';
 
 const SITES_HASH = buildSectionHash(DashboardSections.SITES);
 
+const POLICY_HASH = buildSectionHash(DashboardSections.POLICY);
+
 export const MocksSection: FC = () => {
     const titleId = useId();
 
     const { t } = useTranslation();
     const { mocks, mockPatterns, isLoading, isActionFailed, onMockToggle, onMockDelete } = useMockList();
+    const { policy, isLoading: isPolicyLoading } = usePolicy();
     const { isEnabled, isSaveFailed, onInterceptionEnable } = useInterceptionSwitch();
     const { mockToDelete, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useMockDeletion(onMockDelete);
     const { editedMock, isEditorOpen, onMockCreate, onMockEdit, onEditorClose } = useMockEditor();
 
-    if (isLoading) {
+    if (isLoading || isPolicyLoading) {
         return null;
     }
+
+    const policyLink = (
+        <a className={styles.noticeLink} href={POLICY_HASH}>
+            {t('policyOpen')}
+        </a>
+    );
 
     const newMockButton = (
         <Button variant={ButtonVariants.PRIMARY} onClick={onMockCreate}>
@@ -72,6 +83,18 @@ export const MocksSection: FC = () => {
                 </Notice>
             )}
 
+            {!isFeatureEnabled(policy, Features.MOCKS) && (
+                <Notice action={policyLink} tone={NoticeTones.WARNING}>
+                    {t('mocksFeatureOff')}
+                </Notice>
+            )}
+
+            {isPolicyOnly(policy) && (
+                <Notice action={policyLink} tone={NoticeTones.WARNING}>
+                    {t('mocksPolicyOnly')}
+                </Notice>
+            )}
+
             {!mockPatterns.length && (
                 <Notice
                     action={
@@ -91,6 +114,7 @@ export const MocksSection: FC = () => {
                     {mocks.map(mock => (
                         <MockRow
                             key={mock.id}
+                            isBlockedByPolicy={!isMockAllowed(mock, policy)}
                             mock={mock}
                             onDelete={onDeleteRequest}
                             onEdit={onMockEdit}

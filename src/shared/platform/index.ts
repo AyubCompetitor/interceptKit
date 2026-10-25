@@ -1,5 +1,6 @@
 export * from './storage/storage.ts';
 export * from './storage/useStorageItem.ts';
+export * from './storage/useStoreData.ts';
 export * from './extension/extension.ts';
 export * from './dnr/dnr.ts';
 export * from './permissions/permissions.ts';
@@ -8,3 +9,4 @@ export * from './permissions/useHostPatterns.ts';
 export * from './database/database.ts';
 export * from './database/useDatabaseRecords.ts';
 export * from './alarms/alarms.ts';
+export * from './clipboard/clipboard.ts';

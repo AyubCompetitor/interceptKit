@@ -1,4 +1,4 @@
-import { defineConfig, type RsbuildPlugin } from '@rsbuild/core';
+import { defineConfig, logger, type RsbuildPlugin } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 
 import { buildManifest } from './build/manifest.ts';
@@ -18,9 +18,19 @@ const pluginManifest = (): RsbuildPlugin => ({
     },
 });
 
+const pluginDevHint = (): RsbuildPlugin => ({
+    name: 'interceptkit:dev-hint',
+    setup(api) {
+        api.onAfterStartDevServer(() => {
+            logger.info(`Load ${OUT} as an unpacked extension (chrome://extensions, Developer mode, Load unpacked)`);
+            logger.info('Pages reload themselves; after a change to the service worker, reload the extension');
+        });
+    },
+});
+
 export default defineConfig(({ env }) => ({
-    plugins: [pluginReact({ reactCompiler: true }), pluginManifest()],
-    server: { host: '127.0.0.1', port: 3000, strictPort: true, publicDir: { copyOnBuild: false } },
+    plugins: [pluginReact({ reactCompiler: true }), pluginManifest(), pluginDevHint()],
+    server: { host: '127.0.0.1', port: 3000, strictPort: true, printUrls: false, publicDir: { copyOnBuild: false } },
     output: {
         filenameHash: false,
         legalComments: 'none',

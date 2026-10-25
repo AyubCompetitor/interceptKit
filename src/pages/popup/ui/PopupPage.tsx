@@ -1,6 +1,8 @@
 import type { FC } from 'react';
 
+import { Features, isFeatureEnabled } from '#entities/config';
 import { InterceptionSwitch } from '#features/interception-switch';
+import { usePolicy } from '#features/policy';
 import { useTranslation } from '#shared/i18n';
 import { EXTENSION_PAGES, openExtensionPage, openOptionsPage } from '#shared/platform';
 import {
@@ -27,6 +29,7 @@ const onApiClientOpen = () => {
 
 export const PopupPage: FC = () => {
     const { t } = useTranslation();
+    const { policy } = usePolicy();
     const title = t('extName');
 
     useDocumentTitle(title);
@@ -49,9 +52,11 @@ export const PopupPage: FC = () => {
                     {t('popupOpenDashboard')}
                 </Button>
 
-                <Button isBlock onClick={onApiClientOpen}>
-                    {t('popupOpenApiClient')}
-                </Button>
+                {isFeatureEnabled(policy, Features.API_CLIENT) && (
+                    <Button isBlock onClick={onApiClientOpen}>
+                        {t('popupOpenApiClient')}
+                    </Button>
+                )}
             </Flex>
         </Flex>
     );

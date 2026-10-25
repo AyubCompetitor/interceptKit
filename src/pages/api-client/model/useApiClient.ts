@@ -1,7 +1,9 @@
+import { getLinkedTabNames, isTabUnsaved } from './collectionTabs.ts';
 import { SendStateTypes } from './sendState.ts';
 import { useActiveEnvironment } from './useActiveEnvironment.ts';
 import { useRequestSender } from './useRequestSender.ts';
 import { useRequestTabs } from './useRequestTabs.ts';
+import { useTabSaving } from './useTabSaving.ts';
 import { useVaultSecrets } from './useVaultSecrets.ts';
 
 export const useApiClient = () => {
@@ -14,6 +16,8 @@ export const useApiClient = () => {
         onTabOpen,
         onRequestOpen,
         onCurlImport,
+        onCollectionRequestOpen,
+        onTabLink,
         onTabSelect,
         onTabClose,
         onDraftChange,
@@ -21,8 +25,19 @@ export const useApiClient = () => {
     } = useRequestTabs();
 
     const { onRequestSend, onRequestCancel } = useRequestSender(onSendStateChange);
+    const {
+        collections,
+        isLimitReached,
+        isSaveDialogOpen,
+        isSaveFailed,
+        onActiveTabSave,
+        onSaveAs,
+        onSaveDialogClose,
+    } = useTabSaving(activeTab, onTabLink);
 
     const isSending = activeTab?.sendState.stateType === SendStateTypes.SENDING;
+    const unsavedTabIds = tabs.filter(tab => isTabUnsaved(tab, collections)).map(tab => tab.draft.id);
+    const tabNames = getLinkedTabNames(tabs, collections);
 
     const onActiveRequestSend = () => {
         if (!activeTab || isSending) {
@@ -48,17 +63,27 @@ export const useApiClient = () => {
     return {
         tabs,
         activeTab,
+        collections,
+        unsavedTabIds,
+        tabNames,
 
         isLoading,
         isSending,
+        isLimitReached,
+        isSaveDialogOpen,
+        isSaveFailed,
 
         onTabOpen,
         onRequestOpen,
         onCurlImport,
+        onCollectionRequestOpen,
         onTabSelect,
         onRequestTabClose,
         onDraftChange,
         onActiveRequestSend,
         onActiveRequestCancel,
+        onActiveTabSave,
+        onSaveAs,
+        onSaveDialogClose,
     };
 };

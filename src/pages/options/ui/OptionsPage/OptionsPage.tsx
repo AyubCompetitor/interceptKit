@@ -8,6 +8,7 @@ import { createDocumentTitle, useDocumentTitle } from '#shared/ui';
 
 import { MocksSection } from '../Mock/MocksSection.tsx';
 import styles from './OptionsPage.module.css';
+import { PolicySection } from '../Policy/PolicySection.tsx';
 import { RulesSection } from '../Rule/RulesSection.tsx';
 import { SettingsSection } from '../SettingsSection/SettingsSection.tsx';
 import { SECTION_TITLES } from '../Sidebar/dashboardNav.ts';
@@ -26,6 +27,7 @@ export const OptionsPage: FC = () => {
     const isMocks = section === DashboardSections.MOCKS;
     const isSites = section === DashboardSections.SITES;
     const isTransfer = section === DashboardSections.TRANSFER;
+    const isPolicy = section === DashboardSections.POLICY;
     const isSettings = section === DashboardSections.SETTINGS;
 
     return (
@@ -37,6 +39,7 @@ export const OptionsPage: FC = () => {
                 {isMocks && <MocksSection />}
                 {isSites && <SitesSection />}
                 {isTransfer && <TransferSection />}
+                {isPolicy && <PolicySection />}
                 {isSettings && <SettingsSection />}
             </main>
         </div>

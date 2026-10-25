@@ -1,0 +1,6 @@
+.command {
+    width: 100%;
+    font-family: var(--font-mono);
+    white-space: pre;
+    resize: vertical;
+}

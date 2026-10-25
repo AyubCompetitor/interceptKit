@@ -2,6 +2,7 @@ import {
     array,
     boolean,
     displayName,
+    getRecordIdError,
     isDuplicateValues,
     headerName,
     headerValue,
@@ -138,7 +139,7 @@ export const mockMatch: Validator<MockMatch> = object({
     methods: optional(httpMethods),
 });
 
-export const mockValidator: Validator<Mock> = object({
+const mockShape = object({
     id: identifier,
     name: displayName,
     enabled: boolean(),
@@ -146,6 +147,8 @@ export const mockValidator: Validator<Mock> = object({
     match: mockMatch,
     response: mockResponse,
 });
+
+export const mockValidator: Validator<Mock> = refine(mockShape, getRecordIdError);
 
 export const mocksValidator: Validator<Mock[]> = refine(
     array(mockValidator, { maxLength: MAX_MOCKS }),

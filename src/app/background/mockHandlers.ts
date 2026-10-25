@@ -19,6 +19,13 @@ const SAVE_ERRORS = {
     POLICY_SOURCE: 'policy mocks come only from the administrator',
 } as const;
 
+const REMOVE_ERRORS = {
+    POLICY_MOCK: 'only the administrator removes policy mocks',
+} as const;
+
+const isPolicyMock = (mocks: readonly Mock[], id: string): boolean =>
+    mocks.some(mock => mock.id === id && mock.source === Sources.POLICY);
+
 const saveMockHandler = async (mock: Mock, storageReady: Promise<void>): Promise<Mock> => {
     await storageReady;
 
@@ -44,6 +51,10 @@ const removeMockHandler = async (mockIdParams: MockIdParams, storageReady: Promi
     await storageReady;
 
     const mocks = await readItem(mocksItem);
+
+    if (isPolicyMock(mocks, mockIdParams.id)) {
+        throwRpcError(RpcErrorCodes.FORBIDDEN, REMOVE_ERRORS.POLICY_MOCK);
+    }
 
     await writeItem(mocksItem, removeMock(mocks, mockIdParams.id));
 };

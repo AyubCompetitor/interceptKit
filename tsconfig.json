@@ -19,5 +19,15 @@
         "skipLibCheck": true,
         "types": ["chrome", "@rsbuild/core/types", "node"]
     },
-    "include": ["@types", "src", "build", "e2e", "rsbuild.config.ts", "rstest.config.ts", "playwright.config.ts"]
+    "include": [
+        "@types",
+        "src",
+        "build",
+        "e2e",
+        "store",
+        "rsbuild.config.ts",
+        "rstest.config.ts",
+        "playwright.config.ts",
+        "playwright.store.config.ts"
+    ]
 }

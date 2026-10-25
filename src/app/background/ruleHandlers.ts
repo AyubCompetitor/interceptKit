@@ -19,6 +19,13 @@ const SAVE_ERRORS = {
     TOO_MANY_REGEX_RULES: 'too many regex rules',
 } as const;
 
+const REMOVE_ERRORS = {
+    POLICY_RULE: 'only the administrator removes policy rules',
+} as const;
+
+const isPolicyRule = (rules: readonly Rule[], id: string): boolean =>
+    rules.some(rule => rule.id === id && rule.source === Sources.POLICY);
+
 const isRgxRule = (rule: Rule): boolean => rule.match.url.syntaxType === SyntaxTypes.RGX;
 
 const getRegexSupportError = async (rule: Rule): Promise<NotRequired<string>> => {
@@ -111,6 +118,10 @@ const deleteRuleHandler = async (ruleIdParams: RuleIdParams, storageReady: Promi
     await storageReady;
 
     const rules = await readItem(rulesItem);
+
+    if (isPolicyRule(rules, ruleIdParams.id)) {
+        throwRpcError(RpcErrorCodes.FORBIDDEN, REMOVE_ERRORS.POLICY_RULE);
+    }
 
     await writeItem(rulesItem, removeRule(rules, ruleIdParams.id));
 };

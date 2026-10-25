@@ -1,5 +1,6 @@
 import {
     dropEncryptedValues,
+    getTypedSecretNames,
     isEnvironmentSealed,
     sealEnvironment,
     VAULT_LOCK_ALARM,
@@ -11,14 +12,18 @@ import {
     type VaultKeyParams,
     type VaultStatus,
 } from '#entities/environment';
+import { isVaultRequired } from '#features/policy';
 import { VAULT_CONFIG } from '#shared/config';
 import type { TaskQueue } from '#shared/lib';
 import { RpcError, RpcErrorCodes } from '#shared/messaging';
 import { clearAlarm, readItem, scheduleAlarm, watchAlarm, writeItem } from '#shared/platform';
 
+import { readManagedPolicy } from './managedPolicy.ts';
+
 const VAULT_ERRORS = {
     OFF: 'the vault is off',
     LOCKED: 'the vault is locked',
+    REQUIRED: 'the policy requires secrets to be encrypted',
 } as const;
 
 const NO_KEY: VaultKey = {};
@@ -80,12 +85,23 @@ export const takeVaultKey = async (): Promise<string> => {
     return keyBytes;
 };
 
-/** With the vault on, secrets are stored only encrypted; with it off, nothing can open an encrypted value */
+const prepareWithoutVault = async (environment: Environment): Promise<Environment> => {
+    const policy = await readManagedPolicy();
+
+    const isTypedSecretRefused = isVaultRequired(policy) && !!getTypedSecretNames(environment).length;
+
+    if (isTypedSecretRefused) {
+        throw new RpcError(RpcErrorCodes.FORBIDDEN, VAULT_ERRORS.REQUIRED);
+    }
+
+    return dropEncryptedValues(environment);
+};
+
 export const prepareEnvironment = async (environment: Environment): Promise<Environment> => {
     const { keyParams } = await readItem(vaultItem);
 
     if (!keyParams) {
-        return dropEncryptedValues(environment);
+        return prepareWithoutVault(environment);
     }
 
     if (isEnvironmentSealed(environment)) {

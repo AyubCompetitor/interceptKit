@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 
+import { useCurlExportDialog } from '../../lib/useCurlExportDialog.ts';
 import { useHistoryClearing } from '../../lib/useHistoryClearing.ts';
 import { useHistory } from '../../model/useHistory.ts';
 
@@ -9,6 +10,7 @@ import { useTranslation } from '#shared/i18n';
 import { Button, ButtonSizes, Icon, IconNames, Typography, TypographyColors, TypographySizes } from '#shared/ui';
 
 import { ClearHistoryModal } from './ClearHistoryModal.tsx';
+import { CurlExportModal } from '../Curl/CurlExportModal.tsx';
 import styles from './HistoryPanel.module.css';
 import { HistoryRow } from './HistoryRow.tsx';
 
@@ -23,6 +25,7 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ onRequestOpen }) => {
     const { t } = useTranslation();
     const { entries, isLoading, isActionFailed, onEntryDelete, onHistoryClear } = useHistory();
     const { isConfirmOpen, onClearRequest, onClearCancel, onClearConfirm } = useHistoryClearing(onHistoryClear);
+    const { exportedRequest, onExportOpen, onExportClose } = useCurlExportDialog();
 
     if (isLoading) {
         return null;
@@ -33,7 +36,13 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ onRequestOpen }) => {
             {!!entries.length && (
                 <ul className={styles.list}>
                     {entries.map(entry => (
-                        <HistoryRow key={entry.id} entry={entry} onDelete={onEntryDelete} onOpen={onRequestOpen} />
+                        <HistoryRow
+                            key={entry.id}
+                            entry={entry}
+                            onCurlExport={onExportOpen}
+                            onDelete={onEntryDelete}
+                            onOpen={onRequestOpen}
+                        />
                     ))}
                 </ul>
             )}
@@ -56,6 +65,8 @@ export const HistoryPanel: FC<HistoryPanelProps> = ({ onRequestOpen }) => {
             )}
 
             <ClearHistoryModal isOpen={isConfirmOpen} onCancel={onClearCancel} onConfirm={onClearConfirm} />
+
+            {exportedRequest && <CurlExportModal request={exportedRequest} onClose={onExportClose} />}
         </section>
     );
 };

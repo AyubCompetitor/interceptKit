@@ -1,8 +1,11 @@
+import { collectionValidator, type Collection } from '../model/collection.ts';
 import { historyEntryValidator, type HistoryEntry } from '../model/history.ts';
 import { openRequestsValidator, type OpenRequests } from '../model/openRequests.ts';
 import { QUERY_IN_URL_VERSION, upgradeRequestQuery } from '../model/queryUpgrade.ts';
 
 import { defineDatabase, defineDatabaseStore } from '#shared/lib';
+
+const COLLECTIONS_VERSION = 3;
 
 const upgradeHistoryEntry = (entry: HistoryEntry, oldVersion: number): HistoryEntry => {
     if (oldVersion >= QUERY_IN_URL_VERSION) {
@@ -41,8 +44,14 @@ export const openRequestsStore = defineDatabaseStore<OpenRequests>({
     upgrade: upgradeOpenRequests,
 });
 
+export const collectionsStore = defineDatabaseStore<Collection>({
+    name: 'collections',
+    keyPath: 'id',
+    validator: collectionValidator,
+});
+
 export const apiClientDatabase = defineDatabase({
     name: 'interceptkit-api-client',
-    version: QUERY_IN_URL_VERSION,
-    stores: [historyStore, openRequestsStore],
+    version: COLLECTIONS_VERSION,
+    stores: [historyStore, openRequestsStore, collectionsStore],
 });
