@@ -4,7 +4,7 @@ import type { CollectionTreeActions } from '../../model/useCollectionPanel.ts';
 
 import { getItemId, MAX_FOLDER_DEPTH, type Collection, type CollectionItem } from '#entities/request';
 import { useTranslation } from '#shared/i18n';
-import { Icon, IconNames, joinClassNames, Menu, type MenuAction } from '#shared/ui';
+import { Icon, IconNames, joinClassNames, Menu, MethodLabel, type MenuAction } from '#shared/ui';
 
 import { getTreeNode } from './collectionTree.ts';
 import styles from './CollectionTreeNode.module.css';
@@ -56,7 +56,7 @@ export const CollectionTreeNode: FC<CollectionTreeNodeProps> = ({ collection, it
                         onClick={() => actions.onRequestOpen(collection, request)}
                     >
                         <Icon className={styles.placeholder} name={IconNames.CHEVRON} />
-                        <span className={styles.method}>{request.method}</span>
+                        <MethodLabel method={request.method} />
                         <span className={styles.name}>{node.name}</span>
                     </button>
                 )}

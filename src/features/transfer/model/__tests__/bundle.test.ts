@@ -32,7 +32,7 @@ describe('buildBundleText', () => {
 
         expect(TEXT.endsWith('}\n')).toBe(true);
 
-        expect(TEXT).toContain('\n    "format": "interceptkit"');
+        expect(TEXT).toContain('\n    "format": "xrequest"');
     });
 
     it('leaves out the source and the records of the policy', () => {
@@ -61,7 +61,7 @@ describe('buildBundleText', () => {
 
 describe('buildBundleFileName', () => {
     it('names the file after the day of the export', () => {
-        expect(buildBundleFileName(EXPORTED_AT)).toBe('interceptkit-2026-10-24.json');
+        expect(buildBundleFileName(EXPORTED_AT)).toBe('xrequest-2026-10-24.json');
     });
 });
 
@@ -85,19 +85,19 @@ describe('parseBundle', () => {
     });
 
     it('reads a file with some lists only', () => {
-        const text = JSON.stringify({ format: 'interceptkit', version: 1 });
+        const text = JSON.stringify({ format: 'xrequest', version: 1 });
 
         expect(parseBundle(text)).toEqual({ ok: true, value: makeContent() });
     });
 
     it.each([
         { name: 'text that is not JSON', text: '{', error: 'not JSON' },
-        { name: 'JSON of something else', text: '{"rules":[]}', error: 'not an InterceptKit export' },
-        { name: 'a newer version', text: '{"format":"interceptkit","version":3}', error: 'newer version' },
-        { name: 'an unknown field', text: '{"format":"interceptkit","version":1,"extra":1}', error: '$.extra' },
+        { name: 'JSON of something else', text: '{"rules":[]}', error: 'not an XRequest export' },
+        { name: 'a newer version', text: '{"format":"xrequest","version":3}', error: 'newer version' },
+        { name: 'an unknown field', text: '{"format":"xrequest","version":1,"extra":1}', error: '$.extra' },
         {
             name: 'a broken record, with its path',
-            text: '{"format":"interceptkit","version":1,"rules":[{"id":"r1"}]}',
+            text: '{"format":"xrequest","version":1,"rules":[{"id":"r1"}]}',
             error: '$.rules[0]',
         },
         {

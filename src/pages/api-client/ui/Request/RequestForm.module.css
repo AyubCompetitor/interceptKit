@@ -1,3 +1,9 @@
+.request {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
 .form {
     display: flex;
     flex-direction: column;

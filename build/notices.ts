@@ -19,8 +19,7 @@ const LICENSE_FILE_RGX = /^(licen[cs]e|copying)(\.(md|txt))?$/i;
 
 const SEPARATOR = `\n\n${'-'.repeat(80)}\n\n`;
 
-const HEADER =
-    'InterceptKit includes the following third-party software, each under the license that follows its name.';
+const HEADER = 'XRequest includes the following third-party software, each under the license that follows its name.';
 
 const MISSING_TEXT = 'The package ships no license file; see its page on npm.';
 

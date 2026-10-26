@@ -1,6 +1,6 @@
 .line {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) repeat(3, auto);
+    grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--space-s);
 }
 

@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 
 import type { RequestDraftChange } from '../../model/requestDraft.ts';
+import type { TabLocation } from '../../model/collectionTabs.ts';
 import type { RequestTab } from '../../model/requestTabs.ts';
 
 import { useTranslation } from '#shared/i18n';
@@ -16,6 +17,8 @@ interface RequestWorkspaceProps {
     tabs: readonly RequestTab[];
     /** The tab on the screen */
     activeTab: RequestTab;
+    /** Where the request of the tab on the screen is kept */
+    activeLocation: NotRequired<TabLocation>;
     /** Tabs of a collection whose request differs from the one kept there */
     unsavedTabIds: readonly string[];
     /** Names of the requests that tabs of collections show, by the id of the tab */
@@ -43,6 +46,7 @@ interface RequestWorkspaceProps {
 export const RequestWorkspace: FC<RequestWorkspaceProps> = ({
     tabs,
     activeTab,
+    activeLocation,
     unsavedTabIds,
     tabNames,
     isSending,
@@ -72,6 +76,7 @@ export const RequestWorkspace: FC<RequestWorkspaceProps> = ({
             <RequestForm
                 draft={activeTab.draft}
                 isSending={isSending}
+                location={activeLocation}
                 onCancel={onCancel}
                 onDraftChange={onDraftChange}
                 onSave={onSave}

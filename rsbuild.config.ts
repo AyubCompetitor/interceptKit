@@ -9,7 +9,7 @@ const OFFLINE_PAGES = new Set(['popup', 'options']);
 const entry = (path: string) => `./src/app/entrypoints/${path}`;
 
 const pluginManifest = (): RsbuildPlugin => ({
-    name: 'interceptkit:manifest',
+    name: 'xrequest:manifest',
     setup(api) {
         api.processAssets({ stage: 'additional', environments: ['pages'] }, ({ compilation, sources }) => {
             const manifest = `${JSON.stringify(buildManifest(), null, 2)}\n`;
@@ -19,7 +19,7 @@ const pluginManifest = (): RsbuildPlugin => ({
 });
 
 const pluginDevHint = (): RsbuildPlugin => ({
-    name: 'interceptkit:dev-hint',
+    name: 'xrequest:dev-hint',
     setup(api) {
         api.onAfterStartDevServer(() => {
             logger.info(`Load ${OUT} as an unpacked extension (chrome://extensions, Developer mode, Load unpacked)`);
@@ -56,7 +56,7 @@ export default defineConfig(({ env }) => ({
                 ],
             },
             html: {
-                title: 'InterceptKit',
+                title: 'XRequest',
                 meta: ({ value, entryName }) =>
                     env === 'production' && OFFLINE_PAGES.has(entryName)
                         ? {

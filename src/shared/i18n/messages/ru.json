@@ -1,6 +1,6 @@
 {
     "extName": {
-        "message": "InterceptKit"
+        "message": "XRequest"
     },
     "extDescription": {
         "message": "Редиректы, подмена заголовков, блокировка и моки HTTP-запросов, а также простой API-клиент. Без серверов, аккаунтов и телеметрии."
@@ -39,7 +39,7 @@
         "message": "Политика не задана"
     },
     "policyEmptyText": {
-        "message": "Все функции доступны, и как работает InterceptKit, решаете только вы."
+        "message": "Все функции доступны, и как работает XRequest, решаете только вы."
     },
     "policyValuesTitle": {
         "message": "Что задаёт политика"
@@ -152,6 +152,9 @@
     "transferImportFile": {
         "message": "Файл"
     },
+    "transferImportFileHint": {
+        "message": "JSON, до 5 МБ"
+    },
     "transferImportText": {
         "message": "Или вставьте текст файла"
     },
@@ -228,7 +231,7 @@
         "message": "Не удалось обновить правило. Попробуйте ещё раз."
     },
     "ruleNoAccess": {
-        "message": "У InterceptKit нет доступа к $1, поэтому там правило пока не работает."
+        "message": "У XRequest нет доступа к $1, поэтому там правило пока не работает."
     },
     "ruleHostNotAllowed": {
         "message": "Организация не разрешает доступ к $1, поэтому там правило не работает."
@@ -332,6 +335,60 @@
     "rulePatternRegexPlaceholder": {
         "message": "^https://api\\.example\\.com/(.*)"
     },
+    "patternExamplesLabel": {
+        "message": "Примеры шаблонов"
+    },
+    "patternFilterTitle": {
+        "message": "Как читается фильтр URL"
+    },
+    "patternFilterDomain": {
+        "message": "начало домена; подходят и его поддомены"
+    },
+    "patternFilterEdge": {
+        "message": "начало или конец адреса"
+    },
+    "patternFilterAny": {
+        "message": "любые символы"
+    },
+    "patternFilterSeparator": {
+        "message": "разделитель: /, ?, & или конец адреса"
+    },
+    "patternExamplesTitle": {
+        "message": "Примеры"
+    },
+    "patternFilterExampleSite": {
+        "message": "любые страницы example.com и его поддоменов"
+    },
+    "patternFilterExamplePrefix": {
+        "message": "адреса, которые начинаются с api.example.com/v1/"
+    },
+    "patternFilterExampleExact": {
+        "message": "ровно этот адрес"
+    },
+    "patternFilterExampleScripts": {
+        "message": "скрипты с cdn.example.com"
+    },
+    "patternFilterExampleContains": {
+        "message": "любой адрес, в котором есть /graphql"
+    },
+    "patternRegexTitle": {
+        "message": "Регулярные выражения в синтаксисе RE2"
+    },
+    "patternRegexExampleGroup": {
+        "message": "всё после /v1/ попадает в группу \\1 для перенаправления"
+    },
+    "patternRegexExampleWww": {
+        "message": "http и https, с www и без"
+    },
+    "patternRegexExampleImages": {
+        "message": "картинки .png, .jpg и .jpeg"
+    },
+    "patternRegexExampleId": {
+        "message": "адреса, которые заканчиваются на /users/ и число"
+    },
+    "patternRegexNote": {
+        "message": "Выражение сравнивается со всем адресом, вместе с протоколом. Точку экранируйте: \\. — в RE2 нет проверок вперёд и назад и обратных ссылок."
+    },
     "ruleConditions": {
         "message": "Дополнительные условия"
     },
@@ -413,6 +470,21 @@
     "ruleTargetTransform": {
         "message": "На изменённый URL"
     },
+    "redirectExamplesLabel": {
+        "message": "Примеры перенаправлений"
+    },
+    "redirectExamplesTitle": {
+        "message": "Куда можно отправить подходящий запрос"
+    },
+    "redirectExampleUrl": {
+        "message": "Каждый подходящий запрос уходит ровно на этот адрес; его путь и query не сохраняются."
+    },
+    "redirectExampleSubstitution": {
+        "message": "Шаблон ловит остаток адреса в группу \\1, а подстановка возвращает его на место: /users?page=2 так и останется /users?page=2."
+    },
+    "redirectExampleTransform": {
+        "message": "Меняет только заполненные части: с хостом выше путь и query запроса остаются как были."
+    },
     "ruleTargetUrlLabel": {
         "message": "Новый URL"
     },
@@ -489,7 +561,7 @@
         "message": "Удалить строку"
     },
     "sitesDescription": {
-        "message": "InterceptKit работает только на сайтах, которые вы разрешили. Браузер проверяет доступ и к сайту, куда уходит запрос, и к странице, которая его отправляет. Моки отвечают только на тех сайтах, где вы их включили."
+        "message": "XRequest работает только на сайтах, которые вы разрешили. Браузер проверяет доступ и к сайту, куда уходит запрос, и к странице, которая его отправляет. Моки отвечают только на тех сайтах, где вы их включили."
     },
     "sitesDomain": {
         "message": "Домен"
@@ -675,7 +747,7 @@
         "message": "Без заголовков ответ получит только тип содержимого по формату тела."
     },
     "settingsDescription": {
-        "message": "Как InterceptKit выглядит в этом браузере."
+        "message": "Как XRequest выглядит в этом браузере."
     },
     "settingsLanguage": {
         "message": "Язык интерфейса"
@@ -702,7 +774,7 @@
         "message": "Как в системе"
     },
     "settingsPrivacy": {
-        "message": "Правила и настройки хранятся только в этом браузере. У InterceptKit нет серверов, аккаунтов и телеметрии."
+        "message": "Правила и настройки хранятся только в этом браузере. У XRequest нет серверов, аккаунтов и телеметрии."
     },
     "settingsSaveFailed": {
         "message": "Не удалось сохранить настройку. Попробуйте ещё раз."
@@ -903,7 +975,7 @@
         "message": "Возможно, сервер не работает или недоступен либо браузер не доверяет его сертификату."
     },
     "apiClientNoAccess": {
-        "message": "У InterceptKit нет доступа к $1, а без него браузер скроет ответ."
+        "message": "У XRequest нет доступа к $1, а без него браузер скроет ответ."
     },
     "apiClientHostNotAllowed": {
         "message": "Организация не разрешает запросы к $1."
@@ -1265,6 +1337,15 @@
     "apiClientSaveHint": {
         "message": "Сохранить в коллекцию (Ctrl+S)"
     },
+    "apiClientSaveShort": {
+        "message": "Сохранить"
+    },
+    "apiClientCurlShort": {
+        "message": "cURL"
+    },
+    "apiClientRequestUnsaved": {
+        "message": "Не сохранён в коллекцию"
+    },
     "apiClientSaveTitle": {
         "message": "Сохранить в коллекцию"
     },
@@ -1300,6 +1381,9 @@
     },
     "apiClientImportFile": {
         "message": "Файл"
+    },
+    "apiClientImportFileHint": {
+        "message": "JSON, до 10 МБ"
     },
     "apiClientImportText": {
         "message": "Или вставьте текст файла"
@@ -1405,5 +1489,14 @@
     },
     "codeEditorFormat": {
         "message": "Форматировать"
+    },
+    "fileDropzonePrompt": {
+        "message": "Перетащите файл сюда или нажмите, чтобы выбрать"
+    },
+    "fileDropzoneReplace": {
+        "message": "Перетащите или выберите другой файл, чтобы заменить этот"
+    },
+    "checklistAnyNumber": {
+        "message": "можно несколько"
     }
 }

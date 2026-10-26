@@ -1,6 +1,7 @@
 .modal {
     max-height: calc(100vh - 2 * var(--space-xl));
     padding: 0;
+    overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     background: var(--color-surface-raised);
@@ -38,6 +39,8 @@
 }
 
 .body {
+    flex: 1;
+    min-height: 0;
     padding: 0 var(--space-xl) var(--space-xl);
     overflow: auto;
 }

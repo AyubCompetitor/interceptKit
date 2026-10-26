@@ -48,6 +48,21 @@ const ICON_SHAPES: Record<IconName, ReactNode> = {
         <path d='M4.25 10a.75.75 0 1 0 1.5 0a.75.75 0 1 0-1.5 0M9.25 10a.75.75 0 1 0 1.5 0a.75.75 0 1 0-1.5 0M14.25 10a.75.75 0 1 0 1.5 0a.75.75 0 1 0-1.5 0' />
     ),
     [IconNames.FOLDER]: <path d='M3.5 6V15.5h13V8H10L8.5 6z' />,
+    [IconNames.INFO]: (
+        <>
+            <circle cx='10' cy='10' r='7' />
+            <path d='M10 9v4.5M10 6.5v.25' />
+        </>
+    ),
+    [IconNames.CHECK]: <path d='M4.5 10.5l3.5 3.5 7.5-8' />,
+    [IconNames.DOWNLOAD]: <path d='M10 3.5v9M6 8.5l4 4 4-4M4 15.5h12' />,
+    [IconNames.ERROR]: (
+        <>
+            <circle cx='10' cy='10' r='7' />
+            <path d='M7.5 7.5l5 5M12.5 7.5l-5 5' />
+        </>
+    ),
+    [IconNames.FILE]: <path d='M5.5 3.5h6l3 3v10h-9zM11.5 3.5v3h3M8 10.5h4M8 13h4' />,
 };
 
 export const Icon: FC<IconProps> = ({ name, className }) => (

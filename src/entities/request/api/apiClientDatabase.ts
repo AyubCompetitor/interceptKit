@@ -51,7 +51,7 @@ export const collectionsStore = defineDatabaseStore<Collection>({
 });
 
 export const apiClientDatabase = defineDatabase({
-    name: 'interceptkit-api-client',
+    name: 'xrequest-api-client',
     version: COLLECTIONS_VERSION,
     stores: [historyStore, openRequestsStore, collectionsStore],
 });

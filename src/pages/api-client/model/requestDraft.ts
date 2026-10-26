@@ -99,7 +99,6 @@ const BODY_BUILDERS: Record<RequestBodyType, (draft: RequestDraft) => RequestBod
 
 export const createRequestDraft = (): RequestDraft => ({ ...NEW_REQUEST_DRAFT, id: getRandomUUID() });
 
-/** GET and HEAD go without a body, which the editor keeps for when the method changes; the form says so */
 const buildBody = (draft: RequestDraft): RequestBody => {
     if (isBodylessMethod(draft.method)) {
         return {

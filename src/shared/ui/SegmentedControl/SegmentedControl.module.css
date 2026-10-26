@@ -12,6 +12,17 @@
     font-weight: 600;
 }
 
+.legendRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-s);
+
+    & .legend {
+        margin-bottom: 0;
+    }
+}
+
 .hiddenLegend {
     position: absolute;
     width: 1px;

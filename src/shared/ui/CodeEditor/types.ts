@@ -16,6 +16,8 @@ export interface CodeEditorSettings {
     label: string;
     /** For viewing only */
     isReadOnly: boolean;
+    /** Whether {{templates}} stand out */
+    isWithTemplates: boolean;
     /** Height in lines that the editor keeps even when empty */
     minRows: number;
     /** Lines shown before the editor scrolls */

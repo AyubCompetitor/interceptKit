@@ -44,7 +44,7 @@ export interface BundleContent {
     readonly collections: readonly Collection[];
 }
 
-export const BUNDLE_FORMAT = 'interceptkit';
+export const BUNDLE_FORMAT = 'xrequest';
 
 export const BUNDLE_VERSION = 2;
 
@@ -67,7 +67,7 @@ const FILE_END = '\n';
 const ROOT_PATH = '$';
 
 const FILE_NAME = {
-    PREFIX: 'interceptkit-',
+    PREFIX: 'xrequest-',
     EXTENSION: '.json',
     DATE_LENGTH: 10,
 } as const;
@@ -75,8 +75,8 @@ const FILE_NAME = {
 const BUNDLE_ERRORS = {
     TOO_LARGE: 'the file is larger than 5 MB',
     NOT_JSON: 'the file is not JSON',
-    NOT_BUNDLE: 'the file is not an InterceptKit export',
-    NEWER_VERSION: 'the file comes from a newer version of InterceptKit',
+    NOT_BUNDLE: 'the file is not an XRequest export',
+    NEWER_VERSION: 'the file comes from a newer version of XRequest',
 } as const;
 
 const isPlainObject = (value: unknown): value is StoredData =>
@@ -167,7 +167,7 @@ export const buildBundleText = (content: BundleContent, parts: readonly BundlePa
     return `${JSON.stringify(file, sortRecordKeys, JSON_INDENT)}${FILE_END}`;
 };
 
-/** interceptkit-2026-10-24.json for an export made that day */
+/** xrequest-2026-10-24.json for an export made that day */
 export const buildBundleFileName = (exportedAt: string): string =>
     `${FILE_NAME.PREFIX}${exportedAt.slice(0, FILE_NAME.DATE_LENGTH)}${FILE_NAME.EXTENSION}`;
 

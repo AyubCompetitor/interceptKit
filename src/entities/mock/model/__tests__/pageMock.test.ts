@@ -12,16 +12,16 @@ const DISABLED_HEADER = { key: 'X-Draft', value: 'no', enabled: false };
 
 describe('mockListMessage', () => {
     it('accepts a list of page mocks', () => {
-        expect(validate(mockListMessage, { ik: 1, mocks: [makePageMock()] }).ok).toBe(true);
+        expect(validate(mockListMessage, { xr: 1, mocks: [makePageMock()] }).ok).toBe(true);
     });
 
     it.each([
         { name: 'a message without our marker', message: { mocks: [] } },
-        { name: 'a message with another marker', message: { ik: 2, mocks: [] } },
-        { name: 'a mock list that is not a list', message: { ik: 1, mocks: {} } },
+        { name: 'a message with another marker', message: { xr: 2, mocks: [] } },
+        { name: 'a mock list that is not a list', message: { xr: 1, mocks: {} } },
         {
             name: 'a mock with a status Response refuses',
-            message: { ik: 1, mocks: [{ ...makePageMock(), response: makeResponse({ status: 600 }) }] },
+            message: { xr: 1, mocks: [{ ...makePageMock(), response: makeResponse({ status: 600 }) }] },
         },
         { name: 'a string the page posts', message: 'hello' },
     ])('rejects $name', ({ message }) => {

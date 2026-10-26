@@ -1,0 +1,40 @@
+.field {
+    position: relative;
+    display: block;
+    min-width: 0;
+}
+
+.mirror {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-m);
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: var(--radius-m);
+    background: var(--color-field);
+    color: var(--color-text);
+    font-size: var(--font-size-m);
+    white-space: pre;
+    pointer-events: none;
+}
+
+.input {
+    position: relative;
+    width: 100%;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--color-text);
+
+    &::selection {
+        background: var(--color-selection-translucent);
+        color: transparent;
+    }
+}
+
+.template {
+    border-radius: var(--radius-s);
+    background: var(--color-variable-surface);
+    color: var(--color-variable-text);
+}

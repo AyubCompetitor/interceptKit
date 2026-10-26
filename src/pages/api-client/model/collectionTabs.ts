@@ -9,6 +9,13 @@ import {
 import { buildApiRequest } from './requestDraft.ts';
 import type { RequestTab } from './requestTabs.ts';
 
+export interface TabLocation {
+    /** Name of the collection */
+    readonly collectionName: string;
+    /** Name of the request in it */
+    readonly requestName: string;
+}
+
 export const findCollection = (collections: readonly Collection[], collectionId: string): NotRequired<Collection> =>
     collections.find(collection => collection.id === collectionId);
 
@@ -23,6 +30,23 @@ export const findLinkedRequest = (
     }
 
     return findCollectionRequest(collection, link.requestId);
+};
+
+export const findTabLocation = (
+    tab: NotRequired<RequestTab>,
+    collections: readonly Collection[],
+): NotRequired<TabLocation> => {
+    const collection = tab?.link && findCollection(collections, tab.link.collectionId);
+    const request = findLinkedRequest(collections, tab?.link);
+
+    if (!collection || !request) {
+        return;
+    }
+
+    return {
+        collectionName: collection.name,
+        requestName: request.name ?? '',
+    };
 };
 
 export const buildSavedRequest = (tab: RequestTab, requestId: string): ApiRequest => ({

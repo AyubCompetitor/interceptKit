@@ -70,6 +70,7 @@ export const VariableTableRow: FC<VariableTableRowProps> = ({ variable, onChange
 
             <Checkbox
                 checked={variable.secret}
+                className={styles.secret}
                 label={t('apiClientVariableSecret')}
                 isLabelHidden
                 onChange={onSecretToggle}

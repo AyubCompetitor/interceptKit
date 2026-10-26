@@ -15,7 +15,7 @@ const getTargetOrigin = (): string => {
 
 const postMockList = (mocks: readonly PageMock[]) => {
     const message: MockListMessage = {
-        ik: 1,
+        xr: 1,
         mocks,
     };
 

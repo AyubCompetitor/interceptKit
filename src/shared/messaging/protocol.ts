@@ -3,7 +3,7 @@ import { literal, object, oneOf, optional, string, unknownValue, type Validator 
 /** Envelope of every runtime message we send */
 export interface RpcRequest {
     /** Protocol marker and version */
-    readonly ik: 1;
+    readonly xr: 1;
     /** Name of the called method */
     readonly method: string;
     /** Untrusted until the methods validator accepts them */
@@ -41,7 +41,7 @@ export const RPC_ERROR_CODES = Object.values(RpcErrorCodes);
 const RPC_ERROR_NAME = 'RpcError';
 
 export const rpcRequest: Validator<RpcRequest> = object({
-    ik: literal(1),
+    xr: literal(1),
     method: string({ minLength: 1, maxLength: 128 }),
     params: optional(unknownValue),
 });

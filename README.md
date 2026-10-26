@@ -1,4 +1,4 @@
-# InterceptKit
+# XRequest
 
 Intercept, mock and redirect HTTP requests, plus a lightweight API client, in one open-source browser extension.
 
@@ -53,7 +53,7 @@ How the code is organized: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | Command                  | What it does                                                                               |
 | ------------------------ | ------------------------------------------------------------------------------------------ |
-| `pnpm release`           | Production build plus `dist/interceptkit-<version>.zip` with the licenses, and its SHA-256 |
+| `pnpm release`           | Production build plus `dist/xrequest-<version>.zip` with the licenses, and its SHA-256     |
 | `pnpm store:screenshots` | Production build plus the store screenshots in `store/screenshots`, in English and Russian |
 | `pnpm icons`             | Draws the extension icons and the Edge logo from the brand glyph                           |
 

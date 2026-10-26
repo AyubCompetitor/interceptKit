@@ -54,6 +54,7 @@ export const RequestBodyFields: FC<RequestDraftFields> = ({ draft, onDraftChange
                     label={t('apiClientBodyEditor')}
                     language={CodeLanguages.JSON}
                     value={draft.jsonBody}
+                    isWithTemplates
                     onChange={onJsonBodyChange}
                 />
             )}
@@ -69,12 +70,18 @@ export const RequestBodyFields: FC<RequestDraftFields> = ({ draft, onDraftChange
                     label={t('apiClientBodyEditor')}
                     language={CodeLanguages.TEXT}
                     value={draft.rawBody}
+                    isWithTemplates
                     onChange={onRawBodyChange}
                 />
             )}
 
             {isForm && (
-                <KeyValueTable labels={FORM_FIELD_LABELS} rows={draft.formFields} onRowsChange={onFormFieldsChange} />
+                <KeyValueTable
+                    labels={FORM_FIELD_LABELS}
+                    rows={draft.formFields}
+                    isWithTemplates
+                    onRowsChange={onFormFieldsChange}
+                />
             )}
         </Flex>
     );

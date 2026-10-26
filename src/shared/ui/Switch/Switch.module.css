@@ -48,10 +48,10 @@
 }
 
 .input:checked + .track {
-    background: var(--color-primary);
+    background: var(--color-accent);
 
     &::after {
-        background: var(--color-on-primary);
+        background: var(--color-on-accent);
         transform: translateX(16px);
     }
 }

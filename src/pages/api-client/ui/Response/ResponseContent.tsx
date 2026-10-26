@@ -8,14 +8,18 @@ import {
     Button,
     ButtonSizes,
     Flex,
+    Icon,
+    IconNames,
     Notice,
     NoticeTones,
     Spaces,
+    Spinner,
     Typography,
     TypographyColors,
     TypographySizes,
 } from '#shared/ui';
 
+import styles from './ResponseContent.module.css';
 import { ResponseView } from './ResponseView.tsx';
 
 interface ResponseContentProps {
@@ -102,9 +106,10 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
     if (sendState.stateType === SendStateTypes.FAILED) {
         return (
             <Flex direction='column' gap={Spaces.XS}>
-                <Typography color={TypographyColors.DANGER} role='alert'>
+                <Flex align='center' className={styles.failure} gap={Spaces.S} role='alert'>
+                    <Icon className={styles.failureIcon} name={IconNames.ERROR} />
                     {t('apiClientSendFailed', sendState.reason)}
-                </Typography>
+                </Flex>
                 <Typography color={TypographyColors.HINT} size={TypographySizes.SMALL}>
                     {t('apiClientSendFailedHint')}
                 </Typography>
@@ -114,9 +119,9 @@ export const ResponseContent: FC<ResponseContentProps> = ({ sendState, onAccessR
 
     if (sendState.stateType === SendStateTypes.SENDING) {
         return (
-            <Typography color={TypographyColors.HINT} role='status'>
-                {t('apiClientResponseWaiting')}
-            </Typography>
+            <Flex align='center' aria-label={t('apiClientResponseWaiting')} className={styles.waiting} role='status'>
+                <Spinner />
+            </Flex>
         );
     }
 

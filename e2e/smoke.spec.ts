@@ -1,7 +1,7 @@
 import { expect, openSection, test, trackErrors } from './fixtures.ts';
 
 const CSP_META = 'meta[http-equiv="Content-Security-Policy"]';
-const EXTENSION_NAME = 'InterceptKit';
+const EXTENSION_NAME = 'XRequest';
 
 /** No inline scripts or styles and no images from elsewhere; CodeMirror keeps it through its shadow root */
 const PAGES_CSP =

@@ -3,6 +3,7 @@ import type { ChangeEvent, FC } from 'react';
 import { Button, ButtonSizes, ButtonVariants } from '../Button/index.ts';
 import { Icon, IconNames } from '../Icon/index.ts';
 import { Switch } from '../Switch/index.ts';
+import { TemplateInput } from '../TemplateInput/index.ts';
 
 import { useTranslation } from '#shared/i18n';
 import type { KeyValueRow } from '#shared/lib';
@@ -17,16 +18,27 @@ interface KeyValueTableRowProps {
     labels: KeyValueTableLabels;
     /** Whether the form refuses a row without a key */
     isKeyRequired: boolean;
+    /** Whether the fields colour {{templates}} */
+    isWithTemplates: boolean;
     /** Called with the changed fields of the row */
     onChange: KeyValueRowChange;
     /** Called with the id of the row to delete */
     onRemove: (rowId: string) => void;
 }
 
-export const KeyValueTableRow: FC<KeyValueTableRowProps> = ({ row, labels, isKeyRequired, onChange, onRemove }) => {
+export const KeyValueTableRow: FC<KeyValueTableRowProps> = ({
+    row,
+    labels,
+    isKeyRequired,
+    isWithTemplates,
+    onChange,
+    onRemove,
+}) => {
     const { rowId, enabled } = row;
 
     const { t } = useTranslation();
+
+    const Input = isWithTemplates ? TemplateInput : 'input';
 
     const onKeyChange = (event: ChangeEvent<HTMLInputElement>) => onChange(rowId, { key: event.target.value });
 
@@ -40,7 +52,7 @@ export const KeyValueTableRow: FC<KeyValueTableRowProps> = ({ row, labels, isKey
         <div className={styles.row}>
             <Switch checked={row.enabled} label={t(labels.enabled)} isLabelHidden onChange={onEnabledToggle} />
 
-            <input
+            <Input
                 aria-label={t(labels.key)}
                 className={styles.code}
                 required={isKeyRequired}
@@ -49,7 +61,7 @@ export const KeyValueTableRow: FC<KeyValueTableRowProps> = ({ row, labels, isKey
                 onChange={onKeyChange}
             />
 
-            <input
+            <Input
                 aria-label={t(labels.value)}
                 className={styles.code}
                 spellCheck={false}

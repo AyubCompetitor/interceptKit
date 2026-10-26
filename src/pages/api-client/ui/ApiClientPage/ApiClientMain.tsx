@@ -25,6 +25,7 @@ export const ApiClientMain: FC = () => {
         collections,
         unsavedTabIds,
         tabNames,
+        activeLocation,
         isSending,
         isLimitReached,
         isSaveDialogOpen,
@@ -64,6 +65,7 @@ export const ApiClientMain: FC = () => {
 
                 {activeTab && (
                     <RequestWorkspace
+                        activeLocation={activeLocation}
                         activeTab={activeTab}
                         isSaveFailed={isSaveFailed}
                         isSending={isSending}

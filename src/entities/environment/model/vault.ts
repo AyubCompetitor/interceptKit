@@ -76,7 +76,7 @@ interface EncryptedVariable extends EnvVariable {
     readonly value: EncryptedValue;
 }
 
-const VAULT_CHECK_TEXT = 'interceptkit-vault';
+const VAULT_CHECK_TEXT = 'xrequest-vault';
 
 /** Fewer rounds would make guessing the password cheap; more would freeze unlocking */
 const KEY_ITERATION_LIMITS = {

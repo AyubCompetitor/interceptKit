@@ -1,5 +1,5 @@
 import { useTranslation, type MessageKey, type TFunction } from '#shared/i18n';
-import { Typography, TypographyColors, TypographySizes } from '#shared/ui';
+import { Icon, IconNames, Typography, TypographyColors, TypographySizes } from '#shared/ui';
 
 import styles from './Checklist.module.css';
 
@@ -26,7 +26,7 @@ const getLabel = <T extends string>(t: TFunction, value: T, labels?: Readonly<Re
     return t(labels[value]);
 };
 
-/** Toggle chips over native checkboxes */
+/** Toggle chips over native checkboxes: a check marks a chosen one, a plus one that can join */
 export const Checklist = <T extends string>({
     legend,
     hint,
@@ -39,7 +39,11 @@ export const Checklist = <T extends string>({
 
     return (
         <fieldset className={styles.checklist}>
-            <legend className={styles.legend}>{legend}</legend>
+            <legend className={styles.legend}>
+                {legend}
+
+                <span className={styles.note}>{t('checklistAnyNumber')}</span>
+            </legend>
 
             <div className={styles.chips}>
                 {values.map(value => (
@@ -49,6 +53,11 @@ export const Checklist = <T extends string>({
                             className={styles.input}
                             type='checkbox'
                             onChange={() => onToggle(value)}
+                        />
+
+                        <Icon
+                            className={styles.mark}
+                            name={selected.includes(value) ? IconNames.CHECK : IconNames.PLUS}
                         />
                         {getLabel(t, value, labels)}
                     </label>

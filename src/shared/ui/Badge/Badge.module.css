@@ -11,3 +11,15 @@
     font-weight: 600;
     white-space: nowrap;
 }
+
+.accent {
+    border-color: var(--color-accent-border);
+    background: var(--color-accent-surface);
+    color: var(--color-accent-text);
+}
+
+.warning {
+    border-color: var(--color-warning-border);
+    background: var(--color-warning-surface);
+    color: var(--color-warning-text);
+}

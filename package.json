@@ -1,5 +1,5 @@
 {
-    "name": "interceptkit",
+    "name": "xrequest",
     "version": "0.1.0",
     "private": true,
     "description": "Intercept, mock and redirect HTTP requests, plus a lightweight API client, in one open-source browser extension.",

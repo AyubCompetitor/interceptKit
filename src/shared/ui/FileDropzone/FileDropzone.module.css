@@ -1,0 +1,67 @@
+.zone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    min-height: 72px;
+    padding: var(--space-m) var(--space-l);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-l);
+    background: var(--color-field);
+    transition:
+        background-color 0.15s,
+        border-color 0.15s;
+
+    &:hover {
+        border-color: var(--color-border-hover);
+        background: var(--color-surface-hover);
+    }
+
+    &:has(:focus-visible) {
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 1px var(--color-focus);
+    }
+}
+
+.isDragOver,
+.isDragOver:hover {
+    border-style: solid;
+    border-color: var(--color-accent);
+    background: var(--color-accent-surface);
+}
+
+.input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.icon {
+    color: var(--color-text-subtle);
+    font-size: var(--font-size-xl);
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.title {
+    overflow: hidden;
+    color: var(--color-text);
+    font-size: var(--font-size-s);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hint {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}

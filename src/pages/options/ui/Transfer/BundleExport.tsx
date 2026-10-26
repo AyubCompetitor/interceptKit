@@ -4,7 +4,17 @@ import { useBundleExport } from '../../model/useBundleExport.ts';
 
 import { BUNDLE_PARTS, type BundleContent } from '#features/transfer';
 import { useTranslation } from '#shared/i18n';
-import { Button, ButtonVariants, Flex, Spaces, Typography, TypographyColors, TypographySizes } from '#shared/ui';
+import {
+    Button,
+    ButtonVariants,
+    Flex,
+    Icon,
+    IconNames,
+    Spaces,
+    Typography,
+    TypographyColors,
+    TypographySizes,
+} from '#shared/ui';
 
 import { Checklist } from '../Checklist/Checklist.tsx';
 import styles from './BundleExport.module.css';
@@ -38,6 +48,7 @@ export const BundleExport: FC<BundleExportProps> = ({ content }) => {
 
             <div>
                 <Button disabled={isNothingChosen} variant={ButtonVariants.PRIMARY} onClick={onBundleExport}>
+                    <Icon name={IconNames.DOWNLOAD} />
                     {t('transferExportSubmit')}
                 </Button>
             </div>

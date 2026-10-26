@@ -6,12 +6,13 @@ import { countDraftConditions, type DraftFields } from '../../model/ruleDraft.ts
 import { RESOURCE_TYPES } from '#entities/rule';
 import { useTranslation } from '#shared/i18n';
 import { HTTP_METHODS } from '#shared/lib';
-import { Badge, Field, Flex, Icon, IconNames, SegmentedControl, Spaces } from '#shared/ui';
+import { Badge, Field, Flex, Icon, IconNames, InfoTip, SegmentedControl, Spaces } from '#shared/ui';
 
 import { Checklist } from '../Checklist/Checklist.tsx';
 import { PATTERN_HINTS, PATTERN_PLACEHOLDERS, RESOURCE_TYPE_LABELS, SYNTAX_TYPE_LABELS } from '../Rule/ruleLabels.ts';
 
 import styles from './MatchFields.module.css';
+import { PatternExamples } from './PatternExamples.tsx';
 
 export const MatchFields: FC<DraftFields> = ({ draft, onDraftChange }) => {
     const { t } = useTranslation();
@@ -29,7 +30,15 @@ export const MatchFields: FC<DraftFields> = ({ draft, onDraftChange }) => {
                 onChange={onSyntaxChange}
             />
 
-            <Field hint={t(PATTERN_HINTS[draft.syntaxType])} label={t('rulePattern')}>
+            <Field
+                hint={t(PATTERN_HINTS[draft.syntaxType])}
+                label={t('rulePattern')}
+                labelAside={
+                    <InfoTip label={t('patternExamplesLabel')}>
+                        <PatternExamples syntaxType={draft.syntaxType} />
+                    </InfoTip>
+                }
+            >
                 <input
                     className={styles.code}
                     placeholder={t(PATTERN_PLACEHOLDERS[draft.syntaxType])}

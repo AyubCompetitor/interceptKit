@@ -1,6 +1,6 @@
 {
     "extName": {
-        "message": "InterceptKit",
+        "message": "XRequest",
         "description": "Extension name. Not translated."
     },
     "extDescription": {
@@ -42,7 +42,7 @@
         "message": "No policy is set"
     },
     "policyEmptyText": {
-        "message": "Every feature is available, and only you decide how InterceptKit works."
+        "message": "Every feature is available, and only you decide how XRequest works."
     },
     "policyValuesTitle": {
         "message": "What the policy sets"
@@ -72,7 +72,7 @@
         "message": "None"
     },
     "policyNoHosts": {
-        "message": "None: InterceptKit can't get access to any site"
+        "message": "None: XRequest can't get access to any site"
     },
     "policyUserRulesAllowed": {
         "message": "Allowed"
@@ -156,6 +156,9 @@
     "transferImportFile": {
         "message": "File"
     },
+    "transferImportFileHint": {
+        "message": "JSON, up to 5 MB"
+    },
     "transferImportText": {
         "message": "Or paste the text of a file"
     },
@@ -235,7 +238,7 @@
         "message": "Couldn't update the rule. Try again."
     },
     "ruleNoAccess": {
-        "message": "InterceptKit has no access to $1, so the rule doesn't work there yet.",
+        "message": "XRequest has no access to $1, so the rule doesn't work there yet.",
         "description": "$1 is a host name, such as api.example.com."
     },
     "ruleHostNotAllowed": {
@@ -351,6 +354,60 @@
         "message": "^https://api\\.example\\.com/(.*)",
         "description": "Sample regular expression. Not translated."
     },
+    "patternExamplesLabel": {
+        "message": "Examples of patterns"
+    },
+    "patternFilterTitle": {
+        "message": "How a URL filter reads"
+    },
+    "patternFilterDomain": {
+        "message": "start of a domain; its subdomains match too"
+    },
+    "patternFilterEdge": {
+        "message": "start or end of the address"
+    },
+    "patternFilterAny": {
+        "message": "any characters"
+    },
+    "patternFilterSeparator": {
+        "message": "a separator: /, ?, & or the end of the address"
+    },
+    "patternExamplesTitle": {
+        "message": "Examples"
+    },
+    "patternFilterExampleSite": {
+        "message": "any page of example.com and its subdomains"
+    },
+    "patternFilterExamplePrefix": {
+        "message": "addresses that start with api.example.com/v1/"
+    },
+    "patternFilterExampleExact": {
+        "message": "exactly this address"
+    },
+    "patternFilterExampleScripts": {
+        "message": "scripts from cdn.example.com"
+    },
+    "patternFilterExampleContains": {
+        "message": "any address with /graphql in it"
+    },
+    "patternRegexTitle": {
+        "message": "Regular expressions in the RE2 syntax"
+    },
+    "patternRegexExampleGroup": {
+        "message": "what follows /v1/ goes into group \\1 for a redirect"
+    },
+    "patternRegexExampleWww": {
+        "message": "http and https, with or without www"
+    },
+    "patternRegexExampleImages": {
+        "message": "images in .png, .jpg and .jpeg"
+    },
+    "patternRegexExampleId": {
+        "message": "addresses that end with /users/ and a number"
+    },
+    "patternRegexNote": {
+        "message": "The expression is matched against the whole address with its scheme. Escape a dot as \\. — RE2 has no lookarounds or backreferences."
+    },
     "ruleConditions": {
         "message": "More conditions"
     },
@@ -436,6 +493,21 @@
     "ruleTargetTransform": {
         "message": "A modified URL"
     },
+    "redirectExamplesLabel": {
+        "message": "Examples of redirects"
+    },
+    "redirectExamplesTitle": {
+        "message": "Where a matching request can go"
+    },
+    "redirectExampleUrl": {
+        "message": "Every matching request goes to this one address; its path and query are not kept."
+    },
+    "redirectExampleSubstitution": {
+        "message": "The pattern catches the rest of the address in group \\1, and the substitution puts it back: /users?page=2 stays /users?page=2."
+    },
+    "redirectExampleTransform": {
+        "message": "Changes only the parts you fill in: with the host above, the path and the query of a request stay as they were."
+    },
     "ruleTargetUrlLabel": {
         "message": "New URL"
     },
@@ -517,7 +589,7 @@
         "description": "Accessible name of the × button in a header row."
     },
     "sitesDescription": {
-        "message": "InterceptKit works only on sites you allow. The browser checks access to both the site a request goes to and the page that sends it. Mocks answer only on sites where you turn them on."
+        "message": "XRequest works only on sites you allow. The browser checks access to both the site a request goes to and the page that sends it. Mocks answer only on sites where you turn them on."
     },
     "sitesDomain": {
         "message": "Domain"
@@ -711,7 +783,7 @@
         "message": "Without headers the response gets only a content type for its body format."
     },
     "settingsDescription": {
-        "message": "How InterceptKit looks in this browser."
+        "message": "How XRequest looks in this browser."
     },
     "settingsLanguage": {
         "message": "Interface language"
@@ -740,7 +812,7 @@
         "message": "System"
     },
     "settingsPrivacy": {
-        "message": "Rules and settings are stored only in this browser. InterceptKit has no servers, accounts or telemetry."
+        "message": "Rules and settings are stored only in this browser. XRequest has no servers, accounts or telemetry."
     },
     "settingsSaveFailed": {
         "message": "Couldn't save the setting. Try again."
@@ -952,7 +1024,7 @@
         "message": "The server may be down or out of reach, or the browser may not trust its certificate."
     },
     "apiClientNoAccess": {
-        "message": "InterceptKit has no access to $1, and without it the browser would hide the response.",
+        "message": "XRequest has no access to $1, and without it the browser would hide the response.",
         "description": "$1 is a host name."
     },
     "apiClientHostNotAllowed": {
@@ -1332,6 +1404,15 @@
     "apiClientSaveHint": {
         "message": "Save to a collection (Ctrl+S)"
     },
+    "apiClientSaveShort": {
+        "message": "Save"
+    },
+    "apiClientCurlShort": {
+        "message": "cURL"
+    },
+    "apiClientRequestUnsaved": {
+        "message": "Not saved to a collection"
+    },
     "apiClientSaveTitle": {
         "message": "Save to a collection"
     },
@@ -1367,6 +1448,9 @@
     },
     "apiClientImportFile": {
         "message": "File"
+    },
+    "apiClientImportFileHint": {
+        "message": "JSON, up to 10 MB"
     },
     "apiClientImportText": {
         "message": "Or paste the text of a file"
@@ -1494,5 +1578,14 @@
     "codeEditorFormat": {
         "message": "Format",
         "description": "Button under a JSON editor that lays the JSON out with indents."
+    },
+    "fileDropzonePrompt": {
+        "message": "Drop a file here or click to choose one"
+    },
+    "fileDropzoneReplace": {
+        "message": "Drop or choose another file to replace it"
+    },
+    "checklistAnyNumber": {
+        "message": "any number"
     }
 }

@@ -1,6 +1,6 @@
 # Architecture
 
-InterceptKit is a Manifest V3 extension for Chrome and Edge 140+. This document describes how the code is organized and which rules keep it secure. The rules below are enforced by tooling, not only by convention.
+XRequest is a Manifest V3 extension for Chrome and Edge 140+. This document describes how the code is organized and which rules keep it secure. The rules below are enforced by tooling, not only by convention.
 
 ## Execution contexts
 
@@ -45,7 +45,7 @@ These rules are checked by `oxlint` (`.oxlintrc.json`): `no-restricted-imports` 
 | `chrome.storage.local`   | `settings`, `rules`, `mocks`, `sites`, `environments`, `environmentChoice`, `vault`, `schemaVersion` | Closed to content scripts: the service worker calls `storage.local.setAccessLevel('TRUSTED_CONTEXTS')` on every start |
 | `chrome.storage.session` | `vaultKey`, `vaultStatus` of the unlocked vault                                                      | In memory only; closed to content scripts by default; cleared when the browser closes                                 |
 | `chrome.storage.managed` | Administrator policy                                                                                 | Read-only; validated field by field, see below                                                                        |
-| IndexedDB                | API client history, open tabs and collections (`interceptkit-api-client`)                            | Written by the API client page itself; content scripts cannot reach the extension's IndexedDB                         |
+| IndexedDB                | API client history, open tabs and collections (`xrequest-api-client`)                                | Written by the API client page itself; content scripts cannot reach the extension's IndexedDB                         |
 
 Every value is validated on read and on write with the dependency-free validators in `shared/lib/validation.ts`. Corrupted or foreign data degrades to defaults instead of crashing; invalid data is never written. The layout of `chrome.storage.local` is versioned (`schemaVersion`); migrations run in the service worker before any write.
 
@@ -67,7 +67,7 @@ page ──RPC (runtime.sendMessage)──▶ service worker ──▶ chrome.st
   └──────────────────── storage.onChanged ◀──────────────────┘
 ```
 
-- Envelope: `{ ik: 1, method, params }`, answered with `{ ok: true, result }` or `{ ok: false, error: { code, message } }`.
+- Envelope: `{ xr: 1, method, params }`, answered with `{ ok: true, result }` or `{ ok: false, error: { code, message } }`.
 - The router accepts only senders from this extension. Each method declares who may executeRpc it (extension pages, or also content scripts); the caller's origin is taken from what the browser reports, never from the message.
 - Parameters are validated before a handler runs. A handler rejects bad input with `RpcError` and a reason; any other error is logged and returned as a generic `internal` error.
 - Writes go through a serial queue, so concurrent updates are never lost.
@@ -96,7 +96,7 @@ service worker ──RPC──▶ bridge (isolated world) ──postMessage─�
 ```
 
 - The interceptor imports only `entities/mock` and `shared/lib`, and has no `chrome.*` at all: the linter allows nothing else there.
-- Mocks reach the page as `{ ik: 1, mocks }` with only what answering needs: the URL pattern, methods and the response. Names, owners and disabled headers stay in the extension. The interceptor validates every message, since page scripts can post the same shape.
+- Mocks reach the page as `{ xr: 1, mocks }` with only what answering needs: the URL pattern, methods and the response. Names, owners and disabled headers stay in the extension. The interceptor validates every message, since page scripts can post the same shape.
 - **Page scripts can read the mocks.** Never put secrets into a mock.
 - URL patterns match the way the browser's rules do: the same `||`, `|`, `^` and `*` syntax, case-insensitive (`buildUrlPatternRgx` in `shared/lib`). The first matching mock in the list wins.
 - Until the first mock list arrives, requests wait, so a page's first requests are mocked too. Without a list they go to the network after 2 seconds.
@@ -208,7 +208,7 @@ People share rules, mocks, environments and collections as a JSON file that is e
 
 ```json
 {
-    "format": "interceptkit",
+    "format": "xrequest",
     "version": 2,
     "exportedAt": "2026-10-25T12:00:00.000Z",
     "rules": [],
@@ -261,9 +261,10 @@ dist/chrome-mv3/
 
 - CSS Modules, built into Rsbuild: each component has a `*.module.css` file next to it, and class names are scoped (`button-a1b2c3`).
 - Design tokens are CSS custom properties in `src/shared/ui/tokens.css`; colors follow the system theme through `light-dark()`.
+- The palette stays black, gray and white, and color carries meaning only: a blue accent marks what is on or chosen (switches, chips, checkboxes, focus, the chosen environment, info notices), HTTP methods take the colors Postman uses, statuses go green, blue, orange and red by their hundreds, `{{variables}}` stand out in orange in the fields and the body editor, and JSON keys, strings, numbers and literals have the colors of common code editors. Warnings and errors keep their own colors.
 - Global styles (reset and base typography) live in `@layer reset, base` in `src/app/styles/global.css`. Component styles stay unlayered, so they win regardless of the order of CSS in the bundle.
 - No CSS-in-JS and no UI component library: no third-party runtime code runs in privileged extension pages, and nothing inserts `<style>` elements at runtime, which keeps a strict `style-src` possible.
-- Interactive primitives come from the platform: `Modal` wraps the native `<dialog>`, so the browser traps focus, closes on Esc and restores focus.
+- Interactive primitives come from the platform: `Modal` wraps the native `<dialog>`, so the browser traps focus, closes on Esc and restores focus. `Menu` and `InfoTip` are popovers placed by CSS anchor positioning, and `FileDropzone` lets the native file field take clicks and dropped files. `TemplateInput` colors `{{variables}}` with a copy of the text drawn under a field whose own text is transparent.
 - The code editor (`CodeEditor`, [CodeMirror 6](https://codemirror.net)) is the one third-party UI library. CodeMirror styles itself at runtime, so it runs inside a shadow root of its host: there its styles go to a constructable stylesheet (`adoptedStyleSheets`), which `style-src 'self'` allows, instead of a `<style>` element, which it blocks. Its theme uses the same tokens as the rest of the page, since custom properties reach into the shadow root. Lint markers that CodeMirror draws as `data:` images are restyled, because `img-src 'self'` blocks them. The editor loads in its own chunk when it is first shown.
 - Two details keep the editor exact under that policy. A JSON error is placed where the syntax tree stops, since `JSON.parse` does not name a position for every error. Text that spans lines, typed over several selected lines or inserted with line breaks, goes in through the editor rather than the browser's own editing, which would try to add inline styles.
 

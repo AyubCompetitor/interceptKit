@@ -269,7 +269,7 @@ export const openSection = async (page: Page, name: string) => {
 
 /** Calls a background method the way extension pages do */
 export const callBackground = (page: Page, method: string, params: unknown) =>
-    page.evaluate(message => chrome.runtime.sendMessage(message), { ik: 1, method, params });
+    page.evaluate(message => chrome.runtime.sendMessage(message), { xr: 1, method, params });
 
 export const getDynamicRules = (serviceWorker: Worker) =>
     serviceWorker.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());

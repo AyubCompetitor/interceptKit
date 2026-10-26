@@ -1,6 +1,6 @@
-# InterceptKit in an organization
+# XRequest in an organization
 
-An administrator can install InterceptKit for everyone and limit what it does through the browser's policy for extensions. The extension reads that policy from `chrome.storage.managed`, applies it at once, and shows it to the user in the dashboard's **Organization policy** section.
+An administrator can install XRequest for everyone and limit what it does through the browser's policy for extensions. The extension reads that policy from `chrome.storage.managed`, applies it at once, and shows it to the user in the dashboard's **Organization policy** section.
 
 Without a policy nothing is restricted: a person who installs the extension alone is their own administrator, and every feature works.
 
@@ -27,7 +27,7 @@ For Microsoft Edge Add-ons, the update URL is `https://edge.microsoft.com/extens
 | `allowedHosts`     | list of strings  | The only sites the extension may get access to                           | Any site        | No site                        |
 | `allowUserRules`   | boolean          | `false`: only the rules and mocks of the policy apply                    | User rules work | Only the policy's rules apply  |
 | `requireVault`     | boolean          | `true`: API client secrets must be encrypted with a master password      | Optional        | Required                       |
-| `presetBundle`     | string with JSON | Rules and mocks for everyone, in the format of an InterceptKit export    | None            | None, and the errors are shown |
+| `presetBundle`     | string with JSON | Rules and mocks for everyone, in the format of an XRequest export        | None            | None, and the errors are shown |
 
 A restricting field that is present but invalid is read in its strictest form, so a typo never lifts a restriction. An unknown policy name that reaches the extension is ignored and reported.
 
@@ -56,11 +56,11 @@ With `true`:
 
 ### presetBundle
 
-The value is the text of an InterceptKit export, as a string. To make one, set the rules and mocks up in a browser, open **Import and export** in the dashboard, export rules and mocks, and paste the file's contents into the policy. A minimal bundle with one block rule:
+The value is the text of an XRequest export, as a string. To make one, set the rules and mocks up in a browser, open **Import and export** in the dashboard, export rules and mocks, and paste the file's contents into the policy. A minimal bundle with one block rule:
 
 ```json
 {
-    "format": "interceptkit",
+    "format": "xrequest",
     "version": 1,
     "rules": [
         {
@@ -97,7 +97,7 @@ Put a JSON file into `/etc/opt/chrome/policies/managed/` for Google Chrome, or `
                 "allowedHosts": ["*.example.com", "localhost"],
                 "requireVault": true,
                 "disabledFeatures": ["apiClient"],
-                "presetBundle": "{\"format\":\"interceptkit\",\"version\":1,\"rules\":[]}"
+                "presetBundle": "{\"format\":\"xrequest\",\"version\":1,\"rules\":[]}"
             }
         }
     }
@@ -113,7 +113,7 @@ Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\3rdparty\extensions\<extension-id>\policy]
 "requireVault"=dword:00000001
-"presetBundle"="{\"format\":\"interceptkit\",\"version\":1,\"rules\":[]}"
+"presetBundle"="{\"format\":\"xrequest\",\"version\":1,\"rules\":[]}"
 
 [HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\3rdparty\extensions\<extension-id>\policy\allowedHosts]
 "1"="*.example.com"
@@ -176,6 +176,6 @@ The policy is enforced by the extension's own code. For a line the user cannot c
 - `ExtensionSettings` with `runtime_blocked_hosts` and `runtime_allowed_hosts` keeps extensions away from sites: Google's documentation names script injection, cookie access and web-request modifications. It does not say whether `declarativeNetRequest` rules are covered. Up to 100 entries, in the form `*://*.example.com`.
 - `DeveloperToolsAvailability` can turn DevTools off.
 
-## What InterceptKit never does
+## What XRequest never does
 
 It has no server, accounts, telemetry or analytics, and it sends nothing on its own: the only requests are the ones a user sends in the API client. Everything it keeps stays in the browser profile; people share rules and mocks through JSON files. The permissions and the reasons for them are in [PERMISSIONS.md](PERMISSIONS.md), the threat model in [THREAT_MODEL.md](THREAT_MODEL.md).

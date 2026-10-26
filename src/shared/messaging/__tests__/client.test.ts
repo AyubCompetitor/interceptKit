@@ -11,7 +11,7 @@ describe('executeRpc', () => {
 
         expect(await executeRpc(addMethod, { a: 2, b: 3 })).toBe(5);
 
-        expect(sendMessage).toHaveBeenCalledWith({ ik: 1, method: 'math/add', params: { a: 2, b: 3 } });
+        expect(sendMessage).toHaveBeenCalledWith({ xr: 1, method: 'math/add', params: { a: 2, b: 3 } });
     });
 
     it('turns an error response into RpcError with its code and message', async () => {

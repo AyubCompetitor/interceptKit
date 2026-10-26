@@ -25,7 +25,7 @@
         },
         "presetBundle": {
             "title": "Preset bundle",
-            "description": "Rules and mocks to preinstall: an InterceptKit export bundle as a JSON string.",
+            "description": "Rules and mocks to preinstall: an XRequest export bundle as a JSON string.",
             "type": "string"
         }
     }

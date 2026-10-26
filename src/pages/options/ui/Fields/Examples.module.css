@@ -1,0 +1,51 @@
+.examples {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    color: var(--color-text-muted);
+    line-height: var(--line-height);
+}
+
+.title {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.subtitle {
+    margin-top: var(--space-xs);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.list {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: var(--space-xs) var(--space-m);
+    align-items: baseline;
+}
+
+.code {
+    padding: 1px var(--space-xs);
+    border-radius: var(--radius-s);
+    background: var(--color-field);
+    color: var(--color-text);
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+}
+
+.kinds {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+.kind {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.name {
+    color: var(--color-text);
+    font-weight: 600;
+}

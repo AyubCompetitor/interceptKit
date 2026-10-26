@@ -372,7 +372,7 @@ apiClientTest.describe('sending', () => {
 
             await addRow(apiClientPage, 'Add header', 'Header', 'Cookie', 'typed=1');
 
-            await addRow(apiClientPage, 'Add header', 'Header', 'User-Agent', 'InterceptKit-Test');
+            await addRow(apiClientPage, 'Add header', 'Header', 'User-Agent', 'XRequest-Test');
 
             await addRow(apiClientPage, 'Add header', 'Header', 'Origin', 'https://origin.example');
 
@@ -381,7 +381,7 @@ apiClientTest.describe('sending', () => {
             await getReceived(testServer, PATHS.RULE_HEADERS).toMatchObject({
                 headers: {
                     cookie: 'typed=1',
-                    'user-agent': 'InterceptKit-Test',
+                    'user-agent': 'XRequest-Test',
                     origin: 'https://origin.example',
                 },
             });
@@ -501,7 +501,7 @@ apiClientTest.describe('host access', () => {
 
         await sendRequest(apiClientPage, testServer.foreignOrigin + PATHS.PARAMS);
 
-        await expect(getResponsePanel(apiClientPage)).toContainText(`InterceptKit has no access to ${FOREIGN_HOST}`);
+        await expect(getResponsePanel(apiClientPage)).toContainText(`XRequest has no access to ${FOREIGN_HOST}`);
 
         await expect(apiClientPage.locator('body')).toHaveAttribute(REQUESTED_ORIGINS, `*://${FOREIGN_HOST}/*`);
     });

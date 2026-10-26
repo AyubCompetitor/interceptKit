@@ -9,6 +9,7 @@ import { SyntaxTypes } from '#shared/lib';
 import {
     Field,
     Flex,
+    InfoTip,
     Notice,
     NoticeTones,
     SegmentedControl,
@@ -21,6 +22,7 @@ import {
 import { ChoiceSelect } from '../ChoiceSelect/ChoiceSelect.tsx';
 import { SCHEME_LABELS, TARGET_TYPE_LABELS } from '../Rule/ruleLabels.ts';
 
+import { RedirectExamples } from './RedirectExamples.tsx';
 import styles from './RedirectFields.module.css';
 
 const getDraftAccessibility = (draft: RuleDraft) => {
@@ -59,6 +61,11 @@ export const RedirectFields: FC<DraftFields> = ({ draft, onDraftChange }) => {
             <SegmentedControl
                 labels={TARGET_TYPE_LABELS}
                 legend={t('ruleTarget')}
+                legendAside={
+                    <InfoTip label={t('redirectExamplesLabel')}>
+                        <RedirectExamples />
+                    </InfoTip>
+                }
                 value={draft.targetType}
                 onChange={onTargetTypeChange}
             />

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import type { RequestTab } from '../../model/requestTabs.ts';
 
 import { useTranslation } from '#shared/i18n';
-import { Button, ButtonSizes, ButtonVariants, Icon, IconNames, joinClassNames } from '#shared/ui';
+import { Button, ButtonSizes, ButtonVariants, Icon, IconNames, joinClassNames, MethodLabel } from '#shared/ui';
 
 import { getRequestTabTitle } from './requestTabTitle.ts';
 import styles from './RequestTabItem.module.css';
@@ -33,7 +33,7 @@ export const RequestTabItem: FC<RequestTabItemProps> = ({ tab, isActive, isUnsav
     return (
         <li className={joinClassNames(styles.item, isActive && styles.isActive)}>
             <button aria-current={isActive} className={styles.select} type='button' onClick={onTabSelect}>
-                <span className={styles.method}>{tab.draft.method}</span>
+                <MethodLabel method={tab.draft.method} />
                 <span className={styles.title}>{title}</span>
 
                 {isUnsaved && <span aria-label={t('apiClientTabUnsaved')} className={styles.unsaved} role='img' />}

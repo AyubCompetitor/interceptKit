@@ -55,7 +55,7 @@ describe('readPresetBundle', () => {
         { name: 'text that is not JSON', text: '{', path: '$.presetBundle' },
         {
             name: 'a broken record',
-            text: '{"format":"interceptkit","version":1,"rules":[{"id":"r1"}]}',
+            text: '{"format":"xrequest","version":1,"rules":[{"id":"r1"}]}',
             path: '$.presetBundle.rules[0]',
         },
         {

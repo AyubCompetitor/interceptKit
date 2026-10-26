@@ -14,7 +14,7 @@ const DIST = join(ROOT, 'dist');
 
 const EXTENSION_DIR = join(DIST, 'chrome-mv3');
 
-const ARCHIVE_NAME = `interceptkit-${pkg.version}.zip`;
+const ARCHIVE_NAME = `xrequest-${pkg.version}.zip`;
 
 const packRelease = (): void => {
     copyFileSync(join(ROOT, 'LICENSE'), join(EXTENSION_DIR, 'LICENSE'));

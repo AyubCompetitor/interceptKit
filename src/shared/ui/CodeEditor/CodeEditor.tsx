@@ -19,6 +19,8 @@ interface CodeEditorProps {
     language: CodeLanguage;
     /** For viewing only */
     isReadOnly?: boolean;
+    /** Whether {{templates}} stand out */
+    isWithTemplates?: boolean;
     /** Height in lines that the editor keeps even when empty */
     minRows?: number;
     /** Lines shown before the editor scrolls */
@@ -44,6 +46,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     value,
     language,
     isReadOnly = false,
+    isWithTemplates = false,
     minRows = DEFAULT_ROWS.MIN,
     maxRows = DEFAULT_ROWS.MAX,
     onChange = noop,
@@ -77,7 +80,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
                 }
             >
                 <CodeEditorView
-                    settings={{ language, label, isReadOnly, minRows, maxRows }}
+                    settings={{ language, label, isReadOnly, isWithTemplates, minRows, maxRows }}
                     value={value}
                     onChange={onChange}
                 />

@@ -54,8 +54,8 @@ const EARLY_MOCK = makeMock({
 });
 
 const REGISTERED_SCRIPTS = [
-    { id: 'interceptkit-interceptor', js: ['content/interceptor.js'], world: ScriptWorlds.MAIN },
-    { id: 'interceptkit-bridge', js: ['content/bridge.js'], world: ScriptWorlds.ISOLATED },
+    { id: 'xrequest-interceptor', js: ['content/interceptor.js'], world: ScriptWorlds.MAIN },
+    { id: 'xrequest-bridge', js: ['content/bridge.js'], world: ScriptWorlds.ISOLATED },
 ].map(script => ({ ...script, matches: [TEST_SITE_PATTERN], runAt: 'document_start', allFrames: true }));
 
 const getRegisteredScripts = (serviceWorker: Worker) =>

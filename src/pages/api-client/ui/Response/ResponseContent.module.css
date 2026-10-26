@@ -1,0 +1,13 @@
+.waiting {
+    min-height: var(--control-height-m);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xl);
+}
+
+.failure {
+    color: var(--color-danger-text);
+}
+
+.failureIcon {
+    font-size: var(--font-size-l);
+}

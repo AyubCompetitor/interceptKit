@@ -7,6 +7,7 @@ import {
     Button,
     ButtonVariants,
     Field,
+    FileDropzone,
     Flex,
     Modal,
     ModalSizes,
@@ -78,7 +79,12 @@ export const FileImportModal: FC<FileImportModalProps> = ({ onClose }) => {
                 </Typography>
 
                 <Field label={t('apiClientImportFile')}>
-                    <input accept={FILE_TYPES} type='file' onChange={onFileChoose} />
+                    <FileDropzone
+                        accept={FILE_TYPES}
+                        hint={t('apiClientImportFileHint')}
+                        label={t('apiClientImportFile')}
+                        onChange={onFileChoose}
+                    />
                 </Field>
 
                 <Field label={t('apiClientImportText')}>

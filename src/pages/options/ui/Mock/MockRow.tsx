@@ -5,12 +5,14 @@ import { useTranslation } from '#shared/i18n';
 import { Sources } from '#shared/lib';
 import {
     Badge,
+    BadgeTones,
     Button,
     ButtonSizes,
     ButtonVariants,
     Icon,
     IconNames,
     joinClassNames,
+    StatusCode,
     Switch,
     Typography,
     TypographyColors,
@@ -53,11 +55,13 @@ export const MockRow: FC<MockRowProps> = ({ mock, isBlockedByPolicy, onToggle, o
             <div className={styles.details}>
                 <div className={styles.title}>
                     <span className={styles.name}>{mock.name}</span>
-                    <Badge>{mock.response.status}</Badge>
+                    <Badge>
+                        <StatusCode status={mock.response.status} />
+                    </Badge>
 
-                    {isPolicyMock && <Badge>{t('policySourceBadge')}</Badge>}
+                    {isPolicyMock && <Badge tone={BadgeTones.ACCENT}>{t('policySourceBadge')}</Badge>}
 
-                    {isBlockedByPolicy && <Badge>{t('policyBlockedBadge')}</Badge>}
+                    {isBlockedByPolicy && <Badge tone={BadgeTones.WARNING}>{t('policyBlockedBadge')}</Badge>}
                 </div>
 
                 <code className={styles.pattern}>{mock.match.url.value}</code>

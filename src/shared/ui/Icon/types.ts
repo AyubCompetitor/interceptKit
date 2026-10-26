@@ -19,6 +19,11 @@ export enum IconNames {
     SAVE = 'save',
     MORE = 'more',
     FOLDER = 'folder',
+    INFO = 'info',
+    CHECK = 'check',
+    DOWNLOAD = 'download',
+    ERROR = 'error',
+    FILE = 'file',
 }
 
 export type IconName = `${IconNames}`;

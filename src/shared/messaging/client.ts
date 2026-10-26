@@ -9,7 +9,7 @@ export const executeRpc = async <Params, Result>(
     method: RpcMethod<Params, Result>,
     params: Params,
 ): Promise<Result> => {
-    const request: RpcRequest = { ik: 1, method: method.name, params };
+    const request: RpcRequest = { xr: 1, method: method.name, params };
 
     const raw: unknown = await chrome.runtime.sendMessage(request);
 

@@ -15,6 +15,12 @@
     font-weight: 600;
 }
 
+.note {
+    margin-inline-start: var(--space-s);
+    color: var(--color-text-subtle);
+    font-weight: 400;
+}
+
 .chips {
     display: flex;
     flex-wrap: wrap;
@@ -25,8 +31,9 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    gap: var(--space-xs);
     min-height: var(--control-height-s);
-    padding: 0 var(--space-m);
+    padding: 0 var(--space-m) 0 var(--space-s);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-pill);
     color: var(--color-text-muted);
@@ -45,9 +52,9 @@
     }
 
     &:has(:checked) {
-        border-color: var(--color-primary);
-        background: var(--color-primary);
-        color: var(--color-on-primary);
+        border-color: var(--color-accent-border);
+        background: var(--color-accent-surface);
+        color: var(--color-accent-text);
     }
 
     &:has(:focus-visible) {
@@ -57,6 +64,15 @@
 }
 
 /** The invisible checkbox covers its chip, so a click anywhere toggles it */
+.mark {
+    color: var(--color-text-subtle);
+    font-size: var(--font-size-s);
+
+    .chip:has(:checked) & {
+        color: var(--color-accent-text);
+    }
+}
+
 .input {
     position: absolute;
     inset: 0;

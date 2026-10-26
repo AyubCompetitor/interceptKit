@@ -4,11 +4,11 @@
 }
 
 .trigger {
-    anchor-name: var(--menu-anchor);
+    anchor-name: var(--popover-anchor);
 }
 
 .popover {
-    position-anchor: var(--menu-anchor);
+    position-anchor: var(--popover-anchor);
     position-area: bottom span-left;
     position-try-fallbacks: flip-block;
     inset: auto;

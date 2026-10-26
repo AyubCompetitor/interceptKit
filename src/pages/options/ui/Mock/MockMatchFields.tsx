@@ -5,9 +5,10 @@ import type { MockDraftFields } from '../../model/mockDraft.ts';
 
 import { useTranslation } from '#shared/i18n';
 import { HTTP_METHODS } from '#shared/lib';
-import { Field, Flex, SegmentedControl, Spaces } from '#shared/ui';
+import { Field, Flex, InfoTip, SegmentedControl, Spaces } from '#shared/ui';
 
 import { Checklist } from '../Checklist/Checklist.tsx';
+import { PatternExamples } from '../Fields/PatternExamples.tsx';
 import styles from './MockForm.module.css';
 import { PATTERN_HINTS, PATTERN_PLACEHOLDERS, SYNTAX_TYPE_LABELS } from '../Rule/ruleLabels.ts';
 
@@ -24,7 +25,15 @@ export const MockMatchFields: FC<MockDraftFields> = ({ draft, onDraftChange }) =
                 onChange={onSyntaxChange}
             />
 
-            <Field hint={t(PATTERN_HINTS[draft.syntaxType])} label={t('rulePattern')}>
+            <Field
+                hint={t(PATTERN_HINTS[draft.syntaxType])}
+                label={t('rulePattern')}
+                labelAside={
+                    <InfoTip label={t('patternExamplesLabel')}>
+                        <PatternExamples syntaxType={draft.syntaxType} />
+                    </InfoTip>
+                }
+            >
                 <input
                     className={styles.code}
                     placeholder={t(PATTERN_PLACEHOLDERS[draft.syntaxType])}

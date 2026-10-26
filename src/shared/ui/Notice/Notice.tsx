@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Icon, IconNames } from '../Icon/index.ts';
+import { Icon, IconNames, type IconName } from '../Icon/index.ts';
 import { joinClassNames } from '../joinClassNames.ts';
 
 import styles from './Notice.module.css';
@@ -18,16 +18,17 @@ const TONE_CLASSES: Record<NoticeTone, NotRequired<string>> = {
     [NoticeTones.WARNING]: styles.warning,
 };
 
-export const Notice: FCC<NoticeProps> = ({ tone = NoticeTones.INFO, action, children }) => {
-    const isWarning = tone === NoticeTones.WARNING;
-
-    return (
-        <div className={joinClassNames(styles.notice, TONE_CLASSES[tone])}>
-            {isWarning && <Icon className={styles.icon} name={IconNames.WARNING} />}
-
-            <p className={styles.text}>{children}</p>
-
-            {action}
-        </div>
-    );
+const TONE_ICONS: Record<NoticeTone, IconName> = {
+    [NoticeTones.INFO]: IconNames.INFO,
+    [NoticeTones.WARNING]: IconNames.WARNING,
 };
+
+export const Notice: FCC<NoticeProps> = ({ tone = NoticeTones.INFO, action, children }) => (
+    <div className={joinClassNames(styles.notice, TONE_CLASSES[tone])}>
+        <Icon className={styles.icon} name={TONE_ICONS[tone]} />
+
+        <p className={styles.text}>{children}</p>
+
+        {action}
+    </div>
+);

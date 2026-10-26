@@ -7,6 +7,7 @@ import { useTranslation } from '#shared/i18n';
 import { Sources } from '#shared/lib';
 import {
     Badge,
+    BadgeTones,
     Button,
     ButtonSizes,
     ButtonVariants,
@@ -71,9 +72,9 @@ export const RuleRow: FC<RuleRowProps> = ({
                     <span className={styles.name}>{rule.name}</span>
                     <Badge>{t(RULE_BADGE_LABELS[rule.type])}</Badge>
 
-                    {isPolicyRule && <Badge>{t('policySourceBadge')}</Badge>}
+                    {isPolicyRule && <Badge tone={BadgeTones.ACCENT}>{t('policySourceBadge')}</Badge>}
 
-                    {isBlockedByPolicy && <Badge>{t('policyBlockedBadge')}</Badge>}
+                    {isBlockedByPolicy && <Badge tone={BadgeTones.WARNING}>{t('policyBlockedBadge')}</Badge>}
                 </div>
 
                 <code className={styles.pattern}>{rule.match.url.value}</code>

@@ -11,7 +11,7 @@ export interface PageMock {
 
 export interface MockListMessage {
     /** Marks our messages among the page's own */
-    readonly ik: 1;
+    readonly xr: 1;
     /** Mocks of the site, in priority order */
     readonly mocks: readonly PageMock[];
 }
@@ -22,7 +22,7 @@ const pageMock: Validator<PageMock> = object({
 });
 
 export const mockListMessage: Validator<MockListMessage> = object({
-    ik: literal(1),
+    xr: literal(1),
     mocks: array(pageMock, { maxLength: MAX_MOCKS }),
 });
 

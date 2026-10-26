@@ -33,12 +33,12 @@ export const mocksRpc = {
 
 export const MOCK_SCRIPTS: readonly ContentScriptSpec[] = [
     {
-        id: 'interceptkit-interceptor',
+        id: 'xrequest-interceptor',
         file: 'content/interceptor.js',
         world: ScriptWorlds.MAIN,
     },
     {
-        id: 'interceptkit-bridge',
+        id: 'xrequest-bridge',
         file: 'content/bridge.js',
         world: ScriptWorlds.ISOLATED,
     },

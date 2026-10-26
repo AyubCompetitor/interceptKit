@@ -2,7 +2,7 @@
 
 _Last updated: 2026-10-24_
 
-InterceptKit is a browser extension for web developers and testers. It has no server, no accounts and no analytics, and it does not collect, sell or share any data about you.
+XRequest is a browser extension for web developers and testers. It has no server, no accounts and no analytics, and it does not collect, sell or share any data about you.
 
 ## What the extension keeps
 
@@ -23,7 +23,7 @@ Rules and mocks change requests inside your browser and only on sites you allowe
 
 ## Your organization
 
-If your organization manages your browser, its administrator can set a policy for InterceptKit, for example to limit the sites it works on. The policy comes from your browser and is shown in the dashboard's **Organization policy** section; the extension sends nothing back.
+If your organization manages your browser, its administrator can set a policy for XRequest, for example to limit the sites it works on. The policy comes from your browser and is shown in the dashboard's **Organization policy** section; the extension sends nothing back.
 
 ## Removing your data
 
@@ -31,4 +31,4 @@ Uninstalling the extension deletes everything it kept. You can also delete rules
 
 ## Contact
 
-Questions about this policy go to the issues of the project: <https://github.com/AyubCompetitor/interceptKit/issues>. Security problems are reported privately, as [SECURITY.md](SECURITY.md) describes.
+Questions about this policy go to the issues of the project: <https://github.com/AyubCompetitor/xrequest/issues>. Security problems are reported privately, as [SECURITY.md](SECURITY.md) describes.

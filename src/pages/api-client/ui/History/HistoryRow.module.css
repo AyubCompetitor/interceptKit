@@ -35,13 +35,6 @@
     font-size: var(--font-size-s);
 }
 
-.method {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: var(--font-size-xs);
-    font-weight: 600;
-}
-
 .url {
     overflow: hidden;
     text-overflow: ellipsis;

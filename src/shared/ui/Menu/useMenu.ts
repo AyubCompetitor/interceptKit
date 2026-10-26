@@ -1,24 +1,18 @@
-import { useId, useRef } from 'react';
+import { usePopoverAnchor } from '../usePopoverAnchor.ts';
 
-import type { MenuAction, MenuAnchorStyle } from './types.ts';
-
-/** An anchor name is a dashed ident: the characters useId adds around its number are left out */
-const NON_IDENT_RGX = /[^\w-]/g;
+import type { MenuAction } from './types.ts';
 
 export const useMenu = () => {
-    const menuId = useId();
-    const menuRef = useRef<HTMLDivElement>(null);
-
-    const anchorStyle: MenuAnchorStyle = { '--menu-anchor': `--menu-${menuId.replace(NON_IDENT_RGX, '')}` };
+    const { popoverId, popoverRef, anchorStyle } = usePopoverAnchor();
 
     const onActionSelect = (action: MenuAction) => {
-        menuRef.current?.hidePopover();
+        popoverRef.current?.hidePopover();
         action.onSelect();
     };
 
     return {
-        menuId,
-        menuRef,
+        menuId: popoverId,
+        menuRef: popoverRef,
         anchorStyle,
         onActionSelect,
     };

@@ -90,7 +90,7 @@ const SLOW_MOCK: PageMock = {
 const MOCKS = [USERS_MOCK, POST_ORDERS_MOCK, EMPTY_MOCK, SLOW_MOCK];
 
 const MOCK_LIST_MESSAGE: MockListMessage = {
-    ik: 1,
+    xr: 1,
     mocks: MOCKS,
 };
 

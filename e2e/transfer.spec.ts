@@ -40,7 +40,7 @@ const STAGING: Environment = {
 
 /** A file as another browser exports it: a new rule, and the environment with its secret empty */
 const IMPORTED_TEXT = JSON.stringify({
-    format: 'interceptkit',
+    format: 'xrequest',
     version: 1,
     rules: [{ ...RULE, id: 'block-trackers', name: 'Block trackers', source: undefined }],
     environments: [
@@ -99,12 +99,12 @@ test.describe('export', () => {
 
         const download = await downloading;
 
-        expect(download.suggestedFilename()).toMatch(/^interceptkit-\d{4}-\d{2}-\d{2}\.json$/);
+        expect(download.suggestedFilename()).toMatch(/^xrequest-\d{4}-\d{2}-\d{2}\.json$/);
 
         const file = JSON.parse(readFileSync(await download.path(), 'utf8'));
 
         expect(file).toMatchObject({
-            format: 'interceptkit',
+            format: 'xrequest',
             version: BUNDLE_VERSION,
             rules: [{ id: RULE.id, name: RULE.name }],
             collections: [],
@@ -154,7 +154,7 @@ test.describe('import', () => {
         await openSection(optionsPage, 'Import and export');
 
         await optionsPage.getByLabel('File', { exact: true }).setInputFiles({
-            name: 'interceptkit.json',
+            name: 'xrequest.json',
             mimeType: 'application/json',
             buffer: Buffer.from(IMPORTED_TEXT),
         });
@@ -165,7 +165,7 @@ test.describe('import', () => {
     test('names what is wrong with a file and imports nothing', async ({ optionsPage }) => {
         await openSection(optionsPage, 'Import and export');
 
-        await getImportField(optionsPage).fill('{"format":"interceptkit","version":1,"rules":[{"id":"broken"}]}');
+        await getImportField(optionsPage).fill('{"format":"xrequest","version":1,"rules":[{"id":"broken"}]}');
 
         await expect(optionsPage.getByRole('alert')).toContainText('$.rules[0]');
 
@@ -175,7 +175,7 @@ test.describe('import', () => {
     test('refuses in the background a text that is not an export', async ({ optionsPage }) => {
         const answer = await callBackground(optionsPage, 'transfer/import', { text: '{"rules":[]}' });
 
-        expect(answer).toMatchObject({ ok: false, error: { message: expect.stringContaining('not an InterceptKit') } });
+        expect(answer).toMatchObject({ ok: false, error: { message: expect.stringContaining('not an XRequest') } });
     });
 
     test('brings collections into the API client and back into an export', async ({

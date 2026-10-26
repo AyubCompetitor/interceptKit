@@ -9,9 +9,9 @@
 }
 
 .info {
-    border-color: var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+    border-color: var(--color-accent-border);
+    background: var(--color-accent-surface);
+    color: var(--color-accent-text);
 }
 
 .warning {

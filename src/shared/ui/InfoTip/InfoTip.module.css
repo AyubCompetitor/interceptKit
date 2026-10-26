@@ -1,0 +1,48 @@
+.tip {
+    display: inline-flex;
+    flex: none;
+}
+
+.trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--color-text-subtle);
+    font-size: var(--font-size-s);
+    cursor: pointer;
+    transition:
+        background-color 0.15s,
+        color 0.15s;
+    anchor-name: var(--popover-anchor);
+
+    &:hover,
+    &:focus-visible {
+        background: var(--color-accent-surface);
+        color: var(--color-accent-text);
+    }
+}
+
+.card {
+    position-anchor: var(--popover-anchor);
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline;
+    inset: auto;
+    width: max-content;
+    max-width: min(440px, calc(100vw - 2 * var(--space-l)));
+    margin: var(--space-xs) 0 0;
+    padding: var(--space-l);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-l);
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-raised);
+    color: var(--color-text);
+    font-size: var(--font-size-s);
+    font-weight: 400;
+    text-align: start;
+}

@@ -115,7 +115,7 @@ policyTest.describe('the policy section', () => {
         await expect(getPolicyValue(optionsPage, 'Turned-off features')).toHaveText('Mock API, Redirects');
 
         await expect(getPolicyValue(optionsPage, 'Allowed sites')).toHaveText(
-            "None: InterceptKit can't get access to any site",
+            "None: XRequest can't get access to any site",
         );
 
         await expect(getPolicyValue(optionsPage, 'Your own rules and mocks')).toHaveText(

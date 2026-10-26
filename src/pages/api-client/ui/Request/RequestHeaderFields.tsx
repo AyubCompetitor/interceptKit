@@ -20,7 +20,7 @@ export const RequestHeaderFields: FC<RequestDraftFields> = ({ draft, onDraftChan
 
     return (
         <Flex direction='column' gap={Spaces.L}>
-            <KeyValueTable labels={HEADER_LABELS} rows={draft.headers} onRowsChange={onHeadersChange} />
+            <KeyValueTable labels={HEADER_LABELS} rows={draft.headers} isWithTemplates onRowsChange={onHeadersChange} />
 
             {!!ruleNames.length && (
                 <Notice tone={NoticeTones.INFO}>{t('apiClientRuleHeaders', ruleNames.join(NAME_SEPARATOR))}</Notice>

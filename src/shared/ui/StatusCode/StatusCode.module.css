@@ -1,0 +1,20 @@
+.status {
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.success {
+    color: var(--color-success-text);
+}
+
+.redirect {
+    color: var(--color-accent-text);
+}
+
+.clientError {
+    color: var(--color-caution-text);
+}
+
+.serverError {
+    color: var(--color-danger-text);
+}

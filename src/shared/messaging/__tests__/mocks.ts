@@ -21,7 +21,7 @@ export const addMethod = defineMethod<PairParams, number>('math/add', pairParams
 
 export const pingMethod = defineMethod<PairParams, string>('bridge/ping', pairParams, [RpcCallers.CONTENT_SCRIPT]);
 
-export const makeRequest = (method: string, params?: unknown) => ({ ik: 1, method, params });
+export const makeRequest = (method: string, params?: unknown) => ({ xr: 1, method, params });
 
 /** Fake chrome.runtime whose sendMessage always answers with the given response */
 export const installFakeRuntime = (response: unknown) => {

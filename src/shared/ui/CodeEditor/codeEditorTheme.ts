@@ -3,10 +3,13 @@ import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 
+import { TEMPLATE_CLASS } from './codeEditorTemplates.ts';
+
 const highlightStyle = HighlightStyle.define([
-    { tag: tags.propertyName, color: 'var(--color-text)', fontWeight: '600' },
-    { tag: tags.string, color: 'var(--color-text-muted)' },
-    { tag: [tags.number, tags.bool, tags.null], color: 'var(--color-text)' },
+    { tag: tags.propertyName, color: 'var(--color-code-key)' },
+    { tag: tags.string, color: 'var(--color-code-string)' },
+    { tag: tags.number, color: 'var(--color-code-number)' },
+    { tag: [tags.bool, tags.null], color: 'var(--color-code-keyword)' },
     { tag: [tags.brace, tags.squareBracket, tags.separator, tags.punctuation], color: 'var(--color-text-subtle)' },
     { tag: tags.invalid, color: 'var(--color-danger-text)' },
 ]);
@@ -85,6 +88,11 @@ export const buildCodeEditorTheme = (minRows: number, maxRows: number): Extensio
         },
         '&.cm-focused .cm-matchingBracket': {
             background: 'var(--color-surface-pressed)',
+        },
+        [`.${TEMPLATE_CLASS}, .${TEMPLATE_CLASS} *`]: {
+            borderRadius: 'var(--radius-s)',
+            background: 'var(--color-variable-surface)',
+            color: 'var(--color-variable-text)',
         },
         ...LINT_STYLES,
     }),

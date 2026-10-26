@@ -15,7 +15,7 @@ const ICONS = {
 export const buildManifest = (): chrome.runtime.ManifestV3 => ({
     manifest_version: 3,
     name: '__MSG_extName__',
-    short_name: 'InterceptKit',
+    short_name: 'XRequest',
     description: '__MSG_extDescription__',
     version: pkg.version,
     default_locale: 'en',

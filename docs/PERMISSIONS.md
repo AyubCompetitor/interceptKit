@@ -1,6 +1,6 @@
 # Permissions
 
-Every permission InterceptKit requests is listed here with the reason it needs it. A change to the permissions in [`build/manifest.ts`](../build/manifest.ts) must update this file in the same change. The end-to-end tests assert the exact list, so an unreviewed permission fails the build.
+Every permission XRequest requests is listed here with the reason it needs it. A change to the permissions in [`build/manifest.ts`](../build/manifest.ts) must update this file in the same change. The end-to-end tests assert the exact list, so an unreviewed permission fails the build.
 
 ## Requested at install
 

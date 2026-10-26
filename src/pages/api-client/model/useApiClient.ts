@@ -1,4 +1,4 @@
-import { getLinkedTabNames, isTabUnsaved } from './collectionTabs.ts';
+import { findTabLocation, getLinkedTabNames, isTabUnsaved } from './collectionTabs.ts';
 import { SendStateTypes } from './sendState.ts';
 import { useActiveEnvironment } from './useActiveEnvironment.ts';
 import { useRequestSender } from './useRequestSender.ts';
@@ -38,6 +38,7 @@ export const useApiClient = () => {
     const isSending = activeTab?.sendState.stateType === SendStateTypes.SENDING;
     const unsavedTabIds = tabs.filter(tab => isTabUnsaved(tab, collections)).map(tab => tab.draft.id);
     const tabNames = getLinkedTabNames(tabs, collections);
+    const activeLocation = findTabLocation(activeTab, collections);
 
     const onActiveRequestSend = () => {
         if (!activeTab || isSending) {
@@ -66,6 +67,7 @@ export const useApiClient = () => {
         collections,
         unsavedTabIds,
         tabNames,
+        activeLocation,
 
         isLoading,
         isSending,

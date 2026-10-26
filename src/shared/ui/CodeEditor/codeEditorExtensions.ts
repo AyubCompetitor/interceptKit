@@ -7,6 +7,7 @@ import { EditorState, type Extension } from '@codemirror/state';
 import { drawSelection, EditorView, highlightSpecialChars, keymap, lineNumbers } from '@codemirror/view';
 
 import { lintJson } from './codeEditorLint.ts';
+import { templateHighlight } from './codeEditorTemplates.ts';
 import { buildCodeEditorTheme } from './codeEditorTheme.ts';
 import { CodeLanguages, type CodeEditorSettings, type CodeLanguage } from './types.ts';
 
@@ -75,5 +76,6 @@ export const buildCodeEditorExtensions = (settings: CodeEditorSettings): Extensi
     EditorState.readOnly.of(settings.isReadOnly),
     EditorView.editable.of(!settings.isReadOnly),
     EditorView.contentAttributes.of({ 'aria-label': settings.label }),
+    settings.isWithTemplates ? templateHighlight : [],
     buildCodeEditorTheme(settings.minRows, settings.maxRows),
 ];

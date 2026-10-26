@@ -33,7 +33,9 @@ export const RequestEditor: FC<RequestDraftFields> = ({ draft, onDraftChange }) 
                 onChange={onSectionChange}
             />
 
-            {isParams && <KeyValueTable labels={QUERY_LABELS} rows={draft.query} onRowsChange={onQueryChange} />}
+            {isParams && (
+                <KeyValueTable labels={QUERY_LABELS} rows={draft.query} isWithTemplates onRowsChange={onQueryChange} />
+            )}
 
             {isHeaders && <RequestHeaderFields draft={draft} onDraftChange={onDraftChange} />}
 

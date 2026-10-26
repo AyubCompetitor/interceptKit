@@ -18,12 +18,20 @@ interface KeyValueTableProps {
     rows: readonly KeyValueRow[];
     /** Whether the form refuses a row without a key */
     isKeyRequired?: boolean;
+    /** Whether the fields colour {{templates}} */
+    isWithTemplates?: boolean;
     /** Called with the changed rows */
     onRowsChange: (rows: KeyValueRow[]) => void;
 }
 
 /** Pairs that can be switched off; every field of a row is named for assistive technology, so the column titles are visual */
-export const KeyValueTable: FC<KeyValueTableProps> = ({ labels, rows, isKeyRequired = false, onRowsChange }) => {
+export const KeyValueTable: FC<KeyValueTableProps> = ({
+    labels,
+    rows,
+    isKeyRequired = false,
+    isWithTemplates = false,
+    onRowsChange,
+}) => {
     const { t } = useTranslation();
 
     const onRowAdd = () => onRowsChange([...rows, createKeyValueRow()]);
@@ -48,6 +56,7 @@ export const KeyValueTable: FC<KeyValueTableProps> = ({ labels, rows, isKeyRequi
                         <KeyValueTableRow
                             key={row.rowId}
                             isKeyRequired={isKeyRequired}
+                            isWithTemplates={isWithTemplates}
                             labels={labels}
                             row={row}
                             onChange={onRowChange}

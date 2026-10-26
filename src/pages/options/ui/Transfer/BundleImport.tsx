@@ -8,6 +8,7 @@ import {
     Button,
     ButtonVariants,
     Field,
+    FileDropzone,
     Flex,
     Notice,
     NoticeTones,
@@ -55,7 +56,12 @@ export const BundleImport: FC<BundleImportProps> = ({ content }) => {
             </Typography>
 
             <Field label={t('transferImportFile')}>
-                <input accept={BUNDLE_FILE_TYPES} type='file' onChange={onFileChoose} />
+                <FileDropzone
+                    accept={BUNDLE_FILE_TYPES}
+                    hint={t('transferImportFileHint')}
+                    label={t('transferImportFile')}
+                    onChange={onFileChoose}
+                />
             </Field>
 
             <Field label={t('transferImportText')}>

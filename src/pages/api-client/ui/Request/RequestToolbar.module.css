@@ -1,0 +1,46 @@
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-l);
+    min-height: var(--control-height-s);
+}
+
+.location,
+.unsaved {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--font-size-s);
+    white-space: nowrap;
+}
+
+.collection {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+}
+
+.separator {
+    color: var(--color-text-subtle);
+}
+
+.request {
+    overflow: hidden;
+    color: var(--color-text);
+    font-weight: 600;
+    text-overflow: ellipsis;
+}
+
+.unsaved {
+    color: var(--color-text-subtle);
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-s);
+    margin-inline-start: auto;
+}

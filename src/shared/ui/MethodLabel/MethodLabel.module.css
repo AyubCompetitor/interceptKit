@@ -1,0 +1,30 @@
+.method {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+}
+
+.get {
+    color: var(--color-method-get);
+}
+
+.post {
+    color: var(--color-method-post);
+}
+
+.put {
+    color: var(--color-method-put);
+}
+
+.patch {
+    color: var(--color-method-patch);
+}
+
+.delete {
+    color: var(--color-method-delete);
+}
+
+.other {
+    color: var(--color-method-other);
+}

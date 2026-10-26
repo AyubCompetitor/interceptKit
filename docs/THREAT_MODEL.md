@@ -1,6 +1,6 @@
 # Threat model
 
-What InterceptKit protects, from whom, and what is left to the browser, the operating system and the administrator. How each part works is in [ARCHITECTURE.md](ARCHITECTURE.md); how to report a problem is in [SECURITY.md](../SECURITY.md).
+What XRequest protects, from whom, and what is left to the browser, the operating system and the administrator. How each part works is in [ARCHITECTURE.md](ARCHITECTURE.md); how to report a problem is in [SECURITY.md](../SECURITY.md).
 
 ## What is worth protecting
 
@@ -15,7 +15,7 @@ What InterceptKit protects, from whom, and what is left to the browser, the oper
 
 ## Who might attack
 
-- **A website** the user visits, including one on a site the user granted to InterceptKit.
+- **A website** the user visits, including one on a site the user granted to XRequest.
 - **A file** the user imports, or a policy bundle, written by someone else.
 - **Another extension** in the same browser.
 - **A user who wants around the policy** of their organization.

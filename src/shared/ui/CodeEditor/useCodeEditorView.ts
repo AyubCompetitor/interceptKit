@@ -12,15 +12,15 @@ const SHADOW_MODE = 'open';
  * Runs CodeMirror inside a shadow root of the host
  */
 export const useCodeEditorView = ({ value, settings, onChange }: CodeEditorViewProps) => {
-    const { language, label, isReadOnly, minRows, maxRows } = settings;
+    const { language, label, isReadOnly, isWithTemplates, minRows, maxRows } = settings;
     const [compartment] = useState(() => new Compartment());
 
     const hostRef = useRef<HTMLDivElement>(null);
     const viewRef = useRef<NotRequired<EditorView>>(undefined);
 
     const extensions = useMemo(
-        () => buildCodeEditorExtensions({ language, label, isReadOnly, minRows, maxRows }),
-        [language, label, isReadOnly, minRows, maxRows],
+        () => buildCodeEditorExtensions({ language, label, isReadOnly, isWithTemplates, minRows, maxRows }),
+        [language, label, isReadOnly, isWithTemplates, minRows, maxRows],
     );
 
     const onEditorUpdate = useEffectEvent((update: ViewUpdate) => {

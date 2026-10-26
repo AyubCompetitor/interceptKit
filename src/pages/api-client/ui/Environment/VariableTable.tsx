@@ -42,7 +42,7 @@ export const VariableTable: FC<VariableTableProps> = ({ variables, onVariablesCh
                         <span />
                         <span>{t('apiClientVariableKey')}</span>
                         <span>{t('apiClientValue')}</span>
-                        <span>{t('apiClientVariableSecret')}</span>
+                        <span className={styles.secret}>{t('apiClientVariableSecret')}</span>
                         <span />
                     </div>
                     {variables.map(variable => (

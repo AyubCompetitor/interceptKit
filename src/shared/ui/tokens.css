@@ -20,7 +20,32 @@
     --color-primary: light-dark(#1f1f1f, #f2f2f2);
     --color-primary-hover: light-dark(#000000, #ffffff);
     --color-on-primary: light-dark(#ffffff, #111111);
-    --color-focus: light-dark(#131313, #f2f2f2);
+    --color-focus: light-dark(#1f6feb, #4c8dff);
+
+    --color-accent: light-dark(#1f6feb, #3b82f6);
+    --color-accent-hover: light-dark(#1858c4, #5b98ff);
+    --color-on-accent: #ffffff;
+    --color-accent-text: light-dark(#1858c4, #84b3ff);
+    --color-accent-surface: light-dark(#eaf1fe, #13213a);
+    --color-accent-border: light-dark(#a9c5f8, #29467a);
+
+    --color-success-text: light-dark(#1a7f37, #57c878);
+    --color-caution-text: light-dark(#b4500f, #f29a52);
+
+    --color-method-get: light-dark(#18794e, #5fd38d);
+    --color-method-post: light-dark(#9a6700, #f0c24b);
+    --color-method-put: light-dark(#1858c4, #74a7ff);
+    --color-method-patch: light-dark(#7a3fd0, #c4a3ff);
+    --color-method-delete: light-dark(#c9252d, #ff7b70);
+    --color-method-other: light-dark(#52667a, #9fb2c6);
+
+    --color-variable-text: light-dark(#b4500f, #f5a54a);
+    --color-variable-surface: light-dark(#fdf0e3, #2e2112);
+
+    --color-code-key: light-dark(#0451a5, #9cdcfe);
+    --color-code-string: light-dark(#a31515, #ce9178);
+    --color-code-number: light-dark(#098658, #b5cea8);
+    --color-code-keyword: light-dark(#0000ff, #569cd6);
 
     --color-switch-track: light-dark(#c6c6c6, #4a4a4a);
     --color-switch-thumb: light-dark(#ffffff, #dbdbdb);
@@ -38,6 +63,7 @@
 
     --color-backdrop: light-dark(rgb(0 0 0 / 35%), rgb(0 0 0 / 70%));
     --color-selection: light-dark(#d9d9d9, #444444);
+    --color-selection-translucent: light-dark(rgb(31 111 235 / 25%), rgb(76 141 255 / 35%));
 
     --shadow-raised: 0 16px 48px light-dark(rgb(0 0 0 / 14%), rgb(0 0 0 / 60%));
     --shadow-segment: 0 1px 3px light-dark(rgb(0 0 0 / 18%), rgb(0 0 0 / 45%));

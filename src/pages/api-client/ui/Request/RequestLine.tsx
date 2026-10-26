@@ -5,7 +5,7 @@ import type { RequestDraftFields } from '../../model/requestDraft.ts';
 
 import { SENDABLE_METHODS } from '#entities/request';
 import { useTranslation } from '#shared/i18n';
-import { Button, ButtonVariants, Icon, IconNames } from '#shared/ui';
+import { Button, ButtonVariants, getMethodToneClass, joinClassNames, TemplateInput } from '#shared/ui';
 
 import styles from './RequestLine.module.css';
 
@@ -14,22 +14,11 @@ interface RequestLineProps extends RequestDraftFields {
     isSending: boolean;
     /** Stops the request on the way */
     onCancel: VoidFunction;
-    /** Opens the request as a cURL command */
-    onCurlExport: VoidFunction;
-    /** Saves the request to its collection, or asks where to save it */
-    onSave: VoidFunction;
 }
 
 const URL_PLACEHOLDER = 'https://api.example.com/users';
 
-export const RequestLine: FC<RequestLineProps> = ({
-    draft,
-    isSending,
-    onDraftChange,
-    onCancel,
-    onCurlExport,
-    onSave,
-}) => {
+export const RequestLine: FC<RequestLineProps> = ({ draft, isSending, onDraftChange, onCancel }) => {
     const { t } = useTranslation();
     const { onMethodChange, onUrlChange } = useRequestDraftFields(draft, onDraftChange);
 
@@ -37,18 +26,18 @@ export const RequestLine: FC<RequestLineProps> = ({
         <div className={styles.line}>
             <select
                 aria-label={t('apiClientMethod')}
-                className={styles.method}
+                className={joinClassNames(styles.method, getMethodToneClass(draft.method))}
                 value={draft.method}
                 onChange={onMethodChange}
             >
                 {SENDABLE_METHODS.map(method => (
-                    <option key={method} value={method}>
+                    <option key={method} className={getMethodToneClass(method)} value={method}>
                         {method}
                     </option>
                 ))}
             </select>
 
-            <input
+            <TemplateInput
                 aria-label={t('apiClientUrl')}
                 className={styles.url}
                 inputMode='url'
@@ -67,27 +56,6 @@ export const RequestLine: FC<RequestLineProps> = ({
             )}
 
             {isSending && <Button onClick={onCancel}>{t('apiClientCancel')}</Button>}
-
-            <Button
-                aria-label={t('apiClientSave')}
-                aria-keyshortcuts='Control+S'
-                title={t('apiClientSaveHint')}
-                variant={ButtonVariants.GHOST}
-                isIconOnly
-                onClick={onSave}
-            >
-                <Icon name={IconNames.SAVE} />
-            </Button>
-
-            <Button
-                aria-label={t('apiClientCurlExportOpen')}
-                title={t('apiClientCurlExportOpen')}
-                variant={ButtonVariants.GHOST}
-                isIconOnly
-                onClick={onCurlExport}
-            >
-                <Icon name={IconNames.COPY} />
-            </Button>
         </div>
     );
 };

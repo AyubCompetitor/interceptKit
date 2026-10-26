@@ -22,6 +22,10 @@
     align-self: stretch;
 }
 
+.secret {
+    justify-self: center;
+}
+
 .columns {
     display: contents;
     color: var(--color-text-muted);

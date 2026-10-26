@@ -4,6 +4,7 @@ import type { Environment } from '#entities/environment';
 import { useTranslation } from '#shared/i18n';
 import {
     Badge,
+    BadgeTones,
     Button,
     ButtonSizes,
     ButtonVariants,
@@ -37,7 +38,7 @@ export const EnvironmentRow: FC<EnvironmentRowProps> = ({ environment, isActive,
             <div className={styles.details}>
                 <div className={styles.title}>
                     <span className={styles.name}>{environment.name}</span>
-                    {isActive && <Badge>{t('apiClientEnvironmentActive')}</Badge>}
+                    {isActive && <Badge tone={BadgeTones.ACCENT}>{t('apiClientEnvironmentActive')}</Badge>}
                 </div>
 
                 <Typography color={TypographyColors.HINT} size={TypographySizes.SMALL}>

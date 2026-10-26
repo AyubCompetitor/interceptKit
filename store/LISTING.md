@@ -6,7 +6,7 @@ Everything the Chrome Web Store and Microsoft Edge Add-ons dashboards ask for, r
 
 1. Raise `version` in `package.json`: each upload needs a larger number than the last one.
 2. Run `pnpm check`.
-3. Run `pnpm release`. It writes `dist/interceptkit-<version>.zip` and prints its SHA-256. The archive has fixed dates and a fixed file order, so two builds of the same commit with the same tools give the same bytes: put the hash into the release notes.
+3. Run `pnpm release`. It writes `dist/xrequest-<version>.zip` and prints its SHA-256. The archive has fixed dates and a fixed file order, so two builds of the same commit with the same tools give the same bytes: put the hash into the release notes.
 4. If the interface changed, run `pnpm store:screenshots` and `pnpm icons`.
 5. Upload the archive and fill in the fields below.
 
@@ -14,20 +14,20 @@ Chrome reviews most items within a few days, sometimes a few weeks; Edge certifi
 
 ## Listing
 
-| Field          | Value                                                                 |
-| -------------- | --------------------------------------------------------------------- |
-| Name           | InterceptKit (from the manifest)                                      |
-| Summary        | The manifest's `description`, in English and Russian                  |
-| Category       | Developer Tools                                                       |
-| Languages      | English, Russian                                                      |
-| Homepage       | <https://github.com/AyubCompetitor/interceptKit>                      |
-| Support        | <https://github.com/AyubCompetitor/interceptKit/issues>               |
-| Privacy policy | <https://github.com/AyubCompetitor/interceptKit/blob/main/PRIVACY.md> |
+| Field          | Value                                                             |
+| -------------- | ----------------------------------------------------------------- |
+| Name           | XRequest (from the manifest)                                      |
+| Summary        | The manifest's `description`, in English and Russian              |
+| Category       | Developer Tools                                                   |
+| Languages      | English, Russian                                                  |
+| Homepage       | <https://github.com/AyubCompetitor/xrequest>                      |
+| Support        | <https://github.com/AyubCompetitor/xrequest/issues>               |
+| Privacy policy | <https://github.com/AyubCompetitor/xrequest/blob/main/PRIVACY.md> |
 
 ### Description in English
 
 ```text
-InterceptKit puts the tools for working with HTTP requests into one open-source extension, and keeps everything in your browser.
+XRequest puts the tools for working with HTTP requests into one open-source extension, and keeps everything in your browser.
 
 • Rules: redirect requests to another URL or host, change the headers of requests and responses, block requests. The browser applies the rules itself, and only on sites you allow.
 • Mock API: answer the fetch and XHR requests of a page with your own status, headers, body and delay, with no backend.
@@ -40,13 +40,13 @@ Private by design:
 • no servers, accounts, telemetry or analytics;
 • no remote code, and a strict Content Security Policy;
 • no access to any site until you allow it;
-• open source under the MIT license: https://github.com/AyubCompetitor/interceptKit
+• open source under the MIT license: https://github.com/AyubCompetitor/xrequest
 ```
 
 ### Description in Russian
 
 ```text
-InterceptKit собирает инструменты для работы с HTTP-запросами в одном открытом расширении и хранит всё у вас в браузере.
+XRequest собирает инструменты для работы с HTTP-запросами в одном открытом расширении и хранит всё у вас в браузере.
 
 • Правила: перенаправляйте запросы на другой адрес или хост, меняйте заголовки запросов и ответов, блокируйте запросы. Правила применяет сам браузер, и только на сайтах, которые вы разрешили.
 • Моки API: отвечайте на fetch- и XHR-запросы страницы своим статусом, заголовками, телом и задержкой — без бэкенда.
@@ -59,7 +59,7 @@ InterceptKit собирает инструменты для работы с HTTP
 • без серверов, аккаунтов, телеметрии и аналитики;
 • без удалённого кода, со строгой политикой безопасности содержимого;
 • без доступа к сайтам, пока вы его не дадите;
-• открытый код под лицензией MIT: https://github.com/AyubCompetitor/interceptKit
+• открытый код под лицензией MIT: https://github.com/AyubCompetitor/xrequest
 ```
 
 ## Images

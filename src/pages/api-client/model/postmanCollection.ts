@@ -65,7 +65,6 @@ const readRequestItem = (item: JsonObject, context: PostmanContext): NotRequired
     return createRequestItem(request);
 };
 
-/** depth is 1 at the top of the collection; deeper than the API client keeps, the requests join the folder above */
 const readItems = (items: unknown, context: PostmanContext, depth: number): CollectionItem[] => {
     const collectionItems: CollectionItem[] = [];
 

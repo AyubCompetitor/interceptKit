@@ -26,3 +26,34 @@
     color: var(--color-text-muted);
     font-size: var(--font-size-s);
 }
+
+.isWithAside {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--space-xs);
+
+    & .control {
+        display: contents;
+    }
+
+    & .control > * {
+        grid-column: 1 / -1;
+    }
+
+    & .control > .label {
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    & .hint {
+        grid-column: 1 / -1;
+    }
+}
+
+.aside {
+    display: inline-flex;
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: start;
+}
